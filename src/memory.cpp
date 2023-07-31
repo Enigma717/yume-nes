@@ -12,10 +12,14 @@ uint8_t Memory::mem_read(uint16_t address)
 {
     if (address >= 0x0000 && address <= 0xFFFF)
         return memory[address];
+
+    return 0x00;
 }
 
 int Memory::mem_read_debug(uint16_t address)
 {
     if (address >= 0x0000 && address <= 0xFFFF)
         return static_cast<int>(memory[address]);
+
+    return 0;
 }

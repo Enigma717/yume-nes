@@ -2,7 +2,7 @@
 #define MEMORY_H
 
 
-#include <array>
+#include <vector>
 #include <cstdint>
 
 
@@ -15,7 +15,7 @@ public:
     uint8_t mem_read(uint16_t address);
     int     mem_read_debug(uint16_t address);
 private:
-    std::array<uint8_t, mem_size> memory = {};
+    std::vector<uint8_t> memory = std::vector<uint8_t>(mem_size, 0x00);
 };
 
 

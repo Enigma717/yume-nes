@@ -2,10 +2,11 @@ CPPFLAGS = -Wall -pedantic -std=c++17 -ggdb3
 
 .PHONY = all clean
 
-SRC_DIR = ./src
+SRC  := ./src
+SRCS := $(wildcard $(SRC)/*.cpp)
 
 all:
-	$(CXX) $(FLAGS) -o emu main.cpp $(SRC_DIR)/bus.cpp $(SRC_DIR)/cpu.cpp $(SRC_DIR)/memory.cpp
+	$(CXX) $(FLAGS) -o emu main.cpp $(SRCS)
 
 clean:
 	rm -f emu
