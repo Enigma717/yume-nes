@@ -6,7 +6,7 @@
 #include <cstdint>
 
 
-inline constexpr uint16_t mem_size = 0x07FF;
+inline constexpr uint16_t mem_size = 0x0800;
 
 
 class Memory {
