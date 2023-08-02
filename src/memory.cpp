@@ -1,6 +1,10 @@
 #include "../include/memory.h"
 
 
+void Memory::mem_clear()
+{
+    std::fill(memory.begin(), memory.end(), 0x00);
+}
 
 void Memory::mem_write(uint16_t address, uint8_t data)
 {
@@ -22,4 +26,9 @@ int Memory::mem_read_debug(uint16_t address)
         return static_cast<int>(memory[address]);
 
     return 0;
+}
+
+Memory_vec Memory::get_memory_copy()
+{
+    return memory;
 }

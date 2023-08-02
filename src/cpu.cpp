@@ -95,12 +95,12 @@ uint8_t CPU::read_status_word()
 //  Hard reset console  // 
 //////////////////////////
 
-void hard_reset()
+void CPU::hard_reset()
 {
     acc = 0;
     x_reg = 0;
     y_reg = 0;
     stk_ptr = 0xFD;
     status.word = 0x34;
-    std::fill(ram_ptr->memory.begin(), ram_ptr->memory.end(), 0x00);
+    ram_ptr->mem_clear();
 } 

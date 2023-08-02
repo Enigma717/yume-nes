@@ -36,7 +36,7 @@ public:
     uint8_t read_status_word();
 
     /////  Reset system  /////
-    void reset(); 
+    void hard_reset(); 
 
 private:
     /////  Console internal memory  /////
