@@ -2,48 +2,17 @@
 #define CPU_H
 
 
+#include <cstdint>
 #include <memory>
-
-#include "./memory.h"
 
 
 class Memory;
 
+using MemoryPtr = std::weak_ptr<Memory>; 
+
 
 class CPU {
 public:
-    /////  Memory connection  /////
-    void    connect_with_ram(Memory& ram);
-    Memory* get_ram_address();
-
-
-    /////  Memory I/O  /////
-    void    cpu_mem_write(uint16_t address, uint8_t data);
-    uint8_t cpu_mem_read(uint16_t address);
-    int     cpu_mem_read_debug(uint16_t address);
-
-
-    /////  Status manipulation  /////  (looks retarded, may change it later) 
-    void    set_carry_flag(bool value);
-    void    set_zero_flag(bool value);
-    void    set_interrupt_flag(bool value);
-    void    set_decimal_flag(bool value);
-    void    set_brk_flag(bool value);
-    void    set_unused_flag(bool value);
-    void    set_overflow_flag(bool value);
-    void    set_negative_flag(bool value);
-    void    set_status_word(uint8_t mask);
-    uint8_t read_status_word();
-
-    /////  Reset system  /////
-    void hard_reset(); 
-
-private:
-    /////  Console internal memory  /////
-    Memory* ram_ptr {nullptr};
-
-
-    /////  Flags  /////
     union Status {
         struct {
             uint8_t carry     : 1;
@@ -59,14 +28,69 @@ private:
         uint8_t word;
     };
 
-
-    /////  Registers  /////
     uint8_t  acc     {0x00};
     uint8_t  x_reg   {0x00};
     uint8_t  y_reg   {0x00};
     uint8_t  stk_ptr {0x00};
     uint16_t pc      {0x0000};
     Status   status  {0x00};
+
+    /////////////////////////////////////
+
+    void connect_with_ram(std::shared_ptr<Memory> ram);
+    MemoryPtr get_ram_address() const;
+
+    void    cpu_mem_write(uint16_t address, uint8_t data);
+    uint8_t cpu_mem_read(uint16_t address) const;
+    int     cpu_mem_read_debug(uint16_t address) const;
+
+    void hard_reset(); 
+
+
+    /////  Opcodes  /////
+    void BRK();
+
+    void CLC();
+    void CLD();
+    void CLI();
+    void CLV();
+
+    void DEX();
+    void DEY();
+
+    void INX();
+    void INY();
+
+    void NOP();
+
+    void PHA();
+    void PHP();
+    void PLA();
+    void PLP();
+
+    void RTI();
+    void RTS();
+
+    void SEC();
+    void SED();
+    void SEI();
+
+    void TAX();
+    void TAY();
+    void TSX();
+    void TXA();
+    void TXS();
+    void TYA();
+
+private:
+    MemoryPtr ram_ptr;
+
+    /////////////////////////////////////
+
+    bool check_for_carry_flag(uint8_t reg);
+    bool check_for_zero_flag(uint8_t reg);
+    bool check_for_overflow_flag(uint8_t reg);
+    bool check_for_negative_flag(uint8_t reg);
 };
 
 

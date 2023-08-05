@@ -8,8 +8,9 @@ void test_check_registers_after_reset()
 
     bus.cpu.hard_reset();
 
-    // TODO:
-    // MY_ASSERT(== 0);
+    bool check_regs = bus.cpu.x_reg | bus.cpu.y_reg | bus.cpu.acc;
+
+    MY_ASSERT(check_regs == 0);
 }
 
 void test_check_stk_ptr_after_reset()
@@ -19,8 +20,7 @@ void test_check_stk_ptr_after_reset()
 
     bus.cpu.hard_reset();
 
-    // TODO:
-    // MY_ASSERT(== target_stk_ptr);
+    MY_ASSERT(bus.cpu.stk_ptr == target_stk_ptr);
 }
 
 void test_check_status_after_reset() 
@@ -30,7 +30,7 @@ void test_check_status_after_reset()
 
     bus.cpu.hard_reset();
 
-    MY_ASSERT(bus.cpu.read_status_word() == target_status);
+    MY_ASSERT(bus.cpu.status.word == target_status);
 }
 
 void test_check_memory_after_reset() 
@@ -44,7 +44,7 @@ void test_check_memory_after_reset()
 
     bus.cpu.hard_reset();
 
-    MY_ASSERT(bus.ram.get_memory_copy() == empty_memory);
+    MY_ASSERT(bus.ram->get_memory_copy() == empty_memory);
 }
 
 

@@ -1,3 +1,11 @@
+# executables
 emu
-test/tests
+run_tests
+
+# notes and scripts
 *.txt
+*.sh
+
+# valgrind logs
+vgcore.*
+core.*

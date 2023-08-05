@@ -1,4 +1,4 @@
-CPPFLAGS = -Wall -pedantic -std=c++17 -ggdb3
+CPPFLAGS = -Wall -pedantic -std=c++20 -ggdb3
 
 .PHONY = all clean
 
@@ -7,7 +7,7 @@ SRCS  := $(wildcard $(SRC)/*.cpp)
 TESTS := $(wildcard ./*.cpp)
 
 all:
-	$(CXX) $(FLAGS) -o tests $(SRCS) $(TESTS)
+	$(CXX) $(FLAGS) -o run_tests $(SRCS) $(TESTS)
 
 clean:
 	rm -f tests

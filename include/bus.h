@@ -13,7 +13,7 @@ public:
     SystemBus();
 
     CPU cpu;
-    Memory ram;
+    std::shared_ptr<Memory> ram;
 private:
 };
 
