@@ -8,7 +8,8 @@
 
 using MemoryVec = std::vector<uint8_t>;
 
-inline constexpr uint16_t mem_size = 0x0800;
+inline constexpr uint16_t memory_size = 0x0800;
+inline constexpr uint16_t stack_offset = 0x0100;
 
 
 class Memory {
@@ -20,7 +21,7 @@ public:
 
     MemoryVec get_memory_copy() const;
 private:
-    MemoryVec memory = std::vector<uint8_t>(mem_size, 0x00);
+    MemoryVec memory = std::vector<uint8_t>(memory_size, 0x00);
 };
 
 

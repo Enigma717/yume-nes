@@ -13,14 +13,14 @@ void test_check_registers_after_reset()
     MY_ASSERT(check_regs == 0);
 }
 
-void test_check_stk_ptr_after_reset()
+void test_check_stack_ptr_after_reset()
 {
     SystemBus bus;
-    uint8_t target_stk_ptr = 0xFD;
+    uint8_t target_stack_ptr = 0xFD;
 
     bus.cpu.hard_reset();
 
-    MY_ASSERT(bus.cpu.stk_ptr == target_stk_ptr);
+    MY_ASSERT(bus.cpu.stack_ptr == target_stack_ptr);
 }
 
 void test_check_status_after_reset()
@@ -53,7 +53,7 @@ void ut_cpu_hard_reset()
     TEST_SET;
 
     test_check_registers_after_reset();
-    test_check_stk_ptr_after_reset();
+    test_check_stack_ptr_after_reset();
     test_check_status_after_reset();
     test_check_memory_after_reset();
 }

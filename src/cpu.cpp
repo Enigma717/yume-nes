@@ -1,10 +1,11 @@
 #include "../include/cpu.h"
 #include "../include/memory.h"
+#include <memory.h>
 
 
 void CPU::connect_with_ram(std::shared_ptr<Memory> ram)
 {
-    CPU::ram_ptr = ram;
+    ram_ptr = ram;
 }
 
 MemoryPtr CPU::get_ram_address() const
@@ -33,7 +34,7 @@ void CPU::hard_reset()
     acc = 0;
     x_reg = 0;
     y_reg = 0;
-    stk_ptr = 0xFD;
+    stack_ptr = 0xFD;
     status.word = 0x34;
     ram_ptr.lock()->mem_clear();
 }
@@ -41,29 +42,29 @@ void CPU::hard_reset()
 
 bool CPU::check_for_carry_flag(uint8_t reg) const
 {
-    return
+    return true;
 }
 
 bool CPU::check_for_zero_flag(uint8_t reg) const
 {
-    return
+    return reg == 0x00;
 }
 
 bool CPU::check_for_overflow_flag(uint8_t reg) const
 {
-    return
+    return true;
 }
 
 bool CPU::check_for_negative_flag(uint8_t reg) const
 {
-    return
+    return reg & (1 << 7);
 }
 
 
 
-//////////////
-// Opcodes  //
-//////////////
+///////////////
+//  Opcodes  //
+///////////////
 
 void CPU::BRK()
 {
@@ -92,100 +93,148 @@ void CPU::CLV()
 
 void CPU::DEX()
 {
+    x_reg--;
 
+    check_for_zero_flag(x_reg);
+    check_for_negative_flag(x_reg);
 }
 
 void CPU::DEY()
 {
+    y_reg--;
 
+    check_for_zero_flag(y_reg);
+    check_for_negative_flag(y_reg);
 }
 
 void CPU::INX()
 {
+    x_reg++;
 
+    check_for_zero_flag(x_reg);
+    check_for_negative_flag(x_reg);
 }
 
 void CPU::INY()
 {
+    y_reg++;
 
+    check_for_zero_flag(y_reg);
+    check_for_negative_flag(y_reg);
 }
 
 void CPU::NOP()
 {
-
+    // TODO
 }
 
 void CPU::PHA()
 {
-
+    cpu_mem_write(stack_offset + stack_ptr, acc);
+    stack_ptr--;
 }
 
 void CPU::PHP()
 {
+    status.flag.brk = 1;
+    status.flag.unused = 1;
 
+    cpu_mem_write(stack_offset + stack_ptr, status.word);
+    stack_ptr--;
+
+    status.flag.brk = 0;
+    status.flag.unused = 0;
 }
 
 void CPU::PLA()
 {
+    stack_ptr++;
+    acc = cpu_mem_read(stack_offset + stack_ptr);
 
+    check_for_zero_flag(acc);
+    check_for_negative_flag(acc);
 }
 
 void CPU::PLP()
 {
-
+    status.word = cpu_mem_read(stack_offset + stack_ptr);
+    stack_ptr++;
 }
 
 void CPU::RTI()
 {
+    stack_ptr++;
+    status.word = cpu_mem_read(stack_offset + stack_ptr);
 
+    status.flag.brk = 0;
+    status.flag.unused = 0;
+
+    stack_ptr++;
+    pc = cpu_mem_read(stack_offset + stack_ptr);
 }
 
 void CPU::RTS()
 {
-
+    stack_ptr++;
+    pc = cpu_mem_read(stack_offset + stack_ptr) - 1;
 }
 
 void CPU::SEC()
 {
-
+    status.flag.carry = 1;
 }
 
 void CPU::SED()
 {
-
+    status.flag.decimal = 1;
 }
 
 void CPU::SEI()
 {
-
+    status.flag.interrupt = 1;
 }
 
 void CPU::TAX()
 {
+    x_reg = acc;
 
+    check_for_zero_flag(x_reg);
+    check_for_negative_flag(x_reg);
 }
 
 void CPU::TAY()
 {
+    y_reg = acc;
 
+    check_for_zero_flag(y_reg);
+    check_for_negative_flag(y_reg);
 }
 
 void CPU::TSX()
 {
+    x_reg = cpu_mem_read(stack_offset + stack_ptr);
 
+    check_for_zero_flag(x_reg);
+    check_for_negative_flag(x_reg);
 }
 
 void CPU::TXA()
 {
+    acc = x_reg;
 
+    check_for_zero_flag(acc);
+    check_for_negative_flag(acc);
 }
 
 void CPU::TXS()
 {
-
+    cpu_mem_write(stack_offset + stack_ptr, x_reg);
 }
 
 void CPU::TYA()
 {
+    acc = y_reg;
 
+    check_for_zero_flag(acc);
+    check_for_negative_flag(acc);
 }
