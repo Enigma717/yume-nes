@@ -8,7 +8,7 @@
 
 class Memory;
 
-using MemoryPtr = std::weak_ptr<Memory>; 
+using MemoryPtr = std::weak_ptr<Memory>;
 
 
 class CPU {
@@ -44,7 +44,7 @@ public:
     uint8_t cpu_mem_read(uint16_t address) const;
     int     cpu_mem_read_debug(uint16_t address) const;
 
-    void hard_reset(); 
+    void hard_reset();
 
 
     /////  Opcodes  /////
@@ -87,10 +87,10 @@ private:
 
     /////////////////////////////////////
 
-    bool check_for_carry_flag(uint8_t reg);
-    bool check_for_zero_flag(uint8_t reg);
-    bool check_for_overflow_flag(uint8_t reg);
-    bool check_for_negative_flag(uint8_t reg);
+    bool check_for_carry_flag(uint8_t reg) const;
+    bool check_for_zero_flag(uint8_t reg) const;
+    bool check_for_overflow_flag(uint8_t reg) const;
+    bool check_for_negative_flag(uint8_t reg) const;
 };
 
 

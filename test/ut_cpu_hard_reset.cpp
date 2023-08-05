@@ -2,7 +2,7 @@
 #include "../include/bus.h"
 
 
-void test_check_registers_after_reset() 
+void test_check_registers_after_reset()
 {
     SystemBus bus;
 
@@ -23,7 +23,7 @@ void test_check_stk_ptr_after_reset()
     MY_ASSERT(bus.cpu.stk_ptr == target_stk_ptr);
 }
 
-void test_check_status_after_reset() 
+void test_check_status_after_reset()
 {
     SystemBus bus;
     uint8_t target_status = 0x34;
@@ -33,7 +33,7 @@ void test_check_status_after_reset()
     MY_ASSERT(bus.cpu.status.word == target_status);
 }
 
-void test_check_memory_after_reset() 
+void test_check_memory_after_reset()
 {
     SystemBus bus;
     std::vector<uint8_t> empty_memory = std::vector<uint8_t>(0x800, 0x00);
@@ -51,9 +51,9 @@ void test_check_memory_after_reset()
 void ut_cpu_hard_reset()
 {
     TEST_SET;
-    
-    test_check_registers_after_reset(); 
+
+    test_check_registers_after_reset();
     test_check_stk_ptr_after_reset();
-    test_check_status_after_reset(); 
-    test_check_memory_after_reset(); 
+    test_check_status_after_reset();
+    test_check_memory_after_reset();
 }

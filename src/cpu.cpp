@@ -36,11 +36,33 @@ void CPU::hard_reset()
     stk_ptr = 0xFD;
     status.word = 0x34;
     ram_ptr.lock()->mem_clear();
-} 
+}
+
+
+bool CPU::check_for_carry_flag(uint8_t reg) const
+{
+    return
+}
+
+bool CPU::check_for_zero_flag(uint8_t reg) const
+{
+    return
+}
+
+bool CPU::check_for_overflow_flag(uint8_t reg) const
+{
+    return
+}
+
+bool CPU::check_for_negative_flag(uint8_t reg) const
+{
+    return
+}
+
 
 
 //////////////
-// Opcodes  // 
+// Opcodes  //
 //////////////
 
 void CPU::BRK()

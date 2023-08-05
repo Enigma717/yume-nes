@@ -3,14 +3,14 @@
 
 
 
-void test_same_memory_address() 
+void test_same_memory_address()
 {
     SystemBus bus;
 
     MY_ASSERT(bus.ram == bus.cpu.get_ram_address().lock());
 }
 
-void test_direct_memory_access() 
+void test_direct_memory_access()
 {
     SystemBus bus;
     uint16_t address {0x00DD};

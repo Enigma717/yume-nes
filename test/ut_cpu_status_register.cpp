@@ -2,7 +2,7 @@
 #include "../include/cpu.h"
 
 
-void test_set_status_word_direct() 
+void test_set_status_word_direct()
 {
     CPU cpu;
     uint8_t mask {0b00110100};
@@ -12,7 +12,7 @@ void test_set_status_word_direct()
     MY_ASSERT(cpu.status.word == mask);
 }
 
-void test_set_carry_flag_true() 
+void test_set_carry_flag_true()
 {
     CPU cpu;
     uint8_t carry_mask = (1 << 0);
@@ -22,7 +22,7 @@ void test_set_carry_flag_true()
     MY_ASSERT(cpu.status.word == carry_mask);
 }
 
-void test_set_zero_flag_true() 
+void test_set_zero_flag_true()
 {
     CPU cpu;
     uint8_t zero_mask = (1 << 1);
@@ -98,9 +98,9 @@ void ut_cpu_status_register()
 {
     TEST_SET;
 
-    test_set_status_word_direct(); 
-    test_set_carry_flag_true(); 
-    test_set_zero_flag_true(); 
+    test_set_status_word_direct();
+    test_set_carry_flag_true();
+    test_set_zero_flag_true();
     test_set_interrupt_flag_true();
     test_set_decimal_flag_true();
     test_set_brk_flag_true();
