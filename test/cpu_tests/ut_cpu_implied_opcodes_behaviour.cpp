@@ -1,6 +1,8 @@
 #include "./cpu_tests.h"
 #include "../test_main.h"
 #include "../../include/bus.h"
+#include <cstdint>
+#include <memory.h>
 
 
 void test_brk_behaviour()
@@ -158,6 +160,117 @@ void test_plp_behaviour()
     MY_ASSERT(bus.cpu.status.word == status_final_mask);
 }
 
+void test_rti_behaviour()
+{
+    // TODO
+}
+
+void test_rts_behaviour()
+{
+    // TODO
+}
+
+void test_sec_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_word = (1 << 0);
+
+    bus.cpu.status.word = 0x00;
+    bus.cpu.SEC();
+
+    MY_ASSERT(bus.cpu.status.word == target_word);
+}
+
+void test_sed_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_word = (1 << 3);
+
+    bus.cpu.status.word = 0x00;
+    bus.cpu.SED();
+
+    MY_ASSERT(bus.cpu.status.word == target_word);
+}
+
+void test_sei_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_word = (1 << 2);
+
+    bus.cpu.status.word = 0x00;
+    bus.cpu.SEI();
+
+    MY_ASSERT(bus.cpu.status.word == target_word);
+}
+
+void test_tax_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_value = 0x77;
+
+    bus.cpu.acc = target_value;
+    bus.cpu.TAX();
+
+    MY_ASSERT(bus.cpu.x_reg == target_value);
+}
+
+void test_tay_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_value = 0x88;
+
+    bus.cpu.acc = target_value;
+    bus.cpu.TAY();
+
+    MY_ASSERT(bus.cpu.y_reg == target_value);
+}
+
+void test_tsx_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_value = 0x99;
+
+    bus.cpu.cpu_mem_write(stack_offset + bus.cpu.stack_ptr, target_value);
+    bus.cpu.TSX();
+
+    MY_ASSERT(bus.cpu.x_reg == target_value);
+}
+
+void test_txa_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_value = 0xAA;
+
+    bus.cpu.x_reg = target_value;
+    bus.cpu.TXA();
+
+    MY_ASSERT(bus.cpu.acc == target_value);
+}
+
+void test_txs_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_value = 0xBB;
+
+    bus.cpu.x_reg = target_value;
+    bus.cpu.TXS();
+
+    uint8_t value_from_stack = bus.cpu.cpu_mem_read(stack_offset + bus.cpu.stack_ptr);
+
+    MY_ASSERT(value_from_stack == target_value);
+}
+
+void test_tya_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_value = 0xCC;
+
+    bus.cpu.y_reg = target_value;
+    bus.cpu.TYA();
+
+    MY_ASSERT(bus.cpu.acc == target_value);
+}
+
 
 void ut_cpu_implied_opcodes_behaviour()
 {
@@ -182,4 +295,18 @@ void ut_cpu_implied_opcodes_behaviour()
     test_php_behaviour();
     test_pla_behaviour();
     test_plp_behaviour();
+
+    test_rti_behaviour();
+    test_rts_behaviour();
+
+    test_sec_behaviour();
+    test_sed_behaviour();
+    test_sei_behaviour();
+
+    test_tax_behaviour();
+    test_tay_behaviour();
+    test_tsx_behaviour();
+    test_txa_behaviour();
+    test_txs_behaviour();
+    test_tya_behaviour();
 }

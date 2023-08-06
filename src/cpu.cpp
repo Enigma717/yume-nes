@@ -162,6 +162,8 @@ void CPU::PLP()
 
 void CPU::RTI()
 {
+    // TODO: this is probably wrong
+
     stack_ptr++;
     status.word = cpu_mem_read(stack_offset + stack_ptr);
 
@@ -174,6 +176,8 @@ void CPU::RTI()
 
 void CPU::RTS()
 {
+    // TODO: same as above
+
     stack_ptr++;
     pc = cpu_mem_read(stack_offset + stack_ptr) - 1;
 }
@@ -197,32 +201,32 @@ void CPU::TAX()
 {
     x_reg = acc;
 
-    check_for_zero_flag(x_reg);
-    check_for_negative_flag(x_reg);
+    status.flag.zero = check_for_zero_flag(x_reg);
+    status.flag.negative = check_for_negative_flag(x_reg);
 }
 
 void CPU::TAY()
 {
     y_reg = acc;
 
-    check_for_zero_flag(y_reg);
-    check_for_negative_flag(y_reg);
+    status.flag.zero = check_for_zero_flag(y_reg);
+    status.flag.negative = check_for_negative_flag(y_reg);
 }
 
 void CPU::TSX()
 {
     x_reg = cpu_mem_read(stack_offset + stack_ptr);
 
-    check_for_zero_flag(x_reg);
-    check_for_negative_flag(x_reg);
+    status.flag.zero = check_for_zero_flag(x_reg);
+    status.flag.negative = check_for_negative_flag(x_reg);
 }
 
 void CPU::TXA()
 {
     acc = x_reg;
 
-    check_for_zero_flag(acc);
-    check_for_negative_flag(acc);
+    status.flag.zero = check_for_zero_flag(acc);
+    status.flag.negative = check_for_negative_flag(acc);
 }
 
 void CPU::TXS()
@@ -234,6 +238,6 @@ void CPU::TYA()
 {
     acc = y_reg;
 
-    check_for_zero_flag(acc);
-    check_for_negative_flag(acc);
+    status.flag.zero = check_for_zero_flag(acc);
+    status.flag.negative = check_for_negative_flag(acc);
 }
