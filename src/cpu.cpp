@@ -1,6 +1,5 @@
 #include "../include/cpu.h"
 #include "../include/memory.h"
-#include <memory.h>
 
 
 void CPU::connect_with_ram(std::shared_ptr<Memory> ram)
@@ -31,9 +30,9 @@ int CPU::cpu_mem_read_debug(uint16_t address) const
 
 void CPU::hard_reset()
 {
-    acc = 0;
-    x_reg = 0;
-    y_reg = 0;
+    acc = 0x00;
+    x_reg = 0x00;
+    y_reg = 0x00;
     stack_ptr = 0xFD;
     status.word = 0x34;
     ram_ptr.lock()->mem_clear();
@@ -157,8 +156,8 @@ void CPU::PLA()
 
 void CPU::PLP()
 {
-    status.word = cpu_mem_read(stack_offset + stack_ptr);
     stack_ptr++;
+    status.word = cpu_mem_read(stack_offset + stack_ptr);
 }
 
 void CPU::RTI()

@@ -29,15 +29,15 @@ public:
             uint8_t negative  : 1;
         } flag;
 
-        uint8_t word;
+        uint8_t word {0x34};
     };
 
     uint8_t  acc       {0x00};
     uint8_t  x_reg     {0x00};
     uint8_t  y_reg     {0x00};
-    uint8_t  stack_ptr {0x00};
+    uint8_t  stack_ptr {0xFD};
     uint16_t pc        {0x0000};
-    Status   status    {0x00};
+    Status status      {};
 
     /////////////////////////////////////
 
@@ -87,7 +87,7 @@ public:
     void TYA();
 
 private:
-    MemoryPtr ram_ptr;
+    MemoryPtr ram_ptr {};
 
     /////////////////////////////////////
 
