@@ -94,32 +94,32 @@ void CPU::DEX()
 {
     x_reg--;
 
-    check_for_zero_flag(x_reg);
-    check_for_negative_flag(x_reg);
+    status.flag.zero = check_for_zero_flag(x_reg);
+    status.flag.negative = check_for_negative_flag(x_reg);
 }
 
 void CPU::DEY()
 {
     y_reg--;
 
-    check_for_zero_flag(y_reg);
-    check_for_negative_flag(y_reg);
+    status.flag.zero = check_for_zero_flag(y_reg);
+    status.flag.negative = check_for_negative_flag(y_reg);
 }
 
 void CPU::INX()
 {
     x_reg++;
 
-    check_for_zero_flag(x_reg);
-    check_for_negative_flag(x_reg);
+    status.flag.zero = check_for_zero_flag(x_reg);
+    status.flag.negative = check_for_negative_flag(x_reg);
 }
 
 void CPU::INY()
 {
     y_reg++;
 
-    check_for_zero_flag(y_reg);
-    check_for_negative_flag(y_reg);
+    status.flag.zero = check_for_zero_flag(y_reg);
+    status.flag.negative = check_for_negative_flag(y_reg);
 }
 
 void CPU::NOP()
@@ -150,8 +150,8 @@ void CPU::PLA()
     stack_ptr++;
     acc = cpu_mem_read(stack_offset + stack_ptr);
 
-    check_for_zero_flag(acc);
-    check_for_negative_flag(acc);
+    status.flag.zero = check_for_zero_flag(acc);
+    status.flag.negative = check_for_negative_flag(acc);
 }
 
 void CPU::PLP()

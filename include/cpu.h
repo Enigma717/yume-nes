@@ -37,7 +37,7 @@ public:
     uint8_t  y_reg     {0x00};
     uint8_t  stack_ptr {0xFD};
     uint16_t pc        {0x0000};
-    Status status      {};
+    Status   status    {};
 
     /////////////////////////////////////
 

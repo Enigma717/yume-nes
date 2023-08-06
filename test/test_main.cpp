@@ -10,6 +10,7 @@ void run_all_tests()
     ut_cpu_status_register();
     ut_cpu_hard_reset();
     ut_cpu_implied_opcodes_behaviour();
+    ut_cpu_implied_opcodes_flags();
 }
 
 
