@@ -1,11 +1,12 @@
 #include <iostream>
 
 #include "./test_main.h"
+#include "./cpu_tests/cpu_tests.h"
 
 
 void run_all_tests()
 {
-    ut_bus_cpu_memory_connection();
+    ut_cpu_bus_memory_connection();
     ut_cpu_status_register();
     ut_cpu_hard_reset();
     ut_cpu_implied_opcodes_behaviour();

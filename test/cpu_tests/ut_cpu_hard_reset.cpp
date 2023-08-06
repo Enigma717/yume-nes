@@ -1,5 +1,6 @@
-#include "./test_main.h"
-#include "../include/bus.h"
+#include "./cpu_tests.h"
+#include "../test_main.h"
+#include "../../include/bus.h"
 
 
 void test_check_registers_after_boot()

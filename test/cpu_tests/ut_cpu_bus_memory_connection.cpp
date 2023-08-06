@@ -1,5 +1,6 @@
-#include "./test_main.h"
-#include "../include/bus.h"
+#include "./cpu_tests.h"
+#include "../test_main.h"
+#include "../../include/bus.h"
 
 
 
@@ -52,7 +53,7 @@ void test_outside_memory_read()
 }
 
 
-void ut_bus_cpu_memory_connection()
+void ut_cpu_bus_memory_connection()
 {
     TEST_SET;
 

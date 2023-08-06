@@ -1,5 +1,6 @@
-#include "./test_main.h"
-#include "../include/cpu.h"
+#include "./cpu_tests.h"
+#include "../test_main.h"
+#include "../../include/cpu.h"
 
 
 void test_set_status_word_directly()
@@ -99,7 +100,6 @@ void test_set_negative_flag_as_true()
 
     MY_ASSERT(cpu.status.word == negative_mask);
 }
-
 
 
 void ut_cpu_status_register()

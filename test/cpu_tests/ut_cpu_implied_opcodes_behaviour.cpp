@@ -1,5 +1,6 @@
-#include "./test_main.h"
-#include "../include/bus.h"
+#include "./cpu_tests.h"
+#include "../test_main.h"
+#include "../../include/bus.h"
 
 
 void test_brk_behaviour()
@@ -52,7 +53,6 @@ void test_clv_behaviour()
     MY_ASSERT(bus.cpu.status.word == target_word);
 }
 
-
 void test_dex_behaviour()
 {
     SystemBus bus;
@@ -75,7 +75,6 @@ void test_dey_behaviour()
     MY_ASSERT(bus.cpu.y_reg == target_y_reg);
 }
 
-
 void test_inx_behaviour()
 {
     SystemBus bus;
@@ -97,7 +96,6 @@ void test_iny_behaviour()
 
     MY_ASSERT(bus.cpu.y_reg == target_y_reg);
 }
-
 
 void test_nop_behaviour()
 {
