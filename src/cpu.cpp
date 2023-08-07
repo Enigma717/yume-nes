@@ -56,7 +56,7 @@ bool CPU::check_for_overflow_flag(uint8_t reg) const
 
 bool CPU::check_for_negative_flag(uint8_t reg) const
 {
-    return reg & (1 << 7);
+    return (reg & (1 << 7)) > 0;
 }
 
 

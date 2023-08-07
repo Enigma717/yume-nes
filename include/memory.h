@@ -6,10 +6,10 @@
 #include <cstdint>
 
 
-using MemoryVec = std::vector<uint8_t>;
-
-inline constexpr uint16_t memory_size = 0x0800;
+inline constexpr uint16_t memory_size = 0xFFFF;
 inline constexpr uint16_t stack_offset = 0x0100;
+
+using MemoryVec = std::vector<uint8_t>;
 
 
 class Memory {
@@ -21,7 +21,7 @@ public:
 
     MemoryVec get_memory_copy() const;
 private:
-    MemoryVec memory = std::vector<uint8_t>(memory_size, 0x00);
+    MemoryVec memory {std::vector<uint8_t>(memory_size, 0x00)};
 };
 
 

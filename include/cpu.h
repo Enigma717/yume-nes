@@ -51,7 +51,7 @@ public:
     void hard_reset();
 
 
-    /////  Opcodes  /////
+    /////  Instructions  /////
     void BRK();
 
     void CLC();
