@@ -1,4 +1,4 @@
-CPPFLAGS = -Wall -pedantic -std=c++20 -ggdb3
+CPPFLAGS = -Wall -Wextra -Wconversion -pedantic -std=c++20 -ggdb3
 
 .PHONY = all clean
 

@@ -2,8 +2,8 @@
 #define MEMORY_H
 
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 
 inline constexpr uint16_t memory_size = 0xFFFF;

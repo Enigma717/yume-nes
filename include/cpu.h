@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <memory>
 
+#include "./instruction.h"
+
 
 class Memory;
 
