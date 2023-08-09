@@ -19,6 +19,7 @@ public:
     uint8_t mem_read(uint16_t address) const;
     int     mem_read_debug(uint16_t address) const;
 
+
     MemoryVec get_memory_copy() const;
 private:
     MemoryVec memory {std::vector<uint8_t>(memory_size, 0x00)};

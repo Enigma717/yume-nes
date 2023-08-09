@@ -1,5 +1,8 @@
+#include <algorithm>
+
 #include "../include/cpu.h"
 #include "../include/memory.h"
+#include "../include/instruction.h"
 
 
 void CPU::connect_with_ram(std::shared_ptr<Memory> ram)
@@ -58,6 +61,19 @@ bool CPU::check_for_negative_flag(uint8_t reg) const
 {
     return (reg & (1 << 7)) > 0;
 }
+
+
+Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
+{
+    auto instruction = std::find_if(
+        Lookup::instructions_table.begin(),
+        Lookup::instructions_table.end(),
+        [=] (const Instruction& instr) { return instr.opcode == opcode; }
+        );
+
+    return *instruction;
+}
+
 
 
 

@@ -12,3 +12,6 @@ run_tests
 # valgrind logs
 vgcore.*
 core.*
+
+# vscode
+.vscode
