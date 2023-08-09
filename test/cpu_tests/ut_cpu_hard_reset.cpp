@@ -1,6 +1,7 @@
 #include "./cpu_tests.h"
 #include "../test_main.h"
 #include "../../include/bus.h"
+#include <memory.h>
 
 
 void test_check_registers_after_boot()
@@ -31,7 +32,7 @@ void test_check_status_after_boot()
 void test_check_memory_after_boot()
 {
     SystemBus bus;
-    std::vector<uint8_t> empty_memory = std::vector<uint8_t>(0x800, 0x00);
+    std::vector<uint8_t> empty_memory = std::vector<uint8_t>(0x10000, 0x00);
 
     MY_ASSERT(bus.ram->get_memory_copy() == empty_memory);
 }
@@ -76,7 +77,7 @@ void test_check_status_after_reset()
 void test_check_memory_after_reset()
 {
     SystemBus bus;
-    std::vector<uint8_t> empty_memory = std::vector<uint8_t>(0x800, 0x00);
+    std::vector<uint8_t> empty_memory = std::vector<uint8_t>(0x10000, 0x00);
 
     for (auto i = 0; i < 10; i++) {
         bus.cpu.cpu_mem_write(0xC0 * i, i);

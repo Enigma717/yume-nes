@@ -11,6 +11,7 @@ void run_all_tests()
     ut_cpu_hard_reset();
     ut_cpu_implied_opcodes_behaviour();
     ut_cpu_implied_opcodes_flags();
+    ut_cpu_lookup_table_correctness();
 }
 
 

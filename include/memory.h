@@ -6,7 +6,7 @@
 #include <vector>
 
 
-inline constexpr uint16_t memory_size = 0xFFFF;
+inline constexpr uint32_t memory_size = 0x10000;
 inline constexpr uint16_t stack_offset = 0x0100;
 
 using MemoryVec = std::vector<uint8_t>;

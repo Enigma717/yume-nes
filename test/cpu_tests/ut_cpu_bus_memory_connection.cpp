@@ -3,7 +3,6 @@
 #include "../../include/bus.h"
 
 
-
 void test_same_memory_address()
 {
     SystemBus bus;
@@ -44,14 +43,6 @@ void test_shared_memory_access()
     MY_ASSERT(bus.cpu.cpu_mem_read(address) == data);
 }
 
-void test_outside_memory_read()
-{
-    SystemBus bus;
-    uint16_t address {0xFFFF};
-
-    MY_ASSERT(bus.ram->mem_read(address) == 0x00);
-}
-
 
 void ut_cpu_bus_memory_connection()
 {
@@ -61,5 +52,4 @@ void ut_cpu_bus_memory_connection()
     test_direct_memory_access();
     test_cpu_memory_access();
     test_shared_memory_access();
-    test_outside_memory_read();
 }

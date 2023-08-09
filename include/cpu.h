@@ -109,7 +109,7 @@ namespace Lookup
     static const std::vector<Instruction> instructions_table {
         {"ADC", AM::immediate, 0x69, 2, 2}, Instruction({"ADC", AM::zero_page, 0x65, 2, 3}),
         {"ADC", AM::zero_page_x, 0x75, 2, 4}, {"ADC", AM::absolute, 0x6D, 3, 4},
-        {"ADC", AM::absolute_x, 0x7D, 3, 4}, {"ADC", AM::absolute_x, 0x79, 3, 4},
+        {"ADC", AM::absolute_x, 0x7D, 3, 4}, {"ADC", AM::absolute_y, 0x79, 3, 4},
         {"ADC", AM::indirect_x, 0x61, 2, 6}, {"ADC", AM::indirect_y, 0x71, 2, 5},
         {"AND", AM::immediate, 0x29, 2, 2}, {"AND", AM::zero_page, 0x25, 2, 3},
         {"AND", AM::zero_page_x, 0x35, 2, 4}, {"AND", AM::absolute, 0x2D, 3, 4},
