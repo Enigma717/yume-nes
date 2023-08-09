@@ -1,8 +1,6 @@
 #include "./cpu_tests.h"
 #include "../test_main.h"
 #include "../../include/bus.h"
-#include <cstdint>
-#include <memory.h>
 
 
 void test_brk_behaviour()
@@ -13,90 +11,90 @@ void test_brk_behaviour()
 
 void test_clc_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_word = ~(1 << 0);
 
-    bus.cpu.status.word = 0xFF;
-    bus.cpu.CLC();
+    cpu.status.word = 0xFF;
+    cpu.CLC();
 
-    MY_ASSERT(bus.cpu.status.word == target_word);
+    MY_ASSERT(cpu.status.word == target_word);
 }
 
 void test_cld_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_word = ~(1 << 3);
 
-    bus.cpu.status.word = 0xFF;
-    bus.cpu.CLD();
+    cpu.status.word = 0xFF;
+    cpu.CLD();
 
-    MY_ASSERT(bus.cpu.status.word == target_word);
+    MY_ASSERT(cpu.status.word == target_word);
 }
 
 void test_cli_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_word = ~(1 << 2);
 
-    bus.cpu.status.word = 0xFF;
-    bus.cpu.CLI();
+    cpu.status.word = 0xFF;
+    cpu.CLI();
 
-    MY_ASSERT(bus.cpu.status.word == target_word);
+    MY_ASSERT(cpu.status.word == target_word);
 }
 
 void test_clv_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_word = ~(1 << 6);
 
-    bus.cpu.status.word = 0xFF;
-    bus.cpu.CLV();
+    cpu.status.word = 0xFF;
+    cpu.CLV();
 
-    MY_ASSERT(bus.cpu.status.word == target_word);
+    MY_ASSERT(cpu.status.word == target_word);
 }
 
 void test_dex_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_x_reg = 0x86;
 
-    bus.cpu.x_reg = 0x87;
-    bus.cpu.DEX();
+    cpu.x_reg = 0x87;
+    cpu.DEX();
 
-    MY_ASSERT(bus.cpu.x_reg == target_x_reg);
+    MY_ASSERT(cpu.x_reg == target_x_reg);
 }
 
 void test_dey_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_y_reg = 0x86;
 
-    bus.cpu.y_reg = 0x87;
-    bus.cpu.DEY();
+    cpu.y_reg = 0x87;
+    cpu.DEY();
 
-    MY_ASSERT(bus.cpu.y_reg == target_y_reg);
+    MY_ASSERT(cpu.y_reg == target_y_reg);
 }
 
 void test_inx_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_x_reg = 0xB0;
 
-    bus.cpu.x_reg = 0xAF;
-    bus.cpu.INX();
+    cpu.x_reg = 0xAF;
+    cpu.INX();
 
-    MY_ASSERT(bus.cpu.x_reg == target_x_reg);
+    MY_ASSERT(cpu.x_reg == target_x_reg);
 }
 
 void test_iny_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_y_reg = 0xB0;
 
-    bus.cpu.y_reg = 0xAF;
-    bus.cpu.INY();
+    cpu.y_reg = 0xAF;
+    cpu.INY();
 
-    MY_ASSERT(bus.cpu.y_reg == target_y_reg);
+    MY_ASSERT(cpu.y_reg == target_y_reg);
 }
 
 void test_nop_behaviour()
@@ -132,7 +130,6 @@ void test_php_behaviour()
 void test_pla_behaviour()
 {
     SystemBus bus;
-    uint8_t stack_ptr_init = bus.cpu.stack_ptr;
     uint8_t acc_init_value = 0xAD;
 
     bus.cpu.acc = acc_init_value;
@@ -147,7 +144,6 @@ void test_pla_behaviour()
 void test_plp_behaviour()
 {
     SystemBus bus;
-    uint8_t stack_ptr_init = bus.cpu.stack_ptr;
     uint8_t status_init_mask = 0xAD;
     uint8_t status_final_mask = status_init_mask | (1 << 4) | (1 << 5);
 
@@ -172,57 +168,57 @@ void test_rts_behaviour()
 
 void test_sec_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_word = (1 << 0);
 
-    bus.cpu.status.word = 0x00;
-    bus.cpu.SEC();
+    cpu.status.word = 0x00;
+    cpu.SEC();
 
-    MY_ASSERT(bus.cpu.status.word == target_word);
+    MY_ASSERT(cpu.status.word == target_word);
 }
 
 void test_sed_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_word = (1 << 3);
 
-    bus.cpu.status.word = 0x00;
-    bus.cpu.SED();
+    cpu.status.word = 0x00;
+    cpu.SED();
 
-    MY_ASSERT(bus.cpu.status.word == target_word);
+    MY_ASSERT(cpu.status.word == target_word);
 }
 
 void test_sei_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_word = (1 << 2);
 
-    bus.cpu.status.word = 0x00;
-    bus.cpu.SEI();
+    cpu.status.word = 0x00;
+    cpu.SEI();
 
-    MY_ASSERT(bus.cpu.status.word == target_word);
+    MY_ASSERT(cpu.status.word == target_word);
 }
 
 void test_tax_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_value = 0x77;
 
-    bus.cpu.acc = target_value;
-    bus.cpu.TAX();
+    cpu.acc = target_value;
+    cpu.TAX();
 
-    MY_ASSERT(bus.cpu.x_reg == target_value);
+    MY_ASSERT(cpu.x_reg == target_value);
 }
 
 void test_tay_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_value = 0x88;
 
-    bus.cpu.acc = target_value;
-    bus.cpu.TAY();
+    cpu.acc = target_value;
+    cpu.TAY();
 
-    MY_ASSERT(bus.cpu.y_reg == target_value);
+    MY_ASSERT(cpu.y_reg == target_value);
 }
 
 void test_tsx_behaviour()
@@ -238,13 +234,13 @@ void test_tsx_behaviour()
 
 void test_txa_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_value = 0xAA;
 
-    bus.cpu.x_reg = target_value;
-    bus.cpu.TXA();
+    cpu.x_reg = target_value;
+    cpu.TXA();
 
-    MY_ASSERT(bus.cpu.acc == target_value);
+    MY_ASSERT(cpu.acc == target_value);
 }
 
 void test_txs_behaviour()
@@ -262,13 +258,13 @@ void test_txs_behaviour()
 
 void test_tya_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_value = 0xCC;
 
-    bus.cpu.y_reg = target_value;
-    bus.cpu.TYA();
+    cpu.y_reg = target_value;
+    cpu.TYA();
 
-    MY_ASSERT(bus.cpu.acc == target_value);
+    MY_ASSERT(cpu.acc == target_value);
 }
 
 

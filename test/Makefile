@@ -7,7 +7,7 @@ SRCS     := $(wildcard $(SRC)/*.cpp)
 CPUTESTS := $(wildcard ./cpu_tests/*.cpp)
 
 all:
-	$(CXX) $(FLAGS) -o run_tests test_main.cpp $(SRCS) $(CPUTESTS)
+	$(CXX) $(CPPFLAGS) -o run_tests test_main.cpp $(SRCS) $(CPUTESTS)
 
 clean:
 	rm -f tests

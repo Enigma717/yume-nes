@@ -93,11 +93,8 @@ public:
 private:
     MemoryPtr ram_ptr {};
 
-    /////////////////////////////////////
 
-    bool check_for_carry_flag(uint8_t reg) const;
     bool check_for_zero_flag(uint8_t reg) const;
-    bool check_for_overflow_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;
 };
 
@@ -175,11 +172,11 @@ namespace Lookup
         {"SED", AM::implied, 0xF8, 1, 2}, {"SEI", AM::implied, 0x78, 1, 2},
         {"STA", AM::zero_page, 0x85, 2, 3}, {"STA", AM::zero_page_x, 0x95, 2, 4},
         {"STA", AM::absolute, 0x8D, 3, 4}, {"STA", AM::absolute_x, 0x9D, 3, 5},
-        {"STA", AM::absolute, 0x99, 3, 5}, {"STA", AM::indirect_x, 0x81, 2, 6},
+        {"STA", AM::absolute_y, 0x99, 3, 5}, {"STA", AM::indirect_x, 0x81, 2, 6},
         {"STA", AM::indirect_y, 0x91, 2, 6}, {"STX", AM::zero_page, 0x86, 2, 3},
         {"STX", AM::zero_page_y, 0x96, 2, 4}, {"STX", AM::absolute, 0x8E, 3, 4},
         {"STY", AM::zero_page, 0x84, 2, 3}, {"STY", AM::zero_page_x, 0x94, 2, 4},
-        {"STY", AM::zero_page_y, 0x8C, 3, 4}, {"TAX", AM::implied, 0xAA, 1, 2},
+        {"STY", AM::absolute, 0x8C, 3, 4}, {"TAX", AM::implied, 0xAA, 1, 2},
         {"TAY", AM::implied, 0xA8, 1, 2}, {"TSX", AM::implied, 0xBA, 1, 2},
         {"TXA", AM::implied, 0x8A, 1, 2}, {"TXS", AM::implied, 0x9A, 1, 2},
         {"TYA", AM::implied, 0x98, 1, 2}

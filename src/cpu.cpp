@@ -42,19 +42,9 @@ void CPU::hard_reset()
 }
 
 
-bool CPU::check_for_carry_flag(uint8_t reg) const
-{
-    return true;
-}
-
 bool CPU::check_for_zero_flag(uint8_t reg) const
 {
     return reg == 0x00;
-}
-
-bool CPU::check_for_overflow_flag(uint8_t reg) const
-{
-    return true;
 }
 
 bool CPU::check_for_negative_flag(uint8_t reg) const
@@ -65,13 +55,13 @@ bool CPU::check_for_negative_flag(uint8_t reg) const
 
 Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
 {
-    auto instruction = std::find_if(
+    auto instruction_it = std::find_if(
         Lookup::instructions_table.begin(),
         Lookup::instructions_table.end(),
         [=] (const Instruction& instr) { return instr.opcode == opcode; }
         );
 
-    return *instruction;
+    return *instruction_it;
 }
 
 
