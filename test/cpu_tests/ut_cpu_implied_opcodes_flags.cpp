@@ -412,7 +412,6 @@ void test_tya_negative_flag_set_false()
 }
 
 
-
 void ut_cpu_implied_opcodes_flags()
 {
     TEST_SET;

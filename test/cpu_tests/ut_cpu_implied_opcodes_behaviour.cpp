@@ -8,7 +8,6 @@ void test_brk_behaviour()
     // TODO
 }
 
-
 void test_clc_behaviour()
 {
     CPU cpu;

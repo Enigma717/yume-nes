@@ -6,7 +6,7 @@
 void test_set_status_word_directly()
 {
     CPU cpu;
-    uint8_t mask {0b00110100};
+    uint8_t mask {0b0011'0100};
 
     cpu.status.word = mask;
 

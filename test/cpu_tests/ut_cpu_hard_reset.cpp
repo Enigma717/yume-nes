@@ -36,7 +36,6 @@ void test_check_memory_after_boot()
     MY_ASSERT(bus.ram->get_memory_copy() == empty_memory);
 }
 
-
 void test_check_registers_after_reset()
 {
     SystemBus bus;
