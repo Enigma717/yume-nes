@@ -39,7 +39,7 @@ public:
     uint8_t  x_reg     {0x00};
     uint8_t  y_reg     {0x00};
     uint8_t  stack_ptr {0xFD};
-    uint16_t pc        {0x0000};
+    uint16_t pc        {0x8000};
     Status   status    {};
 
 
@@ -50,11 +50,10 @@ public:
     uint8_t cpu_mem_read(uint16_t address) const;
     int     cpu_mem_read_debug(uint16_t address) const;
 
-    void hard_reset();
 
     Instruction deduce_instr_from_opcode(uint8_t opcode) const;
-
-    void exec_instruciton();
+    void hard_reset();
+    void exec_cycle();
 
 
     /////  Instructions  /////
@@ -95,6 +94,8 @@ public:
 private:
     MemoryPtr ram_ptr {};
 
+
+    uint16_t initialize_pc();
 
     bool check_for_zero_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;

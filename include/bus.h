@@ -12,8 +12,8 @@ class SystemBus {
 public:
     SystemBus();
 
-    CPU cpu;
     std::shared_ptr<Memory> ram;
+    CPU cpu;
 private:
 };
 

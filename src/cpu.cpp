@@ -39,21 +39,10 @@ void CPU::hard_reset()
     x_reg = 0x00;
     y_reg = 0x00;
     stack_ptr = 0xFD;
+    pc = initialize_pc();
     status.word = 0x34;
     ram_ptr.lock()->mem_clear();
 }
-
-
-bool CPU::check_for_zero_flag(uint8_t reg) const
-{
-    return reg == 0x00;
-}
-
-bool CPU::check_for_negative_flag(uint8_t reg) const
-{
-    return (reg & (1 << 7)) > 0;
-}
-
 
 Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
 {
@@ -66,14 +55,64 @@ Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
     return *instruction_it;
 }
 
-void CPU::exec_instruciton()
+void CPU::exec_cycle()
 {
     uint8_t instr_opcode = cpu_mem_read(pc);
+    pc++;
+
+
     Instruction instr_deduced = deduce_instr_from_opcode(instr_opcode);
 
-
+    using MN = Instruction::MnemonicName;
+    switch (instr_deduced.mnemonic) {
+        case MN::BRK: BRK(); break;
+        case MN::CLC: CLC(); break;
+        case MN::CLD: CLD(); break;
+        case MN::CLI: CLI(); break;
+        case MN::CLV: CLV(); break;
+        case MN::DEX: DEX(); break;
+        case MN::DEY: DEY(); break;
+        case MN::INX: INX(); break;
+        case MN::INY: INY(); break;
+        case MN::NOP: NOP(); break;
+        case MN::PHA: PHA(); break;
+        case MN::PHP: PHP(); break;
+        case MN::PLA: PLA(); break;
+        case MN::PLP: PLP(); break;
+        case MN::RTI: RTI(); break;
+        case MN::RTS: RTS(); break;
+        case MN::SEC: SEC(); break;
+        case MN::SED: SED(); break;
+        case MN::SEI: SEI(); break;
+        case MN::TAX: TAX(); break;
+        case MN::TAY: TAY(); break;
+        case MN::TSX: TSX(); break;
+        case MN::TXA: TXA(); break;
+        case MN::TXS: TXS(); break;
+        case MN::TYA: TYA(); break;
+        default: break;
+    }
 }
 
+uint16_t CPU::initialize_pc()
+{
+    uint8_t lsb = cpu_mem_read(0xFFFC);
+    uint8_t msb = cpu_mem_read(0xFFFD);
+
+    uint16_t address = (msb << 8) | lsb;
+
+    return address;
+}
+
+bool CPU::check_for_zero_flag(uint8_t reg) const
+{
+    return reg == 0x00;
+}
+
+bool CPU::check_for_negative_flag(uint8_t reg) const
+{
+    return (reg & (1 << 7)) > 0;
+}
 
 
 ///////////////
