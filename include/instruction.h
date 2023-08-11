@@ -8,6 +8,28 @@
 
 class Instruction {
 public:
+    enum class MnemonicName {
+        ADC, AND, ASL,
+        BCC, BCS, BEQ,
+        BIT, BMI, BNE,
+        BPL, BRK, BVC,
+        BVS, CLC, CLD,
+        CLI, CLV, CMP,
+        CPX, CPY, DEC,
+        DEX, DEY, EOR,
+        INC, INX, INY,
+        JMP, JSR, LDA,
+        LDX, LDY, LSR,
+        NOP, ORA, PHA,
+        PHP, PLA, PLP,
+        ROL, ROR, RTI,
+        RTS, SBC, SEC,
+        SED, SEI, STA,
+        STX, STY, TAX,
+        TAY, TSX, TXA,
+        TXS, TYA, ILL
+    };
+
     enum class AddressingMode {
         implied,
         accumulator,
@@ -25,7 +47,7 @@ public:
         illegal
     };
 
-    const std::string    mnemonic {"ILL"};
+    const MnemonicName   mnemonic {MnemonicName::ILL};
     const AddressingMode address_mode {AddressingMode::illegal};
     const uint8_t        opcode {0x00};
     const int            bytes {0};

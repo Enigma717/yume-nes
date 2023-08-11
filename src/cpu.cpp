@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <cstdint>
+#include <memory>
 
 #include "../include/cpu.h"
 #include "../include/memory.h"
@@ -63,6 +65,15 @@ Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
 
     return *instruction_it;
 }
+
+void CPU::exec_instruciton()
+{
+    uint8_t instr_opcode = cpu_mem_read(pc);
+    Instruction instr_deduced = deduce_instr_from_opcode(instr_opcode);
+
+
+}
+
 
 
 ///////////////
