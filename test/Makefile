@@ -10,4 +10,4 @@ all:
 	$(CXX) $(CPPFLAGS) -o run_tests test_main.cpp $(SRCS) $(CPUTESTS)
 
 clean:
-	rm -f tests
+	rm -f run_tests

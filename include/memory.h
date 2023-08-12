@@ -6,8 +6,13 @@
 #include <vector>
 
 
+namespace MemoryConsts
+{
 inline constexpr uint32_t memory_size = 0x10000;
 inline constexpr uint16_t stack_offset = 0x0100;
+inline constexpr uint16_t reset_vector_lsb = 0xFFFC;
+inline constexpr uint16_t reset_vector_msb = 0xFFFD;
+}
 
 using MemoryVec = std::vector<uint8_t>;
 
@@ -22,7 +27,7 @@ public:
 
     MemoryVec get_memory_copy() const;
 private:
-    MemoryVec memory {std::vector<uint8_t>(memory_size, 0x00)};
+    MemoryVec memory {std::vector<uint8_t>(MemoryConsts::memory_size, 0x00)};
 };
 
 

@@ -110,7 +110,7 @@ void test_pha_behaviour()
     bus.cpu.acc = acc_init_value;
     bus.cpu.PHA();
 
-    MY_ASSERT(bus.cpu.cpu_mem_read(stack_offset + stack_ptr_init) == acc_init_value);
+    MY_ASSERT(bus.cpu.cpu_mem_read(MemoryConsts::stack_offset + stack_ptr_init) == acc_init_value);
 }
 
 void test_php_behaviour()
@@ -123,7 +123,7 @@ void test_php_behaviour()
     bus.cpu.status.word = status_init_mask;
     bus.cpu.PHP();
 
-    MY_ASSERT(bus.cpu.cpu_mem_read(stack_offset + stack_ptr_init) == status_final_mask);
+    MY_ASSERT(bus.cpu.cpu_mem_read(MemoryConsts::stack_offset + stack_ptr_init) == status_final_mask);
 }
 
 void test_pla_behaviour()
@@ -225,7 +225,7 @@ void test_tsx_behaviour()
     SystemBus bus;
     uint8_t target_value = 0x99;
 
-    bus.cpu.cpu_mem_write(stack_offset + bus.cpu.stack_ptr, target_value);
+    bus.cpu.cpu_mem_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, target_value);
     bus.cpu.TSX();
 
     MY_ASSERT(bus.cpu.x_reg == target_value);
@@ -250,7 +250,7 @@ void test_txs_behaviour()
     bus.cpu.x_reg = target_value;
     bus.cpu.TXS();
 
-    uint8_t value_from_stack = bus.cpu.cpu_mem_read(stack_offset + bus.cpu.stack_ptr);
+    uint8_t value_from_stack = bus.cpu.cpu_mem_read(MemoryConsts::stack_offset + bus.cpu.stack_ptr);
 
     MY_ASSERT(value_from_stack == target_value);
 }

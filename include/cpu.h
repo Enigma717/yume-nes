@@ -53,6 +53,7 @@ public:
 
     Instruction deduce_instr_from_opcode(uint8_t opcode) const;
     void hard_reset();
+    void soft_reset();
     void exec_cycle();
 
 
@@ -95,7 +96,7 @@ private:
     MemoryPtr ram_ptr {};
 
 
-    uint16_t initialize_pc();
+    uint16_t read_reset_vector();
 
     bool check_for_zero_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;

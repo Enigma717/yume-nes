@@ -8,7 +8,7 @@ void run_all_tests()
 {
     ut_cpu_bus_memory_connection();
     ut_cpu_status_register();
-    ut_cpu_hard_reset();
+    ut_cpu_boot_and_reset();
     ut_cpu_implied_opcodes_behaviour();
     ut_cpu_implied_opcodes_flags();
     ut_cpu_lookup_table_correctness();

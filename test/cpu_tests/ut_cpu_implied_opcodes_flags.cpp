@@ -295,7 +295,7 @@ void test_tsx_zero_flag_set_true()
 {
     SystemBus bus;
 
-    bus.cpu.cpu_mem_write(stack_offset + bus.cpu.stack_ptr, 0x00);
+    bus.cpu.cpu_mem_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, 0x00);
     bus.cpu.TSX();
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
@@ -305,7 +305,7 @@ void test_tsx_zero_flag_set_false()
 {
     SystemBus bus;
 
-    bus.cpu.cpu_mem_write(stack_offset + bus.cpu.stack_ptr, 0x77);
+    bus.cpu.cpu_mem_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, 0x77);
     bus.cpu.TSX();
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
@@ -315,7 +315,7 @@ void test_tsx_negative_flag_set_true()
 {
     SystemBus bus;
 
-    bus.cpu.cpu_mem_write(stack_offset + bus.cpu.stack_ptr, 0xAA);
+    bus.cpu.cpu_mem_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, 0xAA);
     bus.cpu.TSX();
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
@@ -325,7 +325,7 @@ void test_tsx_negative_flag_set_false()
 {
     SystemBus bus;
 
-    bus.cpu.cpu_mem_write(stack_offset + bus.cpu.stack_ptr, 0x77);
+    bus.cpu.cpu_mem_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, 0x77);
     bus.cpu.TSX();
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);

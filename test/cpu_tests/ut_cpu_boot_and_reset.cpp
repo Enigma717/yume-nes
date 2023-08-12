@@ -1,6 +1,7 @@
 #include "./cpu_tests.h"
 #include "../test_main.h"
 #include "../../include/bus.h"
+#include <memory.h>
 
 
 void test_check_registers_after_boot()
@@ -23,7 +24,7 @@ void test_check_stack_ptr_after_boot()
 void test_check_pc_addr_after_boot()
 {
     SystemBus bus;
-    uint16_t target_pc = 0x8000;
+    uint16_t target_pc = 0x0000;
 
     MY_ASSERT(bus.cpu.pc == target_pc);
 }
@@ -74,8 +75,8 @@ void test_check_pc_addr_after_reset()
     SystemBus bus;
     uint16_t target_pc = 0xABCD;
 
-    bus.cpu.cpu_mem_write(0xFFFC, 0xCD);
-    bus.cpu.cpu_mem_write(0xFFFD, 0xAB);
+    bus.cpu.cpu_mem_write(MemoryConsts::reset_vector_lsb, 0xCD);
+    bus.cpu.cpu_mem_write(MemoryConsts::reset_vector_msb, 0xAB);
     bus.cpu.hard_reset();
 
     MY_ASSERT(bus.cpu.pc == target_pc);
@@ -95,7 +96,7 @@ void test_check_status_after_reset()
 void test_check_memory_after_reset()
 {
     SystemBus bus;
-    std::vector<uint8_t> empty_memory = std::vector<uint8_t>(0x10000, 0x00);
+    std::vector<uint8_t> empty_memory = std::vector<uint8_t>(MemoryConsts::memory_size, 0x00);
 
     for (uint8_t i = 0; i < 10; i++) {
         bus.cpu.cpu_mem_write(0xC0 * i, i);
@@ -107,7 +108,7 @@ void test_check_memory_after_reset()
 }
 
 
-void ut_cpu_hard_reset()
+void ut_cpu_boot_and_reset()
 {
     TEST_SET;
 

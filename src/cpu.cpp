@@ -32,16 +32,22 @@ int CPU::cpu_mem_read_debug(uint16_t address) const
     return ram_ptr.lock()->mem_read_debug(address);
 }
 
-
 void CPU::hard_reset()
 {
     acc = 0x00;
     x_reg = 0x00;
     y_reg = 0x00;
     stack_ptr = 0xFD;
-    pc = initialize_pc();
+    pc = read_reset_vector();
     status.word = 0x34;
     ram_ptr.lock()->mem_clear();
+}
+
+void CPU::soft_reset()
+{
+    stack_ptr -= 0x03;
+    pc = read_reset_vector();
+    status.flag.interrupt = 1;
 }
 
 Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
@@ -94,10 +100,10 @@ void CPU::exec_cycle()
     }
 }
 
-uint16_t CPU::initialize_pc()
+uint16_t CPU::read_reset_vector()
 {
-    uint8_t lsb = cpu_mem_read(0xFFFC);
-    uint8_t msb = cpu_mem_read(0xFFFD);
+    uint8_t lsb = cpu_mem_read(MemoryConsts::reset_vector_lsb);
+    uint8_t msb = cpu_mem_read(MemoryConsts::reset_vector_msb);
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -183,7 +189,7 @@ void CPU::NOP()
 
 void CPU::PHA()
 {
-    cpu_mem_write(stack_offset + stack_ptr, acc);
+    cpu_mem_write(MemoryConsts::stack_offset + stack_ptr, acc);
     stack_ptr--;
 }
 
@@ -192,7 +198,7 @@ void CPU::PHP()
     status.flag.brk = 1;
     status.flag.unused = 1;
 
-    cpu_mem_write(stack_offset + stack_ptr, status.word);
+    cpu_mem_write(MemoryConsts::stack_offset + stack_ptr, status.word);
     stack_ptr--;
 
     status.flag.brk = 0;
@@ -202,7 +208,7 @@ void CPU::PHP()
 void CPU::PLA()
 {
     stack_ptr++;
-    acc = cpu_mem_read(stack_offset + stack_ptr);
+    acc = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
 
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.negative = check_for_negative_flag(acc);
@@ -211,7 +217,7 @@ void CPU::PLA()
 void CPU::PLP()
 {
     stack_ptr++;
-    status.word = cpu_mem_read(stack_offset + stack_ptr);
+    status.word = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
 }
 
 void CPU::RTI()
@@ -219,13 +225,13 @@ void CPU::RTI()
     // TODO: this is probably wrong
 
     stack_ptr++;
-    status.word = cpu_mem_read(stack_offset + stack_ptr);
+    status.word = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
 
     status.flag.brk = 0;
     status.flag.unused = 0;
 
     stack_ptr++;
-    pc = cpu_mem_read(stack_offset + stack_ptr);
+    pc = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
 }
 
 void CPU::RTS()
@@ -233,7 +239,7 @@ void CPU::RTS()
     // TODO: same as above
 
     stack_ptr++;
-    pc = cpu_mem_read(stack_offset + stack_ptr) - 1;
+    pc = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr) - 1;
 }
 
 void CPU::SEC()
@@ -269,7 +275,7 @@ void CPU::TAY()
 
 void CPU::TSX()
 {
-    x_reg = cpu_mem_read(stack_offset + stack_ptr);
+    x_reg = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
 
     status.flag.zero = check_for_zero_flag(x_reg);
     status.flag.negative = check_for_negative_flag(x_reg);
@@ -285,7 +291,7 @@ void CPU::TXA()
 
 void CPU::TXS()
 {
-    cpu_mem_write(stack_offset + stack_ptr, x_reg);
+    cpu_mem_write(MemoryConsts::stack_offset + stack_ptr, x_reg);
 }
 
 void CPU::TYA()
