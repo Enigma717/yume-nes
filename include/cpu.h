@@ -42,49 +42,58 @@ public:
     uint16_t pc        {0x8000};
     Status   status    {};
 
+    uint16_t arg_address {0x0000};
+
 
     void connect_with_ram(std::shared_ptr<Memory> ram);
     MemoryPtr get_ram_address() const;
 
-    void    cpu_mem_write(uint16_t address, uint8_t data);
+    void    cpu_mem_write(uint16_t address, uint8_t data) const;
     uint8_t cpu_mem_read(uint16_t address) const;
     int     cpu_mem_read_debug(uint16_t address) const;
 
 
     Instruction deduce_instr_from_opcode(uint8_t opcode) const;
+    void exec_address_mode(Instruction::AddressingMode address_mode);
+    void exec_instruction(Instruction::MnemonicName mnemonic);
+    void exec_cycle();
     void hard_reset();
     void soft_reset();
-    void exec_cycle();
 
+
+    /////  Addressing modes  /////
+    void addr_mode_immediate();
+    void addr_mode_zero_page();
+    void addr_mode_zero_page_x();
+    void addr_mode_zero_page_y();
+    void addr_mode_relative();
+    void addr_mode_absolute();
+    void addr_mode_absolute_x();
+    void addr_mode_absolute_y();
+    void addr_mode_indirect();
+    void addr_mode_indirect_x();
+    void addr_mode_indirect_y();
 
     /////  Instructions  /////
     void BRK();
-
     void CLC();
     void CLD();
     void CLI();
     void CLV();
-
     void DEX();
     void DEY();
-
     void INX();
     void INY();
-
     void NOP();
-
     void PHA();
     void PHP();
     void PLA();
     void PLP();
-
     void RTI();
     void RTS();
-
     void SEC();
     void SED();
     void SEI();
-
     void TAX();
     void TAY();
     void TSX();
@@ -95,9 +104,7 @@ public:
 private:
     MemoryPtr ram_ptr {};
 
-
-    uint16_t read_reset_vector();
-
+    uint16_t read_reset_vector() const;
     bool check_for_zero_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;
 };

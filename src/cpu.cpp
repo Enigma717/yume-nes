@@ -17,7 +17,7 @@ MemoryPtr CPU::get_ram_address() const
     return ram_ptr;
 }
 
-void CPU::cpu_mem_write(uint16_t address, uint8_t data)
+void CPU::cpu_mem_write(uint16_t address, uint8_t data) const
 {
     ram_ptr.lock()->mem_write(address, data);
 }
@@ -32,24 +32,6 @@ int CPU::cpu_mem_read_debug(uint16_t address) const
     return ram_ptr.lock()->mem_read_debug(address);
 }
 
-void CPU::hard_reset()
-{
-    acc = 0x00;
-    x_reg = 0x00;
-    y_reg = 0x00;
-    stack_ptr = 0xFD;
-    pc = read_reset_vector();
-    status.word = 0x34;
-    ram_ptr.lock()->mem_clear();
-}
-
-void CPU::soft_reset()
-{
-    stack_ptr -= 0x03;
-    pc = read_reset_vector();
-    status.flag.interrupt = 1;
-}
-
 Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
 {
     auto instruction_it = std::find_if(
@@ -61,16 +43,29 @@ Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
     return *instruction_it;
 }
 
-void CPU::exec_cycle()
+void CPU::exec_address_mode(Instruction::AddressingMode address_mode)
 {
-    uint8_t instr_opcode = cpu_mem_read(pc);
-    pc++;
+    using AM = Instruction::AddressingMode;
+    switch (address_mode) {
+        case AM::immediate: addr_mode_immediate(); break;
+        case AM::zero_page: addr_mode_zero_page(); break;
+        case AM::zero_page_x: addr_mode_zero_page_x(); break;
+        case AM::zero_page_y: addr_mode_zero_page_y(); break;
+        case AM::relative: addr_mode_relative(); break;
+        case AM::absolute: addr_mode_absolute(); break;
+        case AM::absolute_x: addr_mode_absolute_x(); break;
+        case AM::absolute_y: addr_mode_absolute_y(); break;
+        case AM::indirect: addr_mode_indirect(); break;
+        case AM::indirect_x: addr_mode_indirect_x(); break;
+        case AM::indirect_y: addr_mode_indirect_y(); break;
+        default: break;
+    }
+}
 
-
-    Instruction instr_deduced = deduce_instr_from_opcode(instr_opcode);
-
+void CPU::exec_instruction(Instruction::MnemonicName mnemonic)
+{
     using MN = Instruction::MnemonicName;
-    switch (instr_deduced.mnemonic) {
+    switch (mnemonic) {
         case MN::BRK: BRK(); break;
         case MN::CLC: CLC(); break;
         case MN::CLD: CLD(); break;
@@ -100,7 +95,35 @@ void CPU::exec_cycle()
     }
 }
 
-uint16_t CPU::read_reset_vector()
+void CPU::exec_cycle()
+{
+    uint8_t instr_opcode = cpu_mem_read(pc);
+    pc++;
+
+    Instruction deduced_instr = deduce_instr_from_opcode(instr_opcode);
+
+    exec_instruction(deduced_instr.mnemonic);
+}
+
+void CPU::hard_reset()
+{
+    acc = 0x00;
+    x_reg = 0x00;
+    y_reg = 0x00;
+    stack_ptr = 0xFD;
+    pc = read_reset_vector();
+    status.word = 0x34;
+    ram_ptr.lock()->mem_clear();
+}
+
+void CPU::soft_reset()
+{
+    stack_ptr -= 0x03;
+    pc = read_reset_vector();
+    status.flag.interrupt = 1;
+}
+
+uint16_t CPU::read_reset_vector() const
 {
     uint8_t lsb = cpu_mem_read(MemoryConsts::reset_vector_lsb);
     uint8_t msb = cpu_mem_read(MemoryConsts::reset_vector_msb);
@@ -119,6 +142,69 @@ bool CPU::check_for_negative_flag(uint8_t reg) const
 {
     return (reg & (1 << 7)) > 0;
 }
+
+
+////////////////////////
+//  Addressing modes  //
+////////////////////////
+
+void CPU::addr_mode_immediate()
+{
+
+}
+
+void CPU::addr_mode_zero_page()
+{
+
+}
+
+void CPU::addr_mode_zero_page_x()
+{
+
+}
+
+void CPU::addr_mode_zero_page_y()
+{
+
+}
+
+void CPU::addr_mode_relative()
+{
+
+}
+
+void CPU::addr_mode_absolute()
+{
+
+}
+
+void CPU::addr_mode_absolute_x()
+{
+
+}
+
+void CPU::addr_mode_absolute_y()
+{
+
+}
+
+void CPU::addr_mode_indirect()
+{
+
+}
+
+void CPU::addr_mode_indirect_x()
+{
+
+}
+
+void CPU::addr_mode_indirect_y()
+{
+
+}
+
+
+
 
 
 ///////////////
