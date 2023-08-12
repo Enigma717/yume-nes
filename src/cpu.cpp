@@ -37,7 +37,7 @@ Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
     auto instruction_it = std::find_if(
         Lookup::instructions_table.begin(),
         Lookup::instructions_table.end(),
-        [=] (const Instruction& instr) { return instr.opcode == opcode; }
+        [&] (const Instruction& instr) { return instr.opcode == opcode; }
         );
 
     return *instruction_it;
@@ -97,11 +97,12 @@ void CPU::exec_instruction(Instruction::MnemonicName mnemonic)
 
 void CPU::exec_cycle()
 {
-    uint8_t instr_opcode = cpu_mem_read(pc);
+    uint8_t instr_opcode {cpu_mem_read(pc)};
     pc++;
 
-    Instruction deduced_instr = deduce_instr_from_opcode(instr_opcode);
+    Instruction deduced_instr {deduce_instr_from_opcode(instr_opcode)};
 
+    exec_address_mode(deduced_instr.address_mode);
     exec_instruction(deduced_instr.mnemonic);
 }
 
@@ -125,10 +126,10 @@ void CPU::soft_reset()
 
 uint16_t CPU::read_reset_vector() const
 {
-    uint8_t lsb = cpu_mem_read(MemoryConsts::reset_vector_lsb);
-    uint8_t msb = cpu_mem_read(MemoryConsts::reset_vector_msb);
+    uint8_t lsb {cpu_mem_read(MemoryConsts::reset_vector_lsb)};
+    uint8_t msb {cpu_mem_read(MemoryConsts::reset_vector_msb)};
 
-    uint16_t address = (msb << 8) | lsb;
+    uint16_t address {static_cast<uint16_t>((msb << 8) | lsb)};
 
     return address;
 }
@@ -150,57 +151,82 @@ bool CPU::check_for_negative_flag(uint8_t reg) const
 
 void CPU::addr_mode_immediate()
 {
-
+    arg_address = static_cast<uint16_t>(cpu_mem_read(pc));
+    pc++;
 }
 
 void CPU::addr_mode_zero_page()
 {
+    arg_address = static_cast<uint16_t>(cpu_mem_read(pc));
+    pc++;
 
+    arg_address &= 0x00FF;
 }
 
 void CPU::addr_mode_zero_page_x()
 {
+    arg_address = static_cast<uint16_t>(cpu_mem_read(pc)) | x_reg;
+    pc++;
 
+    arg_address &= 0x00FF;
 }
 
 void CPU::addr_mode_zero_page_y()
 {
+    arg_address = static_cast<uint16_t>(cpu_mem_read(pc)) | y_reg;
+    pc++;
 
+    arg_address &= 0x00FF;
 }
 
 void CPU::addr_mode_relative()
 {
-
+    // TODO
 }
 
 void CPU::addr_mode_absolute()
 {
+    uint8_t lsb {cpu_mem_read(pc)};
+    pc++;
+    uint8_t msb {cpu_mem_read(pc)};
+    pc++;
 
+    arg_address = static_cast<uint16_t>((msb << 8) | lsb);
 }
 
 void CPU::addr_mode_absolute_x()
 {
+    uint8_t lsb {cpu_mem_read(pc)};
+    pc++;
+    uint8_t msb {cpu_mem_read(pc)};
+    pc++;
 
+    arg_address = static_cast<uint16_t>((msb << 8) | lsb) | x_reg;
 }
 
 void CPU::addr_mode_absolute_y()
 {
+    uint8_t lsb {cpu_mem_read(pc)};
+    pc++;
+    uint8_t msb {cpu_mem_read(pc)};
+    pc++;
 
+    arg_address = static_cast<uint16_t>((msb << 8) | lsb) | y_reg;
 }
 
 void CPU::addr_mode_indirect()
 {
-
+    // TODO
 }
 
 void CPU::addr_mode_indirect_x()
 {
-
+    // TODO
 }
 
 void CPU::addr_mode_indirect_y()
 {
-
+    // TODO
 }
 
 
