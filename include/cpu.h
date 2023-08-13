@@ -42,23 +42,23 @@ public:
     uint16_t pc        {0x8000};
     Status   status    {};
 
-    uint8_t curr_cycles {0x00};
-    uint8_t branch_offset {0x00};
-    uint16_t arg_address {0x0000};
+    uint8_t     branch_offset {0x00};
+    uint16_t    arg_address {0x0000};
+    int         curr_cycles {0x00};
     Instruction curr_instruction {};
 
 
-    void connect_with_ram(std::shared_ptr<Memory> ram);
+    void      connect_with_ram(std::shared_ptr<Memory> ram);
     MemoryPtr get_ram_address() const;
 
     void    cpu_mem_write(uint16_t address, uint8_t data) const;
     uint8_t cpu_mem_read(uint16_t address) const;
     int     cpu_mem_read_debug(uint16_t address) const;
 
-    void perform_cycle();
-    void next_instruction();
-    void exec_address_mode(Instruction::AddressingMode address_mode);
-    void exec_instruction(Instruction::MnemonicName mnemonic);
+    void        perform_cycle(bool debug_mode = false);
+    void        next_instruction();
+    void        exec_address_mode();
+    void        exec_instruction();
     Instruction deduce_instr_from_opcode(uint8_t opcode) const;
 
     void hard_reset();
@@ -121,6 +121,7 @@ private:
     bool check_for_negative_flag(uint8_t reg) const;
     bool check_for_page_crossing(uint16_t old_address, uint16_t new_address) const;
     void perform_branching();
+    void log_debug_info();
 };
 
 

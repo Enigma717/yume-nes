@@ -47,11 +47,11 @@ public:
         illegal
     };
 
-    const MnemonicName   mnemonic {MnemonicName::ILL};
-    const AddressingMode address_mode {AddressingMode::illegal};
-    const uint8_t        opcode {0x00};
-    const int            bytes {0};
-    const int            cycles {0};
+    MnemonicName   mnemonic {MnemonicName::ILL};
+    AddressingMode address_mode {AddressingMode::illegal};
+    uint8_t        opcode {0x00};
+    int            bytes {0};
+    int            cycles {0};
 
 
     bool operator==(const Instruction& rhs) const;

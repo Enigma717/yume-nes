@@ -1,7 +1,9 @@
 #include <algorithm>
+#include <bitset>
 #include <cstdint>
+#include <iostream>
+#include <iomanip>
 #include <memory>
-#include <sys/types.h>
 
 #include "../include/cpu.h"
 #include "../include/memory.h"
@@ -33,11 +35,14 @@ int CPU::cpu_mem_read_debug(uint16_t address) const
     return ram_ptr.lock()->mem_read_debug(address);
 }
 
-void CPU::perform_cycle()
+void CPU::perform_cycle(bool debug_mode)
 {
-    if (curr_cycles == 0) {
+    if (curr_cycles == 0)
         next_instruction();
-    }
+
+    if (debug_mode)
+        log_debug_info();
+
 
     curr_cycles--;
 }
@@ -47,37 +52,36 @@ void CPU::next_instruction()
     uint8_t instr_opcode {cpu_mem_read(pc)};
     pc++;
 
-    Instruction deduced_instr {deduce_instr_from_opcode(instr_opcode)};
+    curr_instruction = deduce_instr_from_opcode(instr_opcode);
+    curr_cycles = curr_instruction.cycles;
 
-    curr_cycles = deduced_instr.cycles;
-
-    exec_address_mode(deduced_instr.address_mode);
-    exec_instruction(deduced_instr.mnemonic);
+    exec_address_mode();
+    exec_instruction();
 }
 
-void CPU::exec_address_mode(Instruction::AddressingMode address_mode)
+void CPU::exec_address_mode()
 {
     using AM = Instruction::AddressingMode;
-    switch (address_mode) {
-        case AM::immediate: addr_mode_immediate(); break;
-        case AM::zero_page: addr_mode_zero_page(); break;
+    switch (curr_instruction.address_mode) {
+        case AM::immediate:   addr_mode_immediate();   break;
+        case AM::zero_page:   addr_mode_zero_page();   break;
         case AM::zero_page_x: addr_mode_zero_page_x(); break;
         case AM::zero_page_y: addr_mode_zero_page_y(); break;
-        case AM::relative: addr_mode_relative(); break;
-        case AM::absolute: addr_mode_absolute(); break;
-        case AM::absolute_x: addr_mode_absolute_x(); break;
-        case AM::absolute_y: addr_mode_absolute_y(); break;
-        case AM::indirect: addr_mode_indirect(); break;
-        case AM::indirect_x: addr_mode_indirect_x(); break;
-        case AM::indirect_y: addr_mode_indirect_y(); break;
+        case AM::relative:    addr_mode_relative();    break;
+        case AM::absolute:    addr_mode_absolute();    break;
+        case AM::absolute_x:  addr_mode_absolute_x();  break;
+        case AM::absolute_y:  addr_mode_absolute_y();  break;
+        case AM::indirect:    addr_mode_indirect();    break;
+        case AM::indirect_x:  addr_mode_indirect_x();  break;
+        case AM::indirect_y:  addr_mode_indirect_y();  break;
         default: break;
     }
 }
 
-void CPU::exec_instruction(Instruction::MnemonicName mnemonic)
+void CPU::exec_instruction()
 {
     using MN = Instruction::MnemonicName;
-    switch (mnemonic) {
+    switch (curr_instruction.mnemonic) {
         case MN::BCC: BCC(); break;
         case MN::BCS: BCS(); break;
         case MN::BEQ: BEQ(); break;
@@ -179,6 +183,18 @@ void CPU::perform_branching()
         curr_cycles += 1;
 
     pc = new_pc;
+}
+
+void CPU::log_debug_info()
+{
+    std::cout << "[DEBUG] " << std::hex
+        << "ACC: " << "0x" << std::setw(3) << std::left << static_cast<int>(acc)
+        << "| X: " << "0x" << std::setw(3) << std::left << static_cast<int>(x_reg)
+        << "| Y: " << "0x" << std::setw(3) << std::left << static_cast<int>(y_reg)
+        << "| STACK_PTR: " << "0x" << std::setw(3) << std::left << static_cast<int>(stack_ptr)
+        << "| PC: " << "0x" << std::setw(5) << std::left << static_cast<int>(pc)
+        << "| STATUS: " << "0b" << std::setw(9) << std::left << std::bitset<8>(status.word)
+        << std::dec << "\n";
 }
 
 
