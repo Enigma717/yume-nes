@@ -44,7 +44,8 @@ public:
 
     uint8_t     branch_offset {0x00};
     uint16_t    arg_address {0x0000};
-    int         curr_cycles {0x00};
+    int         cycles_queued {0};
+    int         cycles_executed {0};
     Instruction curr_instruction {};
 
 
@@ -63,6 +64,7 @@ public:
 
     void hard_reset();
     void soft_reset();
+    void log_debug_info();
 
 
     /////  Addressing modes  /////
@@ -121,7 +123,6 @@ private:
     bool check_for_negative_flag(uint8_t reg) const;
     bool check_for_page_crossing(uint16_t old_address, uint16_t new_address) const;
     void perform_branching();
-    void log_debug_info();
 };
 
 

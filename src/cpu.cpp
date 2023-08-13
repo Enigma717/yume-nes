@@ -37,14 +37,17 @@ int CPU::cpu_mem_read_debug(uint16_t address) const
 
 void CPU::perform_cycle(bool debug_mode)
 {
-    if (curr_cycles == 0)
-        next_instruction();
+    status.flag.unused = 1;
 
     if (debug_mode)
         log_debug_info();
 
+    if (cycles_queued == 0) {
+        next_instruction();
+    }
 
-    curr_cycles--;
+    cycles_queued--;
+    cycles_executed++;
 }
 
 void CPU::next_instruction()
@@ -53,7 +56,7 @@ void CPU::next_instruction()
     pc++;
 
     curr_instruction = deduce_instr_from_opcode(instr_opcode);
-    curr_cycles = curr_instruction.cycles;
+    cycles_queued = curr_instruction.cycles;
 
     exec_address_mode();
     exec_instruction();
@@ -148,6 +151,20 @@ void CPU::soft_reset()
     status.flag.interrupt = 1;
 }
 
+void CPU::log_debug_info()
+{
+    std::cout << "[DEBUG] "
+        << "CYCLE: " << std::setw(6) << std::left << cycles_executed << std::hex
+        << "| OPCODE: 0x" << std::setw(3) << std::left << static_cast<int>(curr_instruction.opcode)
+        << "| A: 0x" << std::setw(3) << std::left << static_cast<int>(acc)
+        << "| X: 0x" << std::setw(3) << std::left << static_cast<int>(x_reg)
+        << "| Y: 0x" << std::setw(3) << std::left << static_cast<int>(y_reg)
+        << "| S: 0x" << std::setw(3) << std::left << static_cast<int>(stack_ptr)
+        << "| PC: 0x" << std::setw(5) << std::left << static_cast<int>(pc)
+        << "| P: 0b" << std::setw(9) << std::left << std::bitset<8>(status.word)
+        << std::dec << "\n";
+}
+
 uint16_t CPU::read_reset_vector() const
 {
     uint8_t lsb {cpu_mem_read(MemoryConsts::reset_vector_lsb)};
@@ -178,25 +195,12 @@ void CPU::perform_branching()
     uint16_t new_pc = pc + branch_offset;
 
     if (check_for_page_crossing(pc, new_pc))
-        curr_cycles += 2;
+        cycles_queued += 2;
     else
-        curr_cycles += 1;
+        cycles_queued += 1;
 
     pc = new_pc;
 }
-
-void CPU::log_debug_info()
-{
-    std::cout << "[DEBUG] " << std::hex
-        << "ACC: " << "0x" << std::setw(3) << std::left << static_cast<int>(acc)
-        << "| X: " << "0x" << std::setw(3) << std::left << static_cast<int>(x_reg)
-        << "| Y: " << "0x" << std::setw(3) << std::left << static_cast<int>(y_reg)
-        << "| STACK_PTR: " << "0x" << std::setw(3) << std::left << static_cast<int>(stack_ptr)
-        << "| PC: " << "0x" << std::setw(5) << std::left << static_cast<int>(pc)
-        << "| STATUS: " << "0b" << std::setw(9) << std::left << std::bitset<8>(status.word)
-        << std::dec << "\n";
-}
-
 
 
 ////////////////////////
