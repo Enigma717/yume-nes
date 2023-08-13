@@ -10,6 +10,8 @@
 #include "../include/instruction.h"
 
 
+namespace MC = MemoryConsts;
+
 void CPU::connect_with_ram(std::shared_ptr<Memory> ram)
 {
     ram_ptr = ram;
@@ -155,20 +157,20 @@ void CPU::log_debug_info()
 {
     std::cout << "[DEBUG] "
         << "CYCLE: " << std::setw(6) << std::left << cycles_executed << std::hex
-        << "| OPCODE: 0x" << std::setw(3) << std::left << static_cast<int>(curr_instruction.opcode)
-        << "| A: 0x" << std::setw(3) << std::left << static_cast<int>(acc)
-        << "| X: 0x" << std::setw(3) << std::left << static_cast<int>(x_reg)
-        << "| Y: 0x" << std::setw(3) << std::left << static_cast<int>(y_reg)
-        << "| S: 0x" << std::setw(3) << std::left << static_cast<int>(stack_ptr)
-        << "| PC: 0x" << std::setw(5) << std::left << static_cast<int>(pc)
+        << "| OPCODE: 0x" << std::setw(3) << std::left << static_cast<short>(curr_instruction.opcode)
+        << "| A: 0x" << std::setw(3) << std::left << static_cast<short>(acc)
+        << "| X: 0x" << std::setw(3) << std::left << static_cast<short>(x_reg)
+        << "| Y: 0x" << std::setw(3) << std::left << static_cast<short>(y_reg)
+        << "| S: 0x" << std::setw(3) << std::left << static_cast<short>(stack_ptr)
+        << "| PC: 0x" << std::setw(5) << std::left << static_cast<short>(pc)
         << "| P: 0b" << std::setw(9) << std::left << std::bitset<8>(status.word)
         << std::dec << "\n";
 }
 
 uint16_t CPU::read_reset_vector() const
 {
-    uint8_t lsb {cpu_mem_read(MemoryConsts::reset_vector_lsb)};
-    uint8_t msb {cpu_mem_read(MemoryConsts::reset_vector_msb)};
+    uint8_t lsb {cpu_mem_read(MC::reset_vector_lsb)};
+    uint8_t msb {cpu_mem_read(MC::reset_vector_msb)};
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -187,7 +189,7 @@ bool CPU::check_for_negative_flag(uint8_t reg) const
 
 bool CPU::check_for_page_crossing(uint16_t address1, uint16_t address2) const
 {
-    return (address1 & 0xFF00) != (address2 & 0xFF00);
+    return (address1 & ~MC::zero_page_mask) != (address2 & ~MC::zero_page_mask);
 }
 
 void CPU::perform_branching()
@@ -218,7 +220,7 @@ void CPU::addr_mode_zero_page()
     arg_address = cpu_mem_read(pc);
     pc++;
 
-    arg_address &= 0x00FF;
+    arg_address &= MC::zero_page_mask;
 }
 
 void CPU::addr_mode_zero_page_x()
@@ -226,7 +228,7 @@ void CPU::addr_mode_zero_page_x()
     arg_address = cpu_mem_read(pc) | x_reg;
     pc++;
 
-    arg_address &= 0x00FF;
+    arg_address &= MC::zero_page_mask;
 }
 
 void CPU::addr_mode_zero_page_y()
@@ -234,7 +236,7 @@ void CPU::addr_mode_zero_page_y()
     arg_address = cpu_mem_read(pc) | y_reg;
     pc++;
 
-    arg_address &= 0x00FF;
+    arg_address &= MC::zero_page_mask;
 }
 
 void CPU::addr_mode_relative()
@@ -275,21 +277,40 @@ void CPU::addr_mode_absolute_y()
 
 void CPU::addr_mode_indirect()
 {
-    // TODO
+    uint8_t lsb {cpu_mem_read(pc)};
+    pc++;
+    uint8_t msb {cpu_mem_read(pc)};
+    pc++;
+
+    uint16_t temp_address = (msb << 8) | lsb;
+
+    lsb = cpu_mem_read(temp_address);
+    msb = cpu_mem_read(temp_address + 1);
+
+    arg_address = (msb << 8) | lsb;
 }
 
 void CPU::addr_mode_indirect_x()
 {
-    // TODO
+    uint16_t temp_address = cpu_mem_read(pc) | x_reg;
+    pc++;
+
+    uint8_t lsb {cpu_mem_read(temp_address & MC::zero_page_mask)};
+    uint8_t msb {cpu_mem_read((temp_address + 1) & MC::zero_page_mask)};
+
+    arg_address = (msb << 8) | lsb;
 }
 
 void CPU::addr_mode_indirect_y()
 {
-    // TODO
+    uint16_t temp_address = cpu_mem_read(pc);
+    pc++;
+
+    uint8_t lsb {cpu_mem_read(temp_address & MC::zero_page_mask)};
+    uint8_t msb {cpu_mem_read((temp_address + 1) & MC::zero_page_mask)};
+
+    arg_address = ((msb << 8) | lsb) | y_reg;
 }
-
-
-
 
 
 ///////////////
@@ -405,7 +426,7 @@ void CPU::NOP() {}
 
 void CPU::PHA()
 {
-    cpu_mem_write(MemoryConsts::stack_offset + stack_ptr, acc);
+    cpu_mem_write(MC::stack_offset + stack_ptr, acc);
     stack_ptr--;
 }
 
@@ -414,7 +435,7 @@ void CPU::PHP()
     status.flag.brk = 1;
     status.flag.unused = 1;
 
-    cpu_mem_write(MemoryConsts::stack_offset + stack_ptr, status.word);
+    cpu_mem_write(MC::stack_offset + stack_ptr, status.word);
     stack_ptr--;
 
     status.flag.brk = 0;
@@ -424,7 +445,7 @@ void CPU::PHP()
 void CPU::PLA()
 {
     stack_ptr++;
-    acc = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
+    acc = cpu_mem_read(MC::stack_offset + stack_ptr);
 
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.negative = check_for_negative_flag(acc);
@@ -433,7 +454,7 @@ void CPU::PLA()
 void CPU::PLP()
 {
     stack_ptr++;
-    status.word = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
+    status.word = cpu_mem_read(MC::stack_offset + stack_ptr);
 }
 
 void CPU::RTI()
@@ -441,13 +462,13 @@ void CPU::RTI()
     // TODO: this is probably wrong
 
     stack_ptr++;
-    status.word = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
+    status.word = cpu_mem_read(MC::stack_offset + stack_ptr);
 
     status.flag.brk = 0;
     status.flag.unused = 0;
 
     stack_ptr++;
-    pc = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
+    pc = cpu_mem_read(MC::stack_offset + stack_ptr);
 }
 
 void CPU::RTS()
@@ -455,7 +476,7 @@ void CPU::RTS()
     // TODO: same as above
 
     stack_ptr++;
-    pc = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr) - 1;
+    pc = cpu_mem_read(MC::stack_offset + stack_ptr) - 1;
 }
 
 void CPU::SEC()
@@ -491,7 +512,7 @@ void CPU::TAY()
 
 void CPU::TSX()
 {
-    x_reg = cpu_mem_read(MemoryConsts::stack_offset + stack_ptr);
+    x_reg = cpu_mem_read(MC::stack_offset + stack_ptr);
 
     status.flag.zero = check_for_zero_flag(x_reg);
     status.flag.negative = check_for_negative_flag(x_reg);
@@ -507,7 +528,7 @@ void CPU::TXA()
 
 void CPU::TXS()
 {
-    cpu_mem_write(MemoryConsts::stack_offset + stack_ptr, x_reg);
+    cpu_mem_write(MC::stack_offset + stack_ptr, x_reg);
 }
 
 void CPU::TYA()

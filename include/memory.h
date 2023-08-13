@@ -12,6 +12,7 @@ namespace MemoryConsts
     constexpr uint16_t stack_offset {0x0100};
     constexpr uint16_t reset_vector_lsb {0xFFFC};
     constexpr uint16_t reset_vector_msb {0xFFFD};
+    constexpr uint16_t zero_page_mask {0x00FF};
 }
 
 using MemoryVec = std::vector<uint8_t>;

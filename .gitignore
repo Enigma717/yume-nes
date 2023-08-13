@@ -9,9 +9,10 @@ run_tests
 *.txt
 *.sh
 
-# valgrind logs
+# logs
 vgcore.*
 core.*
+.log
 
 # vscode
 .vscode
