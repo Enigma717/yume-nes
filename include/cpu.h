@@ -42,7 +42,10 @@ public:
     uint16_t pc        {0x8000};
     Status   status    {};
 
+    uint8_t curr_cycles {0x00};
+    uint8_t branch_offset {0x00};
     uint16_t arg_address {0x0000};
+    Instruction curr_instruction {};
 
 
     void connect_with_ram(std::shared_ptr<Memory> ram);
@@ -52,11 +55,12 @@ public:
     uint8_t cpu_mem_read(uint16_t address) const;
     int     cpu_mem_read_debug(uint16_t address) const;
 
-
-    Instruction deduce_instr_from_opcode(uint8_t opcode) const;
+    void perform_cycle();
+    void next_instruction();
     void exec_address_mode(Instruction::AddressingMode address_mode);
     void exec_instruction(Instruction::MnemonicName mnemonic);
-    void exec_cycle();
+    Instruction deduce_instr_from_opcode(uint8_t opcode) const;
+
     void hard_reset();
     void soft_reset();
 
@@ -75,7 +79,15 @@ public:
     void addr_mode_indirect_y();
 
     /////  Instructions  /////
+    void BCC();
+    void BCS();
+    void BEQ();
+    void BMI();
+    void BNE();
+    void BPL();
     void BRK();
+    void BVC();
+    void BVS();
     void CLC();
     void CLD();
     void CLI();
@@ -107,6 +119,8 @@ private:
     uint16_t read_reset_vector() const;
     bool check_for_zero_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;
+    bool check_for_page_crossing(uint16_t old_address, uint16_t new_address) const;
+    void perform_branching();
 };
 
 

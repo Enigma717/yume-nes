@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <sys/types.h>
 
 #include "../include/cpu.h"
 #include "../include/memory.h"
@@ -32,15 +33,26 @@ int CPU::cpu_mem_read_debug(uint16_t address) const
     return ram_ptr.lock()->mem_read_debug(address);
 }
 
-Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
+void CPU::perform_cycle()
 {
-    auto instruction_it = std::find_if(
-        Lookup::instructions_table.begin(),
-        Lookup::instructions_table.end(),
-        [&] (const Instruction& instr) { return instr.opcode == opcode; }
-        );
+    if (curr_cycles == 0) {
+        next_instruction();
+    }
 
-    return *instruction_it;
+    curr_cycles--;
+}
+
+void CPU::next_instruction()
+{
+    uint8_t instr_opcode {cpu_mem_read(pc)};
+    pc++;
+
+    Instruction deduced_instr {deduce_instr_from_opcode(instr_opcode)};
+
+    curr_cycles = deduced_instr.cycles;
+
+    exec_address_mode(deduced_instr.address_mode);
+    exec_instruction(deduced_instr.mnemonic);
 }
 
 void CPU::exec_address_mode(Instruction::AddressingMode address_mode)
@@ -66,7 +78,15 @@ void CPU::exec_instruction(Instruction::MnemonicName mnemonic)
 {
     using MN = Instruction::MnemonicName;
     switch (mnemonic) {
+        case MN::BCC: BCC(); break;
+        case MN::BCS: BCS(); break;
+        case MN::BEQ: BEQ(); break;
+        case MN::BMI: BMI(); break;
+        case MN::BNE: BNE(); break;
+        case MN::BPL: BPL(); break;
         case MN::BRK: BRK(); break;
+        case MN::BVC: BVC(); break;
+        case MN::BVS: BVS(); break;
         case MN::CLC: CLC(); break;
         case MN::CLD: CLD(); break;
         case MN::CLI: CLI(); break;
@@ -95,15 +115,15 @@ void CPU::exec_instruction(Instruction::MnemonicName mnemonic)
     }
 }
 
-void CPU::exec_cycle()
+Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
 {
-    uint8_t instr_opcode {cpu_mem_read(pc)};
-    pc++;
+    auto instruction_it = std::find_if(
+        Lookup::instructions_table.begin(),
+        Lookup::instructions_table.end(),
+        [&] (const Instruction& instr) { return instr.opcode == opcode; }
+        );
 
-    Instruction deduced_instr {deduce_instr_from_opcode(instr_opcode)};
-
-    exec_address_mode(deduced_instr.address_mode);
-    exec_instruction(deduced_instr.mnemonic);
+    return *instruction_it;
 }
 
 void CPU::hard_reset()
@@ -129,7 +149,7 @@ uint16_t CPU::read_reset_vector() const
     uint8_t lsb {cpu_mem_read(MemoryConsts::reset_vector_lsb)};
     uint8_t msb {cpu_mem_read(MemoryConsts::reset_vector_msb)};
 
-    uint16_t address {static_cast<uint16_t>((msb << 8) | lsb)};
+    uint16_t address = (msb << 8) | lsb;
 
     return address;
 }
@@ -144,6 +164,24 @@ bool CPU::check_for_negative_flag(uint8_t reg) const
     return (reg & (1 << 7)) > 0;
 }
 
+bool CPU::check_for_page_crossing(uint16_t address1, uint16_t address2) const
+{
+    return (address1 & 0xFF00) != (address2 & 0xFF00);
+}
+
+void CPU::perform_branching()
+{
+    uint16_t new_pc = pc + branch_offset;
+
+    if (check_for_page_crossing(pc, new_pc))
+        curr_cycles += 2;
+    else
+        curr_cycles += 1;
+
+    pc = new_pc;
+}
+
+
 
 ////////////////////////
 //  Addressing modes  //
@@ -151,13 +189,13 @@ bool CPU::check_for_negative_flag(uint8_t reg) const
 
 void CPU::addr_mode_immediate()
 {
-    arg_address = static_cast<uint16_t>(cpu_mem_read(pc));
+    arg_address = cpu_mem_read(pc);
     pc++;
 }
 
 void CPU::addr_mode_zero_page()
 {
-    arg_address = static_cast<uint16_t>(cpu_mem_read(pc));
+    arg_address = cpu_mem_read(pc);
     pc++;
 
     arg_address &= 0x00FF;
@@ -165,7 +203,7 @@ void CPU::addr_mode_zero_page()
 
 void CPU::addr_mode_zero_page_x()
 {
-    arg_address = static_cast<uint16_t>(cpu_mem_read(pc)) | x_reg;
+    arg_address = cpu_mem_read(pc) | x_reg;
     pc++;
 
     arg_address &= 0x00FF;
@@ -173,7 +211,7 @@ void CPU::addr_mode_zero_page_x()
 
 void CPU::addr_mode_zero_page_y()
 {
-    arg_address = static_cast<uint16_t>(cpu_mem_read(pc)) | y_reg;
+    arg_address = cpu_mem_read(pc) | y_reg;
     pc++;
 
     arg_address &= 0x00FF;
@@ -181,7 +219,8 @@ void CPU::addr_mode_zero_page_y()
 
 void CPU::addr_mode_relative()
 {
-    // TODO
+    branch_offset = cpu_mem_read(pc);
+    pc++;
 }
 
 void CPU::addr_mode_absolute()
@@ -191,7 +230,7 @@ void CPU::addr_mode_absolute()
     uint8_t msb {cpu_mem_read(pc)};
     pc++;
 
-    arg_address = static_cast<uint16_t>((msb << 8) | lsb);
+    arg_address = (msb << 8) | lsb;
 }
 
 void CPU::addr_mode_absolute_x()
@@ -201,7 +240,7 @@ void CPU::addr_mode_absolute_x()
     uint8_t msb {cpu_mem_read(pc)};
     pc++;
 
-    arg_address = static_cast<uint16_t>((msb << 8) | lsb) | x_reg;
+    arg_address = ((msb << 8) | lsb) | x_reg;
 }
 
 void CPU::addr_mode_absolute_y()
@@ -211,7 +250,7 @@ void CPU::addr_mode_absolute_y()
     uint8_t msb {cpu_mem_read(pc)};
     pc++;
 
-    arg_address = static_cast<uint16_t>((msb << 8) | lsb) | y_reg;
+    arg_address = ((msb << 8) | lsb) | y_reg;
 }
 
 void CPU::addr_mode_indirect()
@@ -237,9 +276,57 @@ void CPU::addr_mode_indirect_y()
 //  Opcodes  //
 ///////////////
 
+void CPU::BCC()
+{
+    if (status.flag.carry == 0)
+        perform_branching();
+}
+
+void CPU::BCS()
+{
+    if (status.flag.carry == 1)
+        perform_branching();
+}
+
+void CPU::BEQ()
+{
+    if (status.flag.zero == 1)
+        perform_branching();
+}
+
+void CPU::BMI()
+{
+    if (status.flag.negative == 1)
+        perform_branching();
+}
+
+void CPU::BNE()
+{
+    if (status.flag.zero == 0)
+        perform_branching();
+}
+
+void CPU::BPL()
+{
+    if (status.flag.negative == 0)
+        perform_branching();
+}
+
 void CPU::BRK()
 {
     // TODO
+}
+
+void CPU::BVC()
+{
+    if (status.flag.overflow == 0)
+        perform_branching();
+}
+
+void CPU::BVS()
+{
+    if (status.flag.overflow == 1)
+        perform_branching();
 }
 
 void CPU::CLC()
@@ -294,10 +381,7 @@ void CPU::INY()
     status.flag.negative = check_for_negative_flag(y_reg);
 }
 
-void CPU::NOP()
-{
-    // TODO
-}
+void CPU::NOP() {}
 
 void CPU::PHA()
 {

@@ -1,7 +1,6 @@
 #include "./cpu_tests.h"
 #include "../test_main.h"
 #include "../../include/bus.h"
-#include <memory.h>
 
 
 void test_check_registers_after_boot()
@@ -16,7 +15,7 @@ void test_check_registers_after_boot()
 void test_check_stack_ptr_after_boot()
 {
     SystemBus bus;
-    uint8_t target_stack_ptr = 0xFD;
+    uint8_t target_stack_ptr {0xFD};
 
     MY_ASSERT(bus.cpu.stack_ptr == target_stack_ptr);
 }
@@ -24,7 +23,7 @@ void test_check_stack_ptr_after_boot()
 void test_check_pc_addr_after_boot()
 {
     SystemBus bus;
-    uint16_t target_pc = 0x0000;
+    uint16_t target_pc {0x0000};
 
     MY_ASSERT(bus.cpu.pc == target_pc);
 }
@@ -32,7 +31,7 @@ void test_check_pc_addr_after_boot()
 void test_check_status_after_boot()
 {
     SystemBus bus;
-    uint8_t target_status = 0x34;
+    uint8_t target_status {0x34};
 
     MY_ASSERT(bus.cpu.status.word == target_status);
 }
@@ -40,9 +39,35 @@ void test_check_status_after_boot()
 void test_check_memory_after_boot()
 {
     SystemBus bus;
-    std::vector<uint8_t> empty_memory = std::vector<uint8_t>(0x10000, 0x00);
+    MemoryVec empty_memory(0x10000, 0x00);
 
     MY_ASSERT(bus.ram->get_memory_copy() == empty_memory);
+}
+
+void test_check_offset_after_boot()
+{
+    SystemBus bus;
+    uint8_t target_branch_offest {0x00};
+
+    MY_ASSERT(bus.cpu.branch_offset == target_branch_offest);
+}
+
+void test_check_arg_addr_after_boot()
+{
+    SystemBus bus;
+    uint8_t target_arg_address {0x0000};
+
+    MY_ASSERT(bus.cpu.arg_address == target_arg_address);
+}
+
+void test_check_curr_instr_after_boot()
+{
+    SystemBus bus;
+    using MN = Instruction::MnemonicName;
+    using AM = Instruction::AddressingMode;
+    Instruction target_instr {MN::ILL, AM::illegal, 0x00, 0, 0};
+
+    MY_ASSERT(bus.cpu.curr_instruction == target_instr);
 }
 
 void test_check_registers_after_reset()
@@ -62,7 +87,7 @@ void test_check_registers_after_reset()
 void test_check_stack_ptr_after_reset()
 {
     SystemBus bus;
-    uint8_t target_stack_ptr = 0xFD;
+    uint8_t target_stack_ptr {0xFD};
 
     bus.cpu.stack_ptr = 0x77;
     bus.cpu.hard_reset();
@@ -73,7 +98,7 @@ void test_check_stack_ptr_after_reset()
 void test_check_pc_addr_after_reset()
 {
     SystemBus bus;
-    uint16_t target_pc = 0xABCD;
+    uint16_t target_pc {0xABCD};
 
     bus.cpu.cpu_mem_write(MemoryConsts::reset_vector_lsb, 0xCD);
     bus.cpu.cpu_mem_write(MemoryConsts::reset_vector_msb, 0xAB);
@@ -85,7 +110,7 @@ void test_check_pc_addr_after_reset()
 void test_check_status_after_reset()
 {
     SystemBus bus;
-    uint8_t target_status = 0x34;
+    uint8_t target_status {0x34};
 
     bus.cpu.status.word = 0xFF;
     bus.cpu.hard_reset();
@@ -96,7 +121,7 @@ void test_check_status_after_reset()
 void test_check_memory_after_reset()
 {
     SystemBus bus;
-    std::vector<uint8_t> empty_memory = std::vector<uint8_t>(MemoryConsts::memory_size, 0x00);
+    MemoryVec empty_memory(MemoryConsts::memory_size, 0x00);
 
     for (uint8_t i = 0; i < 10; i++) {
         bus.cpu.cpu_mem_write(0xC0 * i, i);
@@ -117,6 +142,10 @@ void ut_cpu_boot_and_reset()
     test_check_pc_addr_after_boot();
     test_check_status_after_boot();
     test_check_memory_after_boot();
+    test_check_offset_after_boot();
+    test_check_arg_addr_after_boot();
+    test_check_curr_instr_after_boot();
+
 
     test_check_registers_after_reset();
     test_check_stack_ptr_after_reset();

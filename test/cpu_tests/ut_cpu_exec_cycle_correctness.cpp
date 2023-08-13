@@ -17,10 +17,10 @@ void test_exec_cycle_instr_implied()
     ///////////////////////////////
 
     SystemBus bus;
-    uint8_t dex_opcode = 0xCA;
-    uint8_t php_opcode = 0x08;
-    uint8_t pla_opcode = 0x68;
-    uint8_t tax_opcode = 0xAA;
+    uint8_t dex_opcode {0xCA};
+    uint8_t php_opcode {0x08};
+    uint8_t pla_opcode {0x68};
+    uint8_t tax_opcode {0xAA};
 
     bus.ram->mem_write(bus.cpu.pc + 0, dex_opcode);
     bus.ram->mem_write(bus.cpu.pc + 1, php_opcode);

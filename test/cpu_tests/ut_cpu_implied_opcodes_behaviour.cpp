@@ -11,7 +11,7 @@ void test_brk_behaviour()
 void test_clc_behaviour()
 {
     CPU cpu;
-    uint8_t target_word = ~(1 << 0);
+    uint8_t target_word {0b1111'1110};
 
     cpu.status.word = 0xFF;
     cpu.CLC();
@@ -22,7 +22,7 @@ void test_clc_behaviour()
 void test_cld_behaviour()
 {
     CPU cpu;
-    uint8_t target_word = ~(1 << 3);
+    uint8_t target_word {0b1111'0111};
 
     cpu.status.word = 0xFF;
     cpu.CLD();
@@ -33,7 +33,7 @@ void test_cld_behaviour()
 void test_cli_behaviour()
 {
     CPU cpu;
-    uint8_t target_word = ~(1 << 2);
+    uint8_t target_word {0b1111'1011};
 
     cpu.status.word = 0xFF;
     cpu.CLI();
@@ -44,7 +44,7 @@ void test_cli_behaviour()
 void test_clv_behaviour()
 {
     CPU cpu;
-    uint8_t target_word = ~(1 << 6);
+    uint8_t target_word {0b1011'1111};
 
     cpu.status.word = 0xFF;
     cpu.CLV();
@@ -55,7 +55,7 @@ void test_clv_behaviour()
 void test_dex_behaviour()
 {
     CPU cpu;
-    uint8_t target_x_reg = 0x86;
+    uint8_t target_x_reg {0x86};
 
     cpu.x_reg = 0x87;
     cpu.DEX();
@@ -66,7 +66,7 @@ void test_dex_behaviour()
 void test_dey_behaviour()
 {
     CPU cpu;
-    uint8_t target_y_reg = 0x86;
+    uint8_t target_y_reg {0x86};
 
     cpu.y_reg = 0x87;
     cpu.DEY();
@@ -77,7 +77,7 @@ void test_dey_behaviour()
 void test_inx_behaviour()
 {
     CPU cpu;
-    uint8_t target_x_reg = 0xB0;
+    uint8_t target_x_reg {0xB0};
 
     cpu.x_reg = 0xAF;
     cpu.INX();
@@ -88,7 +88,7 @@ void test_inx_behaviour()
 void test_iny_behaviour()
 {
     CPU cpu;
-    uint8_t target_y_reg = 0xB0;
+    uint8_t target_y_reg {0xB0};
 
     cpu.y_reg = 0xAF;
     cpu.INY();
@@ -104,8 +104,8 @@ void test_nop_behaviour()
 void test_pha_behaviour()
 {
     SystemBus bus;
-    uint8_t stack_ptr_init = bus.cpu.stack_ptr;
-    uint8_t acc_init_value = 0xAD;
+    uint8_t stack_ptr_init {bus.cpu.stack_ptr};
+    uint8_t acc_init_value {0xAD};
 
     bus.cpu.acc = acc_init_value;
     bus.cpu.PHA();
@@ -116,8 +116,8 @@ void test_pha_behaviour()
 void test_php_behaviour()
 {
     SystemBus bus;
-    uint8_t stack_ptr_init = bus.cpu.stack_ptr;
-    uint8_t status_init_mask = 0xAD;
+    uint8_t stack_ptr_init {bus.cpu.stack_ptr};
+    uint8_t status_init_mask {0xAD};
     uint8_t status_final_mask = status_init_mask | (1 << 4) | (1 << 5);
 
     bus.cpu.status.word = status_init_mask;
@@ -129,7 +129,7 @@ void test_php_behaviour()
 void test_pla_behaviour()
 {
     SystemBus bus;
-    uint8_t acc_init_value = 0xAD;
+    uint8_t acc_init_value {0xAD};
 
     bus.cpu.acc = acc_init_value;
     bus.cpu.PHA();
@@ -143,7 +143,7 @@ void test_pla_behaviour()
 void test_plp_behaviour()
 {
     SystemBus bus;
-    uint8_t status_init_mask = 0xAD;
+    uint8_t status_init_mask {0xAD};
     uint8_t status_final_mask = status_init_mask | (1 << 4) | (1 << 5);
 
     bus.cpu.status.word = status_init_mask;
@@ -168,7 +168,7 @@ void test_rts_behaviour()
 void test_sec_behaviour()
 {
     CPU cpu;
-    uint8_t target_word = (1 << 0);
+    uint8_t target_word {0b0000'0001};
 
     cpu.status.word = 0x00;
     cpu.SEC();
@@ -179,7 +179,7 @@ void test_sec_behaviour()
 void test_sed_behaviour()
 {
     CPU cpu;
-    uint8_t target_word = (1 << 3);
+    uint8_t target_word {0b0000'1000};
 
     cpu.status.word = 0x00;
     cpu.SED();
@@ -190,7 +190,7 @@ void test_sed_behaviour()
 void test_sei_behaviour()
 {
     CPU cpu;
-    uint8_t target_word = (1 << 2);
+    uint8_t target_word {0b0000'0100};
 
     cpu.status.word = 0x00;
     cpu.SEI();
@@ -201,7 +201,7 @@ void test_sei_behaviour()
 void test_tax_behaviour()
 {
     CPU cpu;
-    uint8_t target_value = 0x77;
+    uint8_t target_value {0x77};
 
     cpu.acc = target_value;
     cpu.TAX();
@@ -212,7 +212,7 @@ void test_tax_behaviour()
 void test_tay_behaviour()
 {
     CPU cpu;
-    uint8_t target_value = 0x88;
+    uint8_t target_value {0x88};
 
     cpu.acc = target_value;
     cpu.TAY();
@@ -223,7 +223,7 @@ void test_tay_behaviour()
 void test_tsx_behaviour()
 {
     SystemBus bus;
-    uint8_t target_value = 0x99;
+    uint8_t target_value {0x99};
 
     bus.cpu.cpu_mem_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, target_value);
     bus.cpu.TSX();
@@ -234,7 +234,7 @@ void test_tsx_behaviour()
 void test_txa_behaviour()
 {
     CPU cpu;
-    uint8_t target_value = 0xAA;
+    uint8_t target_value {0xAA};
 
     cpu.x_reg = target_value;
     cpu.TXA();
@@ -245,12 +245,12 @@ void test_txa_behaviour()
 void test_txs_behaviour()
 {
     SystemBus bus;
-    uint8_t target_value = 0xBB;
+    uint8_t target_value {0xBB};
 
     bus.cpu.x_reg = target_value;
     bus.cpu.TXS();
 
-    uint8_t value_from_stack = bus.cpu.cpu_mem_read(MemoryConsts::stack_offset + bus.cpu.stack_ptr);
+    uint8_t value_from_stack {bus.cpu.cpu_mem_read(MemoryConsts::stack_offset + bus.cpu.stack_ptr)};
 
     MY_ASSERT(value_from_stack == target_value);
 }
@@ -258,7 +258,7 @@ void test_txs_behaviour()
 void test_tya_behaviour()
 {
     CPU cpu;
-    uint8_t target_value = 0xCC;
+    uint8_t target_value {0xCC};
 
     cpu.y_reg = target_value;
     cpu.TYA();
