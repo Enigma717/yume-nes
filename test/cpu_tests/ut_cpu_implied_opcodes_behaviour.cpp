@@ -118,7 +118,7 @@ void test_php_behaviour()
     SystemBus bus;
     uint8_t stack_ptr_init {bus.cpu.stack_ptr};
     uint8_t status_init_mask {0xAD};
-    uint8_t status_final_mask = status_init_mask | (1 << 4) | (1 << 5);
+    uint8_t status_final_mask = status_init_mask | 0b0001'0000 | 0b0010'0000;
 
     bus.cpu.status.word = status_init_mask;
     bus.cpu.PHP();
@@ -144,7 +144,7 @@ void test_plp_behaviour()
 {
     SystemBus bus;
     uint8_t status_init_mask {0xAD};
-    uint8_t status_final_mask = status_init_mask | (1 << 4) | (1 << 5);
+    uint8_t status_final_mask = status_init_mask | 0b0001'0000 | 0b0010'0000;
 
     bus.cpu.status.word = status_init_mask;
     bus.cpu.PHP();

@@ -52,9 +52,11 @@ public:
     void      connect_with_ram(std::shared_ptr<Memory> ram);
     MemoryPtr get_ram_address() const;
 
-    void    cpu_mem_write(uint16_t address, uint8_t data) const;
+    void    cpu_mem_write(uint16_t address, uint8_t value) const;
     uint8_t cpu_mem_read(uint16_t address) const;
     int     cpu_mem_read_debug(uint16_t address) const;
+    void    cpu_stack_push(uint8_t value);
+    uint8_t cpu_stack_pop();
 
     void        perform_cycle(bool debug_mode = false);
     void        next_instruction();
@@ -81,9 +83,13 @@ public:
     void addr_mode_indirect_y();
 
     /////  Instructions  /////
+    void ADC();
+    void AND();
+    void ASL();
     void BCC();
     void BCS();
     void BEQ();
+    void BIT();
     void BMI();
     void BNE();
     void BPL();
@@ -94,20 +100,39 @@ public:
     void CLD();
     void CLI();
     void CLV();
+    void CMP();
+    void CPX();
+    void CPY();
+    void DEC();
     void DEX();
     void DEY();
+    void EOR();
+    void INC();
     void INX();
     void INY();
+    void JMP();
+    void JSR();
+    void LDA();
+    void LDX();
+    void LDY();
+    void LSR();
     void NOP();
+    void ORA();
     void PHA();
     void PHP();
     void PLA();
     void PLP();
+    void ROL();
+    void ROR();
     void RTI();
     void RTS();
+    void SBC();
     void SEC();
     void SED();
     void SEI();
+    void STA();
+    void STX();
+    void STY();
     void TAX();
     void TAY();
     void TSX();

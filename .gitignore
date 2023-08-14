@@ -12,7 +12,7 @@ run_tests
 # logs
 vgcore.*
 core.*
-.log
+*.log
 
 # vscode
 .vscode
