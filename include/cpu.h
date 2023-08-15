@@ -64,6 +64,8 @@ public:
     void        exec_instruction();
     Instruction deduce_instr_from_opcode(uint8_t opcode) const;
 
+    void interrupt_nmi();
+    void interrupt_irq();
     void hard_reset();
     void soft_reset();
     void log_debug_info();
@@ -143,7 +145,9 @@ public:
 private:
     MemoryPtr ram_ptr {};
 
+    uint16_t read_nmi_vector() const;
     uint16_t read_reset_vector() const;
+    uint16_t read_irq_vector() const;
     bool check_for_zero_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;
     bool check_for_page_crossing(uint16_t old_address, uint16_t new_address) const;

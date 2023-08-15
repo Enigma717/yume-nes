@@ -153,6 +153,41 @@ Instruction CPU::deduce_instr_from_opcode(uint8_t opcode) const
     return *instruction_it;
 }
 
+
+void CPU::interrupt_nmi()
+{
+    uint8_t pc_lsb = static_cast<uint8_t>(pc & MC::zero_page_mask);
+    uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
+
+    status.flag.brk = 0;
+    status.flag.unused = 1;
+    status.flag.interrupt = 1;
+
+    cpu_stack_push(pc_msb);
+    cpu_stack_push(pc_lsb);
+    cpu_stack_push(status.word);
+
+    pc = read_nmi_vector();
+}
+
+void CPU::interrupt_irq()
+{
+    if (status.flag.interrupt == 0) {
+        uint8_t pc_lsb = static_cast<uint8_t>(pc & MC::zero_page_mask);
+        uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
+
+        status.flag.brk = 0;
+        status.flag.unused = 1;
+        status.flag.interrupt = 1;
+
+        cpu_stack_push(pc_msb);
+        cpu_stack_push(pc_lsb);
+        cpu_stack_push(status.word);
+
+        pc = read_irq_vector();
+    }
+}
+
 void CPU::hard_reset()
 {
     acc = 0x00;
@@ -186,10 +221,31 @@ void CPU::log_debug_info()
         << std::dec << "\n";
 }
 
+
+uint16_t CPU::read_nmi_vector() const
+{
+    uint8_t lsb {cpu_mem_read(MC::nmi_vector_lsb)};
+    uint8_t msb {cpu_mem_read(MC::nmi_vector_msb)};
+
+    uint16_t address = (msb << 8) | lsb;
+
+    return address;
+}
+
 uint16_t CPU::read_reset_vector() const
 {
     uint8_t lsb {cpu_mem_read(MC::reset_vector_lsb)};
     uint8_t msb {cpu_mem_read(MC::reset_vector_msb)};
+
+    uint16_t address = (msb << 8) | lsb;
+
+    return address;
+}
+
+uint16_t CPU::read_irq_vector() const
+{
+    uint8_t lsb {cpu_mem_read(MC::irq_vector_lsb)};
+    uint8_t msb {cpu_mem_read(MC::irq_vector_msb)};
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -422,7 +478,18 @@ void CPU::BPL()
 
 void CPU::BRK()
 {
-    // TODO
+    uint8_t pc_lsb = static_cast<uint8_t>(pc & MC::zero_page_mask);
+    uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
+
+    status.flag.brk = 1;
+    status.flag.unused = 1;
+    status.flag.interrupt = 1;
+
+    cpu_stack_push(pc_msb);
+    cpu_stack_push(pc_lsb);
+    cpu_stack_push(status.word);
+
+    pc = read_irq_vector();
 }
 
 void CPU::BVC()

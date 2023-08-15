@@ -10,8 +10,12 @@ namespace MemoryConsts
 {
     constexpr uint32_t memory_size {0x10000};
     constexpr uint16_t stack_offset {0x0100};
+    constexpr uint16_t nmi_vector_lsb {0xFFFA};
+    constexpr uint16_t nmi_vector_msb {0xFFFB};
     constexpr uint16_t reset_vector_lsb {0xFFFC};
     constexpr uint16_t reset_vector_msb {0xFFFD};
+    constexpr uint16_t irq_vector_lsb {0xFFFE};
+    constexpr uint16_t irq_vector_msb {0xFFFF};
     constexpr uint16_t zero_page_mask {0x00FF};
 }
 
