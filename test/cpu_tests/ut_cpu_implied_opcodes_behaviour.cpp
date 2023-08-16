@@ -96,11 +96,6 @@ void test_iny_behaviour()
     MY_ASSERT(cpu.y_reg == target_y_reg);
 }
 
-void test_nop_behaviour()
-{
-    // TODO
-}
-
 void test_pha_behaviour()
 {
     SystemBus bus;
@@ -283,8 +278,6 @@ void ut_cpu_implied_opcodes_behaviour()
 
     test_inx_behaviour();
     test_iny_behaviour();
-
-    test_nop_behaviour();
 
     test_pha_behaviour();
     test_php_behaviour();

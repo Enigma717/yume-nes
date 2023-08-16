@@ -14,6 +14,7 @@ namespace MC = MemoryConsts;
 namespace Masks
 {
     constexpr uint8_t carry_flag_mask = 0b0000'0001;
+    constexpr uint8_t overflow_flag_mask = 0b0100'0000;
     constexpr uint8_t negative_flag_mask = 0b1000'0000;
 }
 
@@ -62,9 +63,8 @@ void CPU::perform_cycle(bool debug_mode)
     if (debug_mode)
         log_debug_info();
 
-    if (cycles_queued == 0) {
+    if (cycles_queued == 0)
         next_instruction();
-    }
 
     cycles_queued--;
     cycles_executed++;
@@ -86,17 +86,17 @@ void CPU::exec_address_mode()
 {
     using AM = Instruction::AddressingMode;
     switch (curr_instruction.address_mode) {
-        case AM::immediate:   addr_mode_immediate();   break;
-        case AM::zero_page:   addr_mode_zero_page();   break;
-        case AM::zero_page_x: addr_mode_zero_page_x(); break;
-        case AM::zero_page_y: addr_mode_zero_page_y(); break;
-        case AM::relative:    addr_mode_relative();    break;
-        case AM::absolute:    addr_mode_absolute();    break;
-        case AM::absolute_x:  addr_mode_absolute_x();  break;
-        case AM::absolute_y:  addr_mode_absolute_y();  break;
-        case AM::indirect:    addr_mode_indirect();    break;
-        case AM::indirect_x:  addr_mode_indirect_x();  break;
-        case AM::indirect_y:  addr_mode_indirect_y();  break;
+        case AM::immediate:   address_mode_immediate();   break;
+        case AM::zero_page:   address_mode_zero_page();   break;
+        case AM::zero_page_x: address_mode_zero_page_x(); break;
+        case AM::zero_page_y: address_mode_zero_page_y(); break;
+        case AM::relative:    address_mode_relative();    break;
+        case AM::absolute:    address_mode_absolute();    break;
+        case AM::absolute_x:  address_mode_absolute_x();  break;
+        case AM::absolute_y:  address_mode_absolute_y();  break;
+        case AM::indirect:    address_mode_indirect();    break;
+        case AM::indirect_x:  address_mode_indirect_x();  break;
+        case AM::indirect_y:  address_mode_indirect_y();  break;
         default: break;
     }
 }
@@ -188,6 +188,13 @@ void CPU::interrupt_irq()
     }
 }
 
+void CPU::interrupt_reset()
+{
+    stack_ptr -= 0x03;
+    pc = read_reset_vector();
+    status.flag.interrupt = 1;
+}
+
 void CPU::hard_reset()
 {
     acc = 0x00;
@@ -197,13 +204,6 @@ void CPU::hard_reset()
     pc = read_reset_vector();
     status.word = 0x34;
     ram_ptr.lock()->mem_clear();
-}
-
-void CPU::soft_reset()
-{
-    stack_ptr -= 0x03;
-    pc = read_reset_vector();
-    status.flag.interrupt = 1;
 }
 
 void CPU::log_debug_info()
@@ -262,9 +262,19 @@ bool CPU::check_for_negative_flag(uint8_t reg) const
     return (reg & Masks::negative_flag_mask) > 0;
 }
 
+bool CPU::check_for_flag_with_mask(uint16_t reg, uint16_t mask) const
+{
+    return (reg & mask) > 0;
+}
+
 bool CPU::check_for_page_crossing(uint16_t address1, uint16_t address2) const
 {
     return (address1 & ~MC::zero_page_mask) != (address2 & ~MC::zero_page_mask);
+}
+
+bool CPU::check_for_sign_change(bool a, bool b, bool c) const
+{
+    return ((a && b) && !c) || (!(a || b) && c);
 }
 
 void CPU::perform_branching()
@@ -284,13 +294,13 @@ void CPU::perform_branching()
 //  Addressing modes  //
 ////////////////////////
 
-void CPU::addr_mode_immediate()
+void CPU::address_mode_immediate()
 {
     arg_address = pc;
     pc++;
 }
 
-void CPU::addr_mode_zero_page()
+void CPU::address_mode_zero_page()
 {
     arg_address = cpu_mem_read(pc);
     pc++;
@@ -298,7 +308,7 @@ void CPU::addr_mode_zero_page()
     arg_address = arg_address & MC::zero_page_mask;
 }
 
-void CPU::addr_mode_zero_page_x()
+void CPU::address_mode_zero_page_x()
 {
     arg_address = cpu_mem_read(pc) | x_reg;
     pc++;
@@ -306,7 +316,7 @@ void CPU::addr_mode_zero_page_x()
     arg_address = arg_address & MC::zero_page_mask;
 }
 
-void CPU::addr_mode_zero_page_y()
+void CPU::address_mode_zero_page_y()
 {
     arg_address = cpu_mem_read(pc) | y_reg;
     pc++;
@@ -314,13 +324,13 @@ void CPU::addr_mode_zero_page_y()
     arg_address = arg_address & MC::zero_page_mask;
 }
 
-void CPU::addr_mode_relative()
+void CPU::address_mode_relative()
 {
     branch_offset = cpu_mem_read(pc);
     pc++;
 }
 
-void CPU::addr_mode_absolute()
+void CPU::address_mode_absolute()
 {
     uint8_t lsb {cpu_mem_read(pc)};
     pc++;
@@ -330,7 +340,7 @@ void CPU::addr_mode_absolute()
     arg_address = (msb << 8) | lsb;
 }
 
-void CPU::addr_mode_absolute_x()
+void CPU::address_mode_absolute_x()
 {
     uint8_t lsb {cpu_mem_read(pc)};
     pc++;
@@ -340,7 +350,7 @@ void CPU::addr_mode_absolute_x()
     arg_address = ((msb << 8) | lsb) | x_reg;
 }
 
-void CPU::addr_mode_absolute_y()
+void CPU::address_mode_absolute_y()
 {
     uint8_t lsb {cpu_mem_read(pc)};
     pc++;
@@ -350,7 +360,7 @@ void CPU::addr_mode_absolute_y()
     arg_address = ((msb << 8) | lsb) | y_reg;
 }
 
-void CPU::addr_mode_indirect()
+void CPU::address_mode_indirect()
 {
     uint8_t lsb {cpu_mem_read(pc)};
     pc++;
@@ -365,7 +375,7 @@ void CPU::addr_mode_indirect()
     arg_address = (msb << 8) | lsb;
 }
 
-void CPU::addr_mode_indirect_x()
+void CPU::address_mode_indirect_x()
 {
     uint16_t temp_address = cpu_mem_read(pc) | x_reg;
     pc++;
@@ -376,7 +386,7 @@ void CPU::addr_mode_indirect_x()
     arg_address = (msb << 8) | lsb;
 }
 
-void CPU::addr_mode_indirect_y()
+void CPU::address_mode_indirect_y()
 {
     uint16_t temp_address = cpu_mem_read(pc);
     pc++;
@@ -388,18 +398,30 @@ void CPU::addr_mode_indirect_y()
 }
 
 
-///////////////
-//  Opcodes  //
-///////////////
+////////////////////
+//  Instructions  //
+////////////////////
 
 void CPU::ADC()
 {
-    // TODO
+    uint8_t value {cpu_mem_read(arg_address)};
+    uint16_t result = static_cast<uint16_t>(acc + value + status.flag.carry);
+
+    acc = static_cast<uint8_t>(result);
+
+    bool acc_sign {check_for_flag_with_mask(acc, Masks::negative_flag_mask)};
+    bool value_sign {check_for_flag_with_mask(value, Masks::negative_flag_mask)};
+    bool result_sign {check_for_flag_with_mask(result, Masks::negative_flag_mask)};
+
+    status.flag.carry = check_for_flag_with_mask(result, 0xFF00);
+    status.flag.zero = check_for_zero_flag(acc);
+    status.flag.overflow = check_for_sign_change(acc_sign, value_sign, result_sign);
+    status.flag.negative = check_for_negative_flag(acc);
 }
 
 void CPU::AND()
 {
-    uint8_t value = cpu_mem_read(arg_address);
+    uint8_t value {cpu_mem_read(arg_address)};
 
     acc = acc & value;
 
@@ -410,22 +432,22 @@ void CPU::AND()
 void CPU::ASL()
 {
     if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
-        status.flag.carry = (acc & Masks::negative_flag_mask) > 0;
+        status.flag.carry = check_for_flag_with_mask(acc, Masks::negative_flag_mask);
 
         acc = acc << 1;
 
         status.flag.zero = check_for_zero_flag(acc);
-        status.flag.negative = check_for_zero_flag(acc);
+        status.flag.negative = check_for_negative_flag(acc);
     }
     else {
         uint8_t result {cpu_mem_read(arg_address)};
-        status.flag.carry = (result & Masks::negative_flag_mask) > 0;
+        status.flag.carry = check_for_flag_with_mask(result, Masks::negative_flag_mask);
 
         result = result << 1;
         cpu_mem_write(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
-        status.flag.negative = check_for_zero_flag(result);
+        status.flag.negative = check_for_negative_flag(result);
     }
 }
 
@@ -454,7 +476,7 @@ void CPU::BIT()
     value = acc & value;
 
     status.flag.zero = check_for_zero_flag(value);
-    status.flag.overflow = (value & 0b0100'0000) > 0;
+    status.flag.overflow = check_for_flag_with_mask(value, Masks::overflow_flag_mask);
     status.flag.negative = check_for_negative_flag(value);
 }
 
@@ -526,7 +548,7 @@ void CPU::CLV()
 
 void CPU::CMP()
 {
-    uint8_t value = cpu_mem_read(arg_address);
+    uint8_t value {cpu_mem_read(arg_address)};
 
     status.flag.carry = acc >= value;
 
@@ -538,7 +560,7 @@ void CPU::CMP()
 
 void CPU::CPX()
 {
-    uint8_t value = cpu_mem_read(arg_address);
+    uint8_t value {cpu_mem_read(arg_address)};
 
     status.flag.carry = x_reg >= value;
 
@@ -550,7 +572,7 @@ void CPU::CPX()
 
 void CPU::CPY()
 {
-    uint8_t value = cpu_mem_read(arg_address);
+    uint8_t value {cpu_mem_read(arg_address)};
 
     status.flag.carry = y_reg >= value;
 
@@ -562,13 +584,13 @@ void CPU::CPY()
 
 void CPU::DEC()
 {
-    uint8_t value = cpu_mem_read(arg_address);
+    uint8_t value {cpu_mem_read(arg_address)};
 
     value--;
     cpu_mem_write(arg_address, value);
 
     status.flag.zero = check_for_zero_flag(value);
-    status.flag.negative = check_for_zero_flag(value);
+    status.flag.negative = check_for_negative_flag(value);
 }
 
 void CPU::DEX()
@@ -589,7 +611,7 @@ void CPU::DEY()
 
 void CPU::EOR()
 {
-    uint8_t value = cpu_mem_read(arg_address);
+    uint8_t value {cpu_mem_read(arg_address)};
 
     acc = acc ^ value;
 
@@ -599,13 +621,13 @@ void CPU::EOR()
 
 void CPU::INC()
 {
-    uint8_t value = cpu_mem_read(arg_address);
+    uint8_t value {cpu_mem_read(arg_address)};
 
     value++;
     cpu_mem_write(arg_address, value);
 
     status.flag.zero = check_for_zero_flag(value);
-    status.flag.negative = check_for_zero_flag(value);
+    status.flag.negative = check_for_negative_flag(value);
 }
 
 void CPU::INX()
@@ -669,22 +691,22 @@ void CPU::LDY()
 void CPU::LSR()
 {
     if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
-        status.flag.carry = acc & Masks::carry_flag_mask;
+        status.flag.carry = check_for_flag_with_mask(acc, Masks::carry_flag_mask);
 
         acc = acc >> 1;
 
         status.flag.zero = check_for_zero_flag(acc);
-        status.flag.negative = check_for_zero_flag(acc);
+        status.flag.negative = check_for_negative_flag(acc);
     }
     else {
         uint8_t result {cpu_mem_read(arg_address)};
-        status.flag.carry = result & Masks::carry_flag_mask;
+        status.flag.carry = check_for_flag_with_mask(result, Masks::carry_flag_mask);
 
         result = result >> 1;
         cpu_mem_write(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
-        status.flag.negative = check_for_zero_flag(result);
+        status.flag.negative = check_for_negative_flag(result);
     }
 }
 
@@ -692,7 +714,7 @@ void CPU::NOP() {}
 
 void CPU::ORA()
 {
-    uint8_t value = cpu_mem_read(arg_address);
+    uint8_t value {cpu_mem_read(arg_address)};
 
     acc = acc | value;
 
@@ -734,24 +756,24 @@ void CPU::ROL()
     bool old_carry = status.flag.carry;
 
     if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
-        status.flag.carry = (acc & Masks::negative_flag_mask) > 0;
+        status.flag.carry = check_for_flag_with_mask(acc, Masks::negative_flag_mask);
 
         acc = acc << 1;
         acc = acc | old_carry;
 
         status.flag.zero = check_for_zero_flag(acc);
-        status.flag.negative = check_for_zero_flag(acc);
+        status.flag.negative = check_for_negative_flag(acc);
     }
     else {
         uint8_t result {cpu_mem_read(arg_address)};
-        status.flag.carry = (result & Masks::negative_flag_mask) > 0;
+        status.flag.carry = check_for_flag_with_mask(result, Masks::negative_flag_mask);
 
         result = result << 1;
         result = result | old_carry;
         cpu_mem_write(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
-        status.flag.negative = check_for_zero_flag(result);
+        status.flag.negative = check_for_negative_flag(result);
     }
 }
 
@@ -760,24 +782,24 @@ void CPU::ROR()
     bool old_carry = status.flag.carry;
 
     if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
-        status.flag.carry = acc & Masks::carry_flag_mask;
+        status.flag.carry = check_for_flag_with_mask(acc, Masks::carry_flag_mask);
 
         acc = acc >> 1;
         acc = acc | (old_carry << 7);
 
         status.flag.zero = check_for_zero_flag(acc);
-        status.flag.negative = check_for_zero_flag(acc);
+        status.flag.negative = check_for_negative_flag(acc);
     }
     else {
         uint8_t result {cpu_mem_read(arg_address)};
-        status.flag.carry = result & Masks::carry_flag_mask;
+        status.flag.carry = check_for_flag_with_mask(result, Masks::carry_flag_mask);
 
         result = result >> 1;
         result = result | (old_carry << 7);
         cpu_mem_write(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
-        status.flag.negative = check_for_zero_flag(result);
+        status.flag.negative = check_for_negative_flag(result);
     }
 }
 

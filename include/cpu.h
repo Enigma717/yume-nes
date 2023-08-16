@@ -66,23 +66,23 @@ public:
 
     void interrupt_nmi();
     void interrupt_irq();
+    void interrupt_reset();
     void hard_reset();
-    void soft_reset();
     void log_debug_info();
 
 
     /////  Addressing modes  /////
-    void addr_mode_immediate();
-    void addr_mode_zero_page();
-    void addr_mode_zero_page_x();
-    void addr_mode_zero_page_y();
-    void addr_mode_relative();
-    void addr_mode_absolute();
-    void addr_mode_absolute_x();
-    void addr_mode_absolute_y();
-    void addr_mode_indirect();
-    void addr_mode_indirect_x();
-    void addr_mode_indirect_y();
+    void address_mode_immediate();
+    void address_mode_zero_page();
+    void address_mode_zero_page_x();
+    void address_mode_zero_page_y();
+    void address_mode_relative();
+    void address_mode_absolute();
+    void address_mode_absolute_x();
+    void address_mode_absolute_y();
+    void address_mode_indirect();
+    void address_mode_indirect_x();
+    void address_mode_indirect_y();
 
     /////  Instructions  /////
     void ADC();
@@ -150,7 +150,9 @@ private:
     uint16_t read_irq_vector() const;
     bool check_for_zero_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;
+    bool check_for_flag_with_mask(uint16_t reg, uint16_t mask) const;
     bool check_for_page_crossing(uint16_t old_address, uint16_t new_address) const;
+    bool check_for_sign_change(bool a, bool b, bool c) const;
     void perform_branching();
 };
 
