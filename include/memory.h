@@ -24,14 +24,13 @@ using SystemMemory = std::vector<uint8_t>;
 
 class Memory {
 public:
-    void    mem_clear();
-    void    mem_load_program(SystemMemory program, uint16_t offset);
-    void    mem_write(uint16_t address, uint8_t value);
-    uint8_t mem_read(uint16_t address) const;
-    int     mem_read_debug(uint16_t address) const;
-
+    void    memory_clear();
+    void    memory_load_program(SystemMemory program, uint16_t offset);
+    void    memory_write(uint16_t address, uint8_t value);
+    uint8_t memory_read(uint16_t address) const;
 
     SystemMemory get_memory_copy() const;
+
 private:
     SystemMemory memory {SystemMemory(MemoryConsts::memory_size, 0x00)};
 };

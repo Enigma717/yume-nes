@@ -28,7 +28,7 @@ void test_perform_cycle_instr_implied()
     SystemBus bus;
     SystemMemory program_code {0xCA, 0x08, 0x68, 0xAA, 0x00};
 
-    bus.ram->mem_load_program(program_code, bus.cpu.pc);
+    bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
         bus.cpu.perform_cycle(true);

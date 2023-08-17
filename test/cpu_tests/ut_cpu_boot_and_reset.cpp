@@ -101,8 +101,8 @@ void test_check_pc_addr_after_reset()
     SystemBus bus;
     uint16_t target_pc {0xABCD};
 
-    bus.cpu.cpu_mem_write(MemoryConsts::reset_vector_lsb, 0xCD);
-    bus.cpu.cpu_mem_write(MemoryConsts::reset_vector_msb, 0xAB);
+    bus.cpu.cpu_memory_write(MemoryConsts::reset_vector_lsb, 0xCD);
+    bus.cpu.cpu_memory_write(MemoryConsts::reset_vector_msb, 0xAB);
     bus.cpu.hard_reset();
 
     MY_ASSERT(bus.cpu.pc == target_pc);
@@ -125,7 +125,7 @@ void test_check_memory_after_reset()
     SystemMemory empty_memory(MemoryConsts::memory_size, 0x00);
 
     for (uint8_t i = 0; i < 10; i++) {
-        bus.cpu.cpu_mem_write(0xC0 * i, i);
+        bus.cpu.cpu_memory_write(0xC0 * i, i);
     }
 
     bus.cpu.hard_reset();

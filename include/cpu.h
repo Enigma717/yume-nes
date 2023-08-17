@@ -49,12 +49,12 @@ public:
     Instruction curr_instruction {};
 
 
-    void      connect_with_ram(std::shared_ptr<Memory> ram);
-    MemoryPtr get_ram_address() const;
+    void      connect_with_memory(std::shared_ptr<Memory> ram);
+    MemoryPtr get_memory_address() const;
 
-    void    cpu_mem_write(uint16_t address, uint8_t value) const;
-    uint8_t cpu_mem_read(uint16_t address) const;
-    int     cpu_mem_read_debug(uint16_t address) const;
+    void    cpu_memory_write(uint16_t address, uint8_t value) const;
+    uint8_t cpu_memory_read(uint16_t address) const;
+    int     cpu_memory_read_debug(uint16_t address) const;
     void    cpu_stack_push(uint8_t value);
     uint8_t cpu_stack_pop();
 
@@ -62,7 +62,7 @@ public:
     void        next_instruction();
     void        exec_address_mode();
     void        exec_instruction();
-    Instruction deduce_instr_from_opcode(uint8_t opcode) const;
+    Instruction deduce_instruction_from_opcode(uint8_t opcode) const;
 
     void interrupt_nmi();
     void interrupt_irq();
@@ -85,69 +85,34 @@ public:
     void address_mode_indirect_y();
 
     /////  Instructions  /////
-    void ADC();
-    void AND();
-    void ASL();
-    void BCC();
-    void BCS();
-    void BEQ();
-    void BIT();
-    void BMI();
-    void BNE();
-    void BPL();
-    void BRK();
-    void BVC();
-    void BVS();
-    void CLC();
-    void CLD();
-    void CLI();
-    void CLV();
-    void CMP();
-    void CPX();
-    void CPY();
-    void DEC();
-    void DEX();
-    void DEY();
-    void EOR();
-    void INC();
-    void INX();
-    void INY();
-    void JMP();
-    void JSR();
-    void LDA();
-    void LDX();
-    void LDY();
-    void LSR();
-    void NOP();
-    void ORA();
-    void PHA();
-    void PHP();
-    void PLA();
-    void PLP();
-    void ROL();
-    void ROR();
-    void RTI();
-    void RTS();
-    void SBC();
-    void SEC();
-    void SED();
-    void SEI();
-    void STA();
-    void STX();
-    void STY();
-    void TAX();
-    void TAY();
-    void TSX();
-    void TXA();
-    void TXS();
-    void TYA();
+    void ADC(); void AND(); void ASL();
+    void BCC(); void BCS(); void BEQ();
+    void BIT(); void BMI(); void BNE();
+    void BPL(); void BRK(); void BVC();
+    void BVS(); void CLC(); void CLD();
+    void CLI(); void CLV(); void CMP();
+    void CPX(); void CPY(); void DEC();
+    void DEX(); void DEY(); void EOR();
+    void INC(); void INX(); void INY();
+    void JMP(); void JSR(); void LDA();
+    void LDX(); void LDY(); void LSR();
+    void NOP(); void ORA(); void PHA();
+    void PHP(); void PLA(); void PLP();
+    void ROL(); void ROR(); void RTI();
+    void RTS(); void SBC(); void SEC();
+    void SED(); void SEI(); void STA();
+    void STX(); void STY(); void TAX();
+    void TAY(); void TSX(); void TXA();
+    void TXS(); void TYA(); void ILL();
 
 private:
     MemoryPtr ram_ptr {};
 
+
     uint16_t read_nmi_vector() const;
     uint16_t read_reset_vector() const;
     uint16_t read_irq_vector() const;
+
     bool check_for_zero_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;
     bool check_for_flag_with_mask(uint16_t reg, uint16_t mask) const;
@@ -237,7 +202,7 @@ namespace Lookup
         {MN::STY, AM::absolute, 0x8C, 3, 4}, {MN::TAX, AM::implied, 0xAA, 1, 2},
         {MN::TAY, AM::implied, 0xA8, 1, 2}, {MN::TSX, AM::implied, 0xBA, 1, 2},
         {MN::TXA, AM::implied, 0x8A, 1, 2}, {MN::TXS, AM::implied, 0x9A, 1, 2},
-        {MN::TYA, AM::implied, 0x98, 1, 2}
+        {MN::TYA, AM::implied, 0x98, 1, 2}, {MN::ILL, AM::illegal, 0x02, 1, 1}
     };
 }
 

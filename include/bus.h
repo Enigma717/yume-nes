@@ -14,7 +14,6 @@ public:
 
     std::shared_ptr<Memory> ram;
     CPU cpu;
-private:
 };
 
 

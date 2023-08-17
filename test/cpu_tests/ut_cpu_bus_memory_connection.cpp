@@ -8,7 +8,7 @@ void test_same_memory_address()
 {
     SystemBus bus;
 
-    MY_ASSERT(bus.ram == bus.cpu.get_ram_address().lock());
+    MY_ASSERT(bus.ram == bus.cpu.get_memory_address().lock());
 }
 
 void test_direct_memory_access()
@@ -17,9 +17,9 @@ void test_direct_memory_access()
     uint16_t address {0x00DD};
     uint8_t data {0xFF};
 
-    bus.ram->mem_write(address, data);
+    bus.ram->memory_write(address, data);
 
-    MY_ASSERT(bus.ram->mem_read(address) == data);
+    MY_ASSERT(bus.ram->memory_read(address) == data);
 }
 
 void test_cpu_memory_access()
@@ -28,9 +28,9 @@ void test_cpu_memory_access()
     uint16_t address {0x00DD};
     uint8_t data {0xFF};
 
-    bus.cpu.cpu_mem_write(address, data);
+    bus.cpu.cpu_memory_write(address, data);
 
-    MY_ASSERT(bus.cpu.cpu_mem_read(address) == data);
+    MY_ASSERT(bus.cpu.cpu_memory_read(address) == data);
 }
 
 void test_shared_memory_access()
@@ -39,9 +39,9 @@ void test_shared_memory_access()
     uint16_t address {0x00DD};
     uint8_t data {0xFF};
 
-    bus.ram->mem_write(address, data);
+    bus.ram->memory_write(address, data);
 
-    MY_ASSERT(bus.cpu.cpu_mem_read(address) == data);
+    MY_ASSERT(bus.cpu.cpu_memory_read(address) == data);
 }
 
 

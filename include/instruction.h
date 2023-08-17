@@ -49,10 +49,9 @@ public:
 
     MnemonicName   mnemonic {MnemonicName::ILL};
     AddressingMode address_mode {AddressingMode::illegal};
-    uint8_t        opcode {0x00};
-    int            bytes {0};
-    int            cycles {0};
-
+    uint8_t        opcode {0x02};
+    int            bytes {1};
+    int            cycles {1};
 
     bool operator==(const Instruction& rhs) const;
 };
