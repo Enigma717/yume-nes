@@ -1,7 +1,8 @@
-#include <iostream>
-
 #include "./test_main.h"
+
 #include "./cpu_tests/cpu_tests.h"
+
+#include <iostream>
 
 
 void run_all_tests()

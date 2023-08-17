@@ -19,21 +19,21 @@ namespace MemoryConsts
     constexpr uint16_t zero_page_mask {0x00FF};
 }
 
-using MemoryVec = std::vector<uint8_t>;
+using SystemMemory = std::vector<uint8_t>;
 
 
 class Memory {
 public:
     void    mem_clear();
-    void    mem_load_program(MemoryVec program, uint16_t offset);
+    void    mem_load_program(SystemMemory program, uint16_t offset);
     void    mem_write(uint16_t address, uint8_t value);
     uint8_t mem_read(uint16_t address) const;
     int     mem_read_debug(uint16_t address) const;
 
 
-    MemoryVec get_memory_copy() const;
+    SystemMemory get_memory_copy() const;
 private:
-    MemoryVec memory {MemoryVec(MemoryConsts::memory_size, 0x00)};
+    SystemMemory memory {SystemMemory(MemoryConsts::memory_size, 0x00)};
 };
 
 

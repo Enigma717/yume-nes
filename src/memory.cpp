@@ -1,4 +1,5 @@
 #include "../include/memory.h"
+
 #include <algorithm>
 
 
@@ -7,7 +8,7 @@ void Memory::mem_clear()
     std::fill(memory.begin(), memory.end(), 0x00);
 }
 
-void Memory::mem_load_program(MemoryVec program, uint16_t offset)
+void Memory::mem_load_program(SystemMemory program, uint16_t offset)
 {
     std::copy(program.begin(), program.end(), memory.begin() + offset);
 }
@@ -28,7 +29,7 @@ int Memory::mem_read_debug(uint16_t address) const
     return static_cast<int>(memory[address]);
 }
 
-MemoryVec Memory::get_memory_copy() const
+SystemMemory Memory::get_memory_copy() const
 {
     return memory;
 }

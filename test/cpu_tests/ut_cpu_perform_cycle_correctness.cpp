@@ -1,4 +1,5 @@
 #include "./cpu_tests.h"
+
 #include "../test_main.h"
 #include "../../include/bus.h"
 
@@ -25,7 +26,7 @@ void test_perform_cycle_instr_implied()
     ///////////////////////////////
 
     SystemBus bus;
-    MemoryVec program_code {0xCA, 0x08, 0x68, 0xAA, 0x00};
+    SystemMemory program_code {0xCA, 0x08, 0x68, 0xAA, 0x00};
 
     bus.ram->mem_load_program(program_code, bus.cpu.pc);
 

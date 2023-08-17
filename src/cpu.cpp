@@ -1,13 +1,14 @@
+#include "../include/cpu.h"
+
+#include "../include/instruction.h"
+#include "../include/memory.h"
+
 #include <algorithm>
 #include <bitset>
 #include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <memory>
-
-#include "../include/cpu.h"
-#include "../include/memory.h"
-#include "../include/instruction.h"
 
 
 namespace MC = MemoryConsts;

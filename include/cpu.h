@@ -6,11 +6,11 @@
 #define CPU_H
 
 
+#include "../include/instruction.h"
+
 #include <cstdint>
 #include <memory>
 #include <vector>
-
-#include "../include/instruction.h"
 
 
 class Memory;

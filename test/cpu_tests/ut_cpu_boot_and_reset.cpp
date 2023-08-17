@@ -1,4 +1,5 @@
 #include "./cpu_tests.h"
+
 #include "../test_main.h"
 #include "../../include/bus.h"
 
@@ -39,7 +40,7 @@ void test_check_status_after_boot()
 void test_check_memory_after_boot()
 {
     SystemBus bus;
-    MemoryVec empty_memory(0x10000, 0x00);
+    SystemMemory empty_memory(0x10000, 0x00);
 
     MY_ASSERT(bus.ram->get_memory_copy() == empty_memory);
 }
@@ -121,7 +122,7 @@ void test_check_status_after_reset()
 void test_check_memory_after_reset()
 {
     SystemBus bus;
-    MemoryVec empty_memory(MemoryConsts::memory_size, 0x00);
+    SystemMemory empty_memory(MemoryConsts::memory_size, 0x00);
 
     for (uint8_t i = 0; i < 10; i++) {
         bus.cpu.cpu_mem_write(0xC0 * i, i);

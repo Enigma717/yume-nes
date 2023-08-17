@@ -2,10 +2,10 @@
 #define BUS_H
 
 
-#include <memory>
-
 #include "./cpu.h"
 #include "./memory.h"
+
+#include <memory>
 
 
 class SystemBus {
