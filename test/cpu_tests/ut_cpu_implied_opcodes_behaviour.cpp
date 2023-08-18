@@ -6,7 +6,30 @@
 
 void test_brk_behaviour()
 {
-    // TODO
+    SystemBus bus;
+    uint8_t target_word {0xBD};
+    uint8_t target_stack_ptr {0xFA};
+    uint16_t target_pc {0x2731};
+
+    bus.cpu.cpu_memory_write(MemoryConsts::irq_vector_msb, 0x27);
+    bus.cpu.cpu_memory_write(MemoryConsts::irq_vector_lsb, 0x31);
+
+    bus.cpu.pc = 0x01FF;
+    bus.cpu.status.word = 0x89;
+    bus.cpu.BRK();
+
+    bool status_check {bus.cpu.status.word == target_word};
+    bool stack_ptr_check {bus.cpu.stack_ptr == target_stack_ptr};
+    bool pc_check {bus.cpu.pc == target_pc};
+
+    bool stack_msb_check {bus.cpu.cpu_memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {bus.cpu.cpu_memory_read(0x01FC) == 0xFF};
+    bool stack_word_check {bus.cpu.cpu_memory_read(0x01FB) == target_word};
+
+    bool stack_check {stack_msb_check && stack_lsb_check && stack_word_check};
+    bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
+
+    MY_ASSERT(all_check == true);
 }
 
 void test_clc_behaviour()
@@ -97,6 +120,62 @@ void test_iny_behaviour()
     MY_ASSERT(cpu.y_reg == target_y_reg);
 }
 
+void test_irq_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_word {0xAD};
+    uint8_t target_stack_ptr {0xFA};
+    uint16_t target_pc {0x2731};
+
+    bus.cpu.cpu_memory_write(MemoryConsts::irq_vector_msb, 0x27);
+    bus.cpu.cpu_memory_write(MemoryConsts::irq_vector_lsb, 0x31);
+
+    bus.cpu.pc = 0x01FF;
+    bus.cpu.status.word = 0x89;
+    bus.cpu.interrupt_irq();
+
+    bool status_check {bus.cpu.status.word == target_word};
+    bool stack_ptr_check {bus.cpu.stack_ptr == target_stack_ptr};
+    bool pc_check {bus.cpu.pc == target_pc};
+
+    bool stack_msb_check {bus.cpu.cpu_memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {bus.cpu.cpu_memory_read(0x01FC) == 0xFF};
+    bool stack_word_check {bus.cpu.cpu_memory_read(0x01FB) == target_word};
+
+    bool stack_check {stack_msb_check && stack_lsb_check && stack_word_check};
+    bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
+
+    MY_ASSERT(all_check == true);
+}
+
+void test_nmi_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_word {0xAD};
+    uint8_t target_stack_ptr {0xFA};
+    uint16_t target_pc {0x2731};
+
+    bus.cpu.cpu_memory_write(MemoryConsts::nmi_vector_msb, 0x27);
+    bus.cpu.cpu_memory_write(MemoryConsts::nmi_vector_lsb, 0x31);
+
+    bus.cpu.pc = 0x01FF;
+    bus.cpu.status.word = 0x89;
+    bus.cpu.interrupt_nmi();
+
+    bool status_check {bus.cpu.status.word == target_word};
+    bool stack_ptr_check {bus.cpu.stack_ptr == target_stack_ptr};
+    bool pc_check {bus.cpu.pc == target_pc};
+
+    bool stack_msb_check {bus.cpu.cpu_memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {bus.cpu.cpu_memory_read(0x01FC) == 0xFF};
+    bool stack_word_check {bus.cpu.cpu_memory_read(0x01FB) == target_word};
+
+    bool stack_check {stack_msb_check && stack_lsb_check && stack_word_check};
+    bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
+
+    MY_ASSERT(all_check == true);
+}
+
 void test_pha_behaviour()
 {
     SystemBus bus;
@@ -153,12 +232,37 @@ void test_plp_behaviour()
 
 void test_rti_behaviour()
 {
-    // TODO
+    SystemBus bus;
+    uint8_t target_word {0x8D};
+    uint8_t target_stack_ptr {0xFD};
+    uint16_t target_pc {0x01FF};
+
+    bus.cpu.pc = target_pc;
+    bus.cpu.status.word = 0x89;
+    bus.cpu.interrupt_nmi();
+    bus.cpu.RTI();
+
+    bool status_check {bus.cpu.status.word == target_word};
+    bool stack_ptr_check {bus.cpu.stack_ptr == target_stack_ptr};
+    bool pc_check {bus.cpu.pc == target_pc};
+
+    bool all_check {status_check && stack_ptr_check && pc_check};
+
+    MY_ASSERT(all_check == true);
 }
 
 void test_rts_behaviour()
 {
-    // TODO
+    SystemBus bus;
+    uint16_t target_pc {0x01FF};
+
+    bus.cpu.pc = 0x01FF;
+    bus.cpu.JSR();
+    bus.cpu.RTS();
+
+    bool pc_check {bus.cpu.pc == target_pc};
+
+    MY_ASSERT(pc_check == true);
 }
 
 void test_sec_behaviour()
@@ -279,6 +383,9 @@ void ut_cpu_implied_opcodes_behaviour()
 
     test_inx_behaviour();
     test_iny_behaviour();
+
+    test_irq_behaviour();
+    test_nmi_behaviour();
 
     test_pha_behaviour();
     test_php_behaviour();

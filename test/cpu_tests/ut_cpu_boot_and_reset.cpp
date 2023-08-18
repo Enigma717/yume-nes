@@ -66,7 +66,7 @@ void test_check_curr_instr_after_boot()
     SystemBus bus;
     using MN = Instruction::MnemonicName;
     using AM = Instruction::AddressingMode;
-    Instruction target_instr {MN::ILL, AM::illegal, 0x00, 0, 0};
+    Instruction target_instr {MN::ILL, AM::illegal, 0x02, 1, 1};
 
     MY_ASSERT(bus.cpu.curr_instruction == target_instr);
 }
