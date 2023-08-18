@@ -42,10 +42,10 @@ public:
     uint16_t pc        {0x8000};
     Status   status    {};
 
-    uint8_t     branch_offset {0x00};
-    uint16_t    arg_address {0x0000};
-    int         cycles_queued {0};
-    int         cycles_executed {0};
+    uint8_t     branch_offset    {0x00};
+    uint16_t    arg_address      {0x0000};
+    int         cycles_queued    {0};
+    int         cycles_executed  {0};
     Instruction curr_instruction {};
 
 
@@ -54,7 +54,6 @@ public:
 
     void    cpu_memory_write(uint16_t address, uint8_t value) const;
     uint8_t cpu_memory_read(uint16_t address) const;
-    int     cpu_memory_read_debug(uint16_t address) const;
     void    cpu_stack_push(uint8_t value);
     uint8_t cpu_stack_pop();
 
@@ -69,7 +68,6 @@ public:
     void interrupt_reset();
     void hard_reset();
     void log_debug_info();
-
 
     /////  Addressing modes  /////
     void address_mode_immediate();

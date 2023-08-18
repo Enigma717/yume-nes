@@ -14,9 +14,10 @@
 namespace MC = MemoryConsts;
 namespace Masks
 {
-    constexpr uint8_t carry_flag_mask = 0b0000'0001;
-    constexpr uint8_t overflow_flag_mask = 0b0100'0000;
-    constexpr uint8_t negative_flag_mask = 0b1000'0000;
+    constexpr uint8_t carry_flag_mask    {0b0000'0001};
+    constexpr uint8_t overflow_flag_mask {0b0100'0000};
+    constexpr uint8_t negative_flag_mask {0b1000'0000};
+    constexpr uint16_t zero_page_mask    {0x00FF};
 }
 
 void CPU::connect_with_memory(std::shared_ptr<Memory> ram)
@@ -37,11 +38,6 @@ void CPU::cpu_memory_write(uint16_t address, uint8_t value) const
 uint8_t CPU::cpu_memory_read(uint16_t address) const
 {
     return ram_ptr.lock()->memory_read(address);
-}
-
-int CPU::cpu_memory_read_debug(uint16_t address) const
-{
-    return ram_ptr.lock()->memory_read_debug(address);
 }
 
 void CPU::cpu_stack_push(uint8_t value)
@@ -183,7 +179,7 @@ Instruction CPU::deduce_instruction_from_opcode(uint8_t opcode) const
 
 void CPU::interrupt_nmi()
 {
-    uint8_t pc_lsb = static_cast<uint8_t>(pc & MC::zero_page_mask);
+    uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
     uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
 
     status.flag.brk = 0;
@@ -200,7 +196,7 @@ void CPU::interrupt_nmi()
 void CPU::interrupt_irq()
 {
     if (status.flag.interrupt == 0) {
-        uint8_t pc_lsb = static_cast<uint8_t>(pc & MC::zero_page_mask);
+        uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
         uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
 
         status.flag.brk = 0;
@@ -296,7 +292,7 @@ bool CPU::check_for_flag_with_mask(uint16_t reg, uint16_t mask) const
 
 bool CPU::check_for_page_crossing(uint16_t address1, uint16_t address2) const
 {
-    return (address1 & ~MC::zero_page_mask) != (address2 & ~MC::zero_page_mask);
+    return (address1 & ~Masks::zero_page_mask) != (address2 & ~Masks::zero_page_mask);
 }
 
 bool CPU::check_for_sign_change(bool a, bool b, bool c) const
@@ -332,7 +328,7 @@ void CPU::address_mode_zero_page()
     arg_address = cpu_memory_read(pc);
     pc++;
 
-    arg_address = arg_address & MC::zero_page_mask;
+    arg_address = arg_address & Masks::zero_page_mask;
 }
 
 void CPU::address_mode_zero_page_x()
@@ -340,7 +336,7 @@ void CPU::address_mode_zero_page_x()
     arg_address = cpu_memory_read(pc) | x_reg;
     pc++;
 
-    arg_address = arg_address & MC::zero_page_mask;
+    arg_address = arg_address & Masks::zero_page_mask;
 }
 
 void CPU::address_mode_zero_page_y()
@@ -348,7 +344,7 @@ void CPU::address_mode_zero_page_y()
     arg_address = cpu_memory_read(pc) | y_reg;
     pc++;
 
-    arg_address = arg_address & MC::zero_page_mask;
+    arg_address = arg_address & Masks::zero_page_mask;
 }
 
 void CPU::address_mode_relative()
@@ -407,8 +403,8 @@ void CPU::address_mode_indirect_x()
     uint16_t temp_address = cpu_memory_read(pc) | x_reg;
     pc++;
 
-    uint8_t lsb {cpu_memory_read(temp_address & MC::zero_page_mask)};
-    uint8_t msb {cpu_memory_read((temp_address + 1) & MC::zero_page_mask)};
+    uint8_t lsb {cpu_memory_read(temp_address & Masks::zero_page_mask)};
+    uint8_t msb {cpu_memory_read((temp_address + 1) & Masks::zero_page_mask)};
 
     arg_address = (msb << 8) | lsb;
 }
@@ -418,8 +414,8 @@ void CPU::address_mode_indirect_y()
     uint16_t temp_address = cpu_memory_read(pc);
     pc++;
 
-    uint8_t lsb {cpu_memory_read(temp_address & MC::zero_page_mask)};
-    uint8_t msb {cpu_memory_read((temp_address + 1) & MC::zero_page_mask)};
+    uint8_t lsb {cpu_memory_read(temp_address & Masks::zero_page_mask)};
+    uint8_t msb {cpu_memory_read((temp_address + 1) & Masks::zero_page_mask)};
 
     arg_address = ((msb << 8) | lsb) | y_reg;
 }
@@ -527,7 +523,7 @@ void CPU::BPL()
 
 void CPU::BRK()
 {
-    uint8_t pc_lsb = static_cast<uint8_t>(pc & MC::zero_page_mask);
+    uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
     uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
 
     status.flag.brk = 1;
@@ -682,7 +678,7 @@ void CPU::JSR()
 {
     pc--;
 
-    uint8_t pc_lsb = static_cast<uint8_t>(pc & MC::zero_page_mask);
+    uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
     uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
 
     cpu_stack_push(pc_msb);
