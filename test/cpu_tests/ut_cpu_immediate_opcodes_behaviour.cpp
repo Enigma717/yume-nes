@@ -2,8 +2,12 @@
 
 #include "../test_main.h"
 #include "../../include/bus.h"
-#include <cstdint>
 
+
+namespace DebugMode
+{
+    constexpr bool debug_mode = false;
+}
 
 namespace InstrLookup
 {
@@ -12,6 +16,7 @@ namespace InstrLookup
 
     constexpr Instruction brk_instr {MN::BRK, AM::implied, 0x00, 1, 7};
 }
+
 
 void test_adc_imm_behaviour()
 {
@@ -22,7 +27,7 @@ void test_adc_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -37,7 +42,7 @@ void test_and_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -52,7 +57,7 @@ void test_cmp_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.status.word == target_word);
@@ -67,7 +72,7 @@ void test_cpx_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.status.word == target_word);
@@ -82,7 +87,7 @@ void test_cpy_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.status.word == target_word);
@@ -97,7 +102,7 @@ void test_eor_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -112,7 +117,7 @@ void test_lda_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.acc == target_value);
@@ -127,7 +132,7 @@ void test_ldx_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.x_reg == target_value);
@@ -142,7 +147,7 @@ void test_ldy_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.y_reg == target_value);
@@ -157,7 +162,7 @@ void test_ora_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -172,7 +177,7 @@ void test_sbc_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
+        bus.cpu.perform_cycle(DebugMode::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
     MY_ASSERT(bus.cpu.acc == target_result);

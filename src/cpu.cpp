@@ -20,6 +20,7 @@ namespace Masks
     constexpr uint16_t zero_page_mask    {0x00FF};
 }
 
+
 void CPU::connect_with_memory(std::shared_ptr<Memory> ram)
 {
     ram_ptr = ram;

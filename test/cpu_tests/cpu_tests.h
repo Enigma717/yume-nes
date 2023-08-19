@@ -9,7 +9,7 @@ void ut_cpu_lookup_table_correctness();
 void ut_cpu_implied_opcodes_behaviour();
 void ut_cpu_implied_opcodes_flags();
 void ut_cpu_immediate_opcodes_behaviour();
-// void ut_cpu_immediate_opcodes_flags();
+void ut_cpu_immediate_opcodes_flags();
 void ut_cpu_perform_cycle_correctness();
 
 

@@ -4,6 +4,11 @@
 #include "../../include/bus.h"
 
 
+namespace Debug
+{
+    constexpr bool debug_mode = false;
+}
+
 namespace InstrLookup
 {
     using MN = Instruction::MnemonicName;
@@ -11,6 +16,7 @@ namespace InstrLookup
 
     constexpr Instruction brk_instr {MN::BRK, AM::implied, 0x00, 1, 7};
 }
+
 
 void test_perform_cycle_instr_implied()
 {
@@ -31,7 +37,7 @@ void test_perform_cycle_instr_implied()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(true);
+        bus.cpu.perform_cycle(Debug::debug_mode);
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
 
 

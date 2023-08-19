@@ -11,8 +11,8 @@ void test_brk_behaviour()
     uint8_t target_stack_ptr {0xFA};
     uint16_t target_pc {0x2731};
 
-    bus.cpu.cpu_memory_write(MemoryConsts::irq_vector_msb, 0x27);
-    bus.cpu.cpu_memory_write(MemoryConsts::irq_vector_lsb, 0x31);
+    bus.ram->memory_write(MemoryConsts::irq_vector_msb, 0x27);
+    bus.ram->memory_write(MemoryConsts::irq_vector_lsb, 0x31);
 
     bus.cpu.pc = 0x01FF;
     bus.cpu.status.word = 0x89;
@@ -22,11 +22,11 @@ void test_brk_behaviour()
     bool stack_ptr_check {bus.cpu.stack_ptr == target_stack_ptr};
     bool pc_check {bus.cpu.pc == target_pc};
 
-    bool stack_msb_check {bus.cpu.cpu_memory_read(0x01FD) == 0x01};
-    bool stack_lsb_check {bus.cpu.cpu_memory_read(0x01FC) == 0xFF};
-    bool stack_word_check {bus.cpu.cpu_memory_read(0x01FB) == target_word};
+    bool stack_msb_check {bus.ram->memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {bus.ram->memory_read(0x01FC) == 0xFF};
+    bool stack_status_check {bus.ram->memory_read(0x01FB) == target_word};
 
-    bool stack_check {stack_msb_check && stack_lsb_check && stack_word_check};
+    bool stack_check {stack_msb_check && stack_lsb_check && stack_status_check};
     bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
 
     MY_ASSERT(all_check == true);
@@ -127,8 +127,8 @@ void test_irq_behaviour()
     uint8_t target_stack_ptr {0xFA};
     uint16_t target_pc {0x2731};
 
-    bus.cpu.cpu_memory_write(MemoryConsts::irq_vector_msb, 0x27);
-    bus.cpu.cpu_memory_write(MemoryConsts::irq_vector_lsb, 0x31);
+    bus.ram->memory_write(MemoryConsts::irq_vector_msb, 0x27);
+    bus.ram->memory_write(MemoryConsts::irq_vector_lsb, 0x31);
 
     bus.cpu.pc = 0x01FF;
     bus.cpu.status.word = 0x89;
@@ -138,11 +138,11 @@ void test_irq_behaviour()
     bool stack_ptr_check {bus.cpu.stack_ptr == target_stack_ptr};
     bool pc_check {bus.cpu.pc == target_pc};
 
-    bool stack_msb_check {bus.cpu.cpu_memory_read(0x01FD) == 0x01};
-    bool stack_lsb_check {bus.cpu.cpu_memory_read(0x01FC) == 0xFF};
-    bool stack_word_check {bus.cpu.cpu_memory_read(0x01FB) == target_word};
+    bool stack_msb_check {bus.ram->memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {bus.ram->memory_read(0x01FC) == 0xFF};
+    bool stack_status_check {bus.ram->memory_read(0x01FB) == target_word};
 
-    bool stack_check {stack_msb_check && stack_lsb_check && stack_word_check};
+    bool stack_check {stack_msb_check && stack_lsb_check && stack_status_check};
     bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
 
     MY_ASSERT(all_check == true);
@@ -155,8 +155,8 @@ void test_nmi_behaviour()
     uint8_t target_stack_ptr {0xFA};
     uint16_t target_pc {0x2731};
 
-    bus.cpu.cpu_memory_write(MemoryConsts::nmi_vector_msb, 0x27);
-    bus.cpu.cpu_memory_write(MemoryConsts::nmi_vector_lsb, 0x31);
+    bus.ram->memory_write(MemoryConsts::nmi_vector_msb, 0x27);
+    bus.ram->memory_write(MemoryConsts::nmi_vector_lsb, 0x31);
 
     bus.cpu.pc = 0x01FF;
     bus.cpu.status.word = 0x89;
@@ -166,11 +166,11 @@ void test_nmi_behaviour()
     bool stack_ptr_check {bus.cpu.stack_ptr == target_stack_ptr};
     bool pc_check {bus.cpu.pc == target_pc};
 
-    bool stack_msb_check {bus.cpu.cpu_memory_read(0x01FD) == 0x01};
-    bool stack_lsb_check {bus.cpu.cpu_memory_read(0x01FC) == 0xFF};
-    bool stack_word_check {bus.cpu.cpu_memory_read(0x01FB) == target_word};
+    bool stack_msb_check {bus.ram->memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {bus.ram->memory_read(0x01FC) == 0xFF};
+    bool stack_status_check {bus.ram->memory_read(0x01FB) == target_word};
 
-    bool stack_check {stack_msb_check && stack_lsb_check && stack_word_check};
+    bool stack_check {stack_msb_check && stack_lsb_check && stack_status_check};
     bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
 
     MY_ASSERT(all_check == true);
@@ -185,7 +185,7 @@ void test_pha_behaviour()
     bus.cpu.acc = acc_init_value;
     bus.cpu.PHA();
 
-    MY_ASSERT(bus.cpu.cpu_memory_read(MemoryConsts::stack_offset + stack_ptr_init) == acc_init_value);
+    MY_ASSERT(bus.ram->memory_read(MemoryConsts::stack_offset + stack_ptr_init) == acc_init_value);
 }
 
 void test_php_behaviour()
@@ -198,7 +198,7 @@ void test_php_behaviour()
     bus.cpu.status.word = status_init_mask;
     bus.cpu.PHP();
 
-    MY_ASSERT(bus.cpu.cpu_memory_read(MemoryConsts::stack_offset + stack_ptr_init) == status_final_mask);
+    MY_ASSERT(bus.ram->memory_read(MemoryConsts::stack_offset + stack_ptr_init) == status_final_mask);
 }
 
 void test_pla_behaviour()
@@ -325,7 +325,7 @@ void test_tsx_behaviour()
     SystemBus bus;
     uint8_t target_value {0x99};
 
-    bus.cpu.cpu_memory_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, target_value);
+    bus.ram->memory_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, target_value);
     bus.cpu.TSX();
 
     MY_ASSERT(bus.cpu.x_reg == target_value);
@@ -350,7 +350,7 @@ void test_txs_behaviour()
     bus.cpu.x_reg = target_value;
     bus.cpu.TXS();
 
-    uint8_t value_from_stack {bus.cpu.cpu_memory_read(MemoryConsts::stack_offset + bus.cpu.stack_ptr)};
+    uint8_t value_from_stack {bus.ram->memory_read(MemoryConsts::stack_offset + bus.cpu.stack_ptr)};
 
     MY_ASSERT(value_from_stack == target_value);
 }
