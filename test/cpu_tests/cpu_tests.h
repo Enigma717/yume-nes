@@ -2,12 +2,31 @@
 #define CPU_TESTS_H
 
 
+#include "../../include/instruction.h"
+
+
+namespace DebugMode
+{
+    constexpr bool cpu_debug_mode = false;
+}
+
+namespace InstrLookup
+{
+    using MN = Instruction::MnemonicName;
+    using AM = Instruction::AddressingMode;
+
+    constexpr Instruction brk_instruction {MN::BRK, AM::implied, 0x00, 1, 7};
+}
+
+
 void ut_cpu_boot_and_reset();
 void ut_cpu_bus_memory_connection();
 void ut_cpu_status_register();
 void ut_cpu_lookup_table_correctness();
 void ut_cpu_implied_opcodes_behaviour();
 void ut_cpu_implied_opcodes_flags();
+void ut_cpu_accumulator_opcodes_behaviour();
+void ut_cpu_accumulator_opcodes_flags();
 void ut_cpu_immediate_opcodes_behaviour();
 void ut_cpu_immediate_opcodes_flags();
 void ut_cpu_perform_cycle_correctness();

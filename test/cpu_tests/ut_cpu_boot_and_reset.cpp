@@ -21,7 +21,7 @@ void test_check_stack_ptr_after_boot()
     MY_ASSERT(bus.cpu.stack_ptr == target_stack_ptr);
 }
 
-void test_check_pc_addr_after_boot()
+void test_check_pc_address_after_boot()
 {
     SystemBus bus;
     uint16_t target_pc {0x0000};
@@ -53,7 +53,7 @@ void test_check_offset_after_boot()
     MY_ASSERT(bus.cpu.branch_offset == target_branch_offest);
 }
 
-void test_check_arg_addr_after_boot()
+void test_check_arg_address_after_boot()
 {
     SystemBus bus;
     uint8_t target_arg_address {0x0000};
@@ -96,7 +96,7 @@ void test_check_stack_ptr_after_reset()
     MY_ASSERT(bus.cpu.stack_ptr == target_stack_ptr);
 }
 
-void test_check_pc_addr_after_reset()
+void test_check_pc_address_after_reset()
 {
     SystemBus bus;
     uint16_t target_pc {0xABCD};
@@ -140,17 +140,17 @@ void ut_cpu_boot_and_reset()
 
     test_check_registers_after_boot();
     test_check_stack_ptr_after_boot();
-    test_check_pc_addr_after_boot();
+    test_check_pc_address_after_boot();
     test_check_status_after_boot();
     test_check_memory_after_boot();
     test_check_offset_after_boot();
-    test_check_arg_addr_after_boot();
+    test_check_arg_address_after_boot();
     test_check_curr_instr_after_boot();
 
 
     test_check_registers_after_reset();
     test_check_stack_ptr_after_reset();
-    test_check_pc_addr_after_reset();
+    test_check_pc_address_after_reset();
     test_check_status_after_reset();
     test_check_memory_after_reset();
 }

@@ -25,7 +25,7 @@ inline int failed = 0;
     failed++)
 
 #define TEST_SET \
-    std::cout << c_blue << "\n===== Tests set: " << __FUNCTION__ << " ===== " << c_reset << "\n"
+    std::cout << c_blue << "\n===== Test set: " << __FUNCTION__ << " ===== " << c_reset << "\n"
 
 #define MY_ASSERT(expr) (expr ? TEST_PASS : TEST_FAIL)
 

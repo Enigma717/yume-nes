@@ -4,20 +4,6 @@
 #include "../../include/bus.h"
 
 
-namespace DebugMode
-{
-    constexpr bool debug_mode = false;
-}
-
-namespace InstrLookup
-{
-    using MN = Instruction::MnemonicName;
-    using AM = Instruction::AddressingMode;
-
-    constexpr Instruction brk_instr {MN::BRK, AM::implied, 0x00, 1, 7};
-}
-
-
 void test_adc_imm_carry_flag_set_true()
 {
     SystemBus bus;
@@ -26,8 +12,8 @@ void test_adc_imm_carry_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 1);
 }
@@ -40,8 +26,8 @@ void test_adc_imm_carry_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 0);
 }
@@ -54,8 +40,8 @@ void test_adc_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -68,8 +54,8 @@ void test_adc_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -82,8 +68,8 @@ void test_adc_imm_overflow_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.overflow == 1);
 }
@@ -96,8 +82,8 @@ void test_adc_imm_overflow_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.overflow == 0);
 }
@@ -110,8 +96,8 @@ void test_adc_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -124,8 +110,8 @@ void test_adc_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -138,8 +124,8 @@ void test_and_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -152,8 +138,8 @@ void test_and_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -166,8 +152,8 @@ void test_and_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -180,8 +166,8 @@ void test_and_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -194,8 +180,8 @@ void test_cmp_imm_carry_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 1);
 }
@@ -208,8 +194,8 @@ void test_cmp_imm_carry_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 0);
 }
@@ -222,8 +208,8 @@ void test_cmp_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -236,8 +222,8 @@ void test_cmp_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -250,8 +236,8 @@ void test_cmp_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -264,8 +250,8 @@ void test_cmp_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -278,8 +264,8 @@ void test_cpx_imm_carry_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 1);
 }
@@ -292,8 +278,8 @@ void test_cpx_imm_carry_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 0);
 }
@@ -306,8 +292,8 @@ void test_cpx_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -320,8 +306,8 @@ void test_cpx_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -334,8 +320,8 @@ void test_cpx_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -348,8 +334,8 @@ void test_cpx_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -362,8 +348,8 @@ void test_cpy_imm_carry_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 1);
 }
@@ -376,8 +362,8 @@ void test_cpy_imm_carry_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 0);
 }
@@ -390,8 +376,8 @@ void test_cpy_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -404,8 +390,8 @@ void test_cpy_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -418,8 +404,8 @@ void test_cpy_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -432,8 +418,8 @@ void test_cpy_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -446,8 +432,8 @@ void test_eor_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -460,8 +446,8 @@ void test_eor_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -474,8 +460,8 @@ void test_eor_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -488,8 +474,8 @@ void test_eor_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -502,8 +488,8 @@ void test_lda_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -516,8 +502,8 @@ void test_lda_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -530,8 +516,8 @@ void test_lda_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -544,8 +530,8 @@ void test_lda_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -558,8 +544,8 @@ void test_ldx_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -572,8 +558,8 @@ void test_ldx_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -586,8 +572,8 @@ void test_ldx_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -600,8 +586,8 @@ void test_ldx_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -614,8 +600,8 @@ void test_ldy_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -628,8 +614,8 @@ void test_ldy_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -642,8 +628,8 @@ void test_ldy_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -656,8 +642,8 @@ void test_ldy_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -670,8 +656,8 @@ void test_ora_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -684,8 +670,8 @@ void test_ora_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -698,8 +684,8 @@ void test_ora_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -712,8 +698,8 @@ void test_ora_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
@@ -726,8 +712,8 @@ void test_sbc_imm_carry_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 1);
 }
@@ -740,8 +726,8 @@ void test_sbc_imm_carry_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.carry == 0);
 }
@@ -754,8 +740,8 @@ void test_sbc_imm_zero_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 1);
 }
@@ -768,8 +754,8 @@ void test_sbc_imm_zero_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.zero == 0);
 }
@@ -782,8 +768,8 @@ void test_sbc_imm_overflow_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.overflow == 1);
 }
@@ -796,8 +782,8 @@ void test_sbc_imm_overflow_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.overflow == 0);
 }
@@ -810,8 +796,8 @@ void test_sbc_imm_negative_flag_set_true()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 1);
 }
@@ -824,8 +810,8 @@ void test_sbc_imm_negative_flag_set_false()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::debug_mode);
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instr));
+        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }

@@ -852,7 +852,8 @@ void CPU::RTS()
 void CPU::SBC()
 {
     uint8_t value {cpu_memory_read(arg_address)};
-    uint16_t result = static_cast<uint16_t>(acc + ~value + status.flag.carry);
+    uint8_t value_neg = static_cast<uint8_t>(~value);
+    uint16_t result = static_cast<uint16_t>(acc + value_neg + status.flag.carry);
 
     bool acc_sign {check_for_flag_with_mask(acc, Masks::negative_flag_mask)};
     bool value_sign {check_for_flag_with_mask(value, Masks::negative_flag_mask)};
