@@ -13,7 +13,7 @@ void test_asl_acc_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -28,7 +28,7 @@ void test_lsr_acc_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -44,7 +44,7 @@ void test_rol_acc_behaviour_with_carry()
     bus.cpu.status.flag.carry = 1;
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -60,7 +60,7 @@ void test_rol_acc_behaviour_without_carry()
     bus.cpu.status.flag.carry = 0;
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -76,7 +76,7 @@ void test_ror_acc_behaviour_with_carry()
     bus.cpu.status.flag.carry = 1;
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -92,7 +92,7 @@ void test_ror_acc_behaviour_without_carry()
     bus.cpu.status.flag.carry = 0;
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);

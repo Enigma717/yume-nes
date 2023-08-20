@@ -236,6 +236,7 @@ void CPU::log_debug_info()
         << "CYCLE: " << std::setw(6) << std::left << cycles_executed << std::hex
         << "| OPCODE: 0x" << std::setw(3) << std::left << static_cast<short>(curr_instruction.opcode)
         << "| ARG: 0x" << std::setw(5) << std::left << static_cast<short>(arg_address)
+        << "| MEM[ARG]: 0x" << std::setw(5) << std::left << static_cast<short>(cpu_memory_read(arg_address))
         << "|| A: 0x" << std::setw(3) << std::left << static_cast<short>(acc)
         << "| X: 0x" << std::setw(3) << std::left << static_cast<short>(x_reg)
         << "| Y: 0x" << std::setw(3) << std::left << static_cast<short>(y_reg)
@@ -496,10 +497,9 @@ void CPU::BEQ()
 void CPU::BIT()
 {
     uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t result = acc & value;
 
-    value = acc & value;
-
-    status.flag.zero = check_for_zero_flag(value);
+    status.flag.zero = check_for_zero_flag(result);
     status.flag.overflow = check_for_flag_with_mask(value, Masks::overflow_flag_mask);
     status.flag.negative = check_for_negative_flag(value);
 }

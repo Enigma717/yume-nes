@@ -5,11 +5,6 @@
 #include "../../include/instruction.h"
 
 
-namespace DebugMode
-{
-    constexpr bool cpu_debug_mode = false;
-}
-
 namespace InstrLookup
 {
     using MN = Instruction::MnemonicName;
@@ -29,6 +24,8 @@ void ut_cpu_accumulator_opcodes_behaviour();
 void ut_cpu_accumulator_opcodes_flags();
 void ut_cpu_immediate_opcodes_behaviour();
 void ut_cpu_immediate_opcodes_flags();
+void ut_cpu_zero_page_opcodes_behaviour();
+void ut_cpu_zero_page_opcodes_flags();
 void ut_cpu_perform_cycle_correctness();
 
 

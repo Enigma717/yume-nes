@@ -14,7 +14,7 @@ void test_adc_imm_behaviour_with_carry()
     bus.cpu.status.flag.carry = 1;
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -30,7 +30,7 @@ void test_adc_imm_behaviour_without_carry()
     bus.cpu.status.flag.carry = 0;
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -45,7 +45,7 @@ void test_and_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -60,7 +60,7 @@ void test_cmp_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.word == target_word);
@@ -75,7 +75,7 @@ void test_cpx_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.word == target_word);
@@ -90,7 +90,7 @@ void test_cpy_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.status.word == target_word);
@@ -105,7 +105,7 @@ void test_eor_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -120,7 +120,7 @@ void test_lda_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_value);
@@ -135,7 +135,7 @@ void test_ldx_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.x_reg == target_value);
@@ -150,7 +150,7 @@ void test_ldy_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.y_reg == target_value);
@@ -165,7 +165,7 @@ void test_ora_imm_behaviour()
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -181,7 +181,7 @@ void test_sbc_imm_behaviour_with_carry()
     bus.cpu.status.flag.carry = 1;
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
@@ -197,7 +197,7 @@ void test_sbc_imm_behaviour_without_carry()
     bus.cpu.status.flag.carry = 0;
 
     do {
-        bus.cpu.perform_cycle(DebugMode::cpu_debug_mode);
+        bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(bus.cpu.acc == target_result);
