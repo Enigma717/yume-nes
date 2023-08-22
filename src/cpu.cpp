@@ -233,7 +233,7 @@ void CPU::hard_reset()
 void CPU::log_debug_info()
 {
     std::cout << "[DEBUG] "
-        << "CYCLE: " << std::setw(6) << std::left << cycles_executed << std::hex
+        << "CYCLE: " << std::setw(6) << std::left << cycles_executed << std::hex << std::uppercase
         << "| OPCODE: 0x" << std::setw(3) << std::left << static_cast<short>(curr_instruction.opcode)
         << "| ARG: 0x" << std::setw(5) << std::left << static_cast<short>(arg_address)
         << "| MEM[ARG]: 0x" << std::setw(5) << std::left << static_cast<short>(cpu_memory_read(arg_address))
@@ -335,7 +335,7 @@ void CPU::address_mode_zero_page()
 
 void CPU::address_mode_zero_page_x()
 {
-    arg_address = cpu_memory_read(pc) | x_reg;
+    arg_address = cpu_memory_read(pc) + x_reg;
     pc++;
 
     arg_address = arg_address & Masks::zero_page_mask;
@@ -343,7 +343,7 @@ void CPU::address_mode_zero_page_x()
 
 void CPU::address_mode_zero_page_y()
 {
-    arg_address = cpu_memory_read(pc) | y_reg;
+    arg_address = cpu_memory_read(pc) + y_reg;
     pc++;
 
     arg_address = arg_address & Masks::zero_page_mask;
@@ -372,7 +372,8 @@ void CPU::address_mode_absolute_x()
     uint8_t msb {cpu_memory_read(pc)};
     pc++;
 
-    arg_address = ((msb << 8) | lsb) | x_reg;
+    arg_address = (msb << 8) | lsb;
+    arg_address += x_reg;
 }
 
 void CPU::address_mode_absolute_y()
@@ -382,7 +383,8 @@ void CPU::address_mode_absolute_y()
     uint8_t msb {cpu_memory_read(pc)};
     pc++;
 
-    arg_address = ((msb << 8) | lsb) | y_reg;
+    arg_address = (msb << 8) | lsb;
+    arg_address += y_reg;
 }
 
 void CPU::address_mode_indirect()
@@ -402,7 +404,7 @@ void CPU::address_mode_indirect()
 
 void CPU::address_mode_indirect_x()
 {
-    uint16_t temp_address = cpu_memory_read(pc) | x_reg;
+    uint16_t temp_address = cpu_memory_read(pc) + x_reg;
     pc++;
 
     uint8_t lsb {cpu_memory_read(temp_address & Masks::zero_page_mask)};
@@ -419,7 +421,8 @@ void CPU::address_mode_indirect_y()
     uint8_t lsb {cpu_memory_read(temp_address & Masks::zero_page_mask)};
     uint8_t msb {cpu_memory_read((temp_address + 1) & Masks::zero_page_mask)};
 
-    arg_address = ((msb << 8) | lsb) | y_reg;
+    arg_address = (msb << 8) | lsb;
+    arg_address += y_reg;
 }
 
 
