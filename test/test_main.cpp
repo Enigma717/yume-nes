@@ -5,7 +5,7 @@
 #include <iostream>
 
 
-void run_all_tests()
+void run_cpu_tests()
 {
     ut_cpu_boot_and_reset();
     ut_cpu_bus_memory_connection();
@@ -21,7 +21,14 @@ void run_all_tests()
     ut_cpu_zero_page_opcodes_flags();
     ut_cpu_zero_page_x_opcodes_behaviour();
     ut_cpu_zero_page_x_opcodes_flags();
+    ut_cpu_zero_page_y_opcodes_behaviour();
+    ut_cpu_zero_page_y_opcodes_flags();
     ut_cpu_perform_cycle_correctness();
+}
+
+void run_all_tests()
+{
+    run_cpu_tests();
 }
 
 

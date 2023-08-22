@@ -301,7 +301,7 @@ void test_sta_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x31};
-    SystemMemory program_code {0xA2, 0x59, 0xA9, 0x31, 0x85, 0xF8, 0x00};
+    SystemMemory program_code {0xA2, 0x59, 0xA9, 0x31, 0x95, 0xF8, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -309,14 +309,14 @@ void test_sta_zpx_behaviour()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0xF8) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0x51) == target_result);
 }
 
 void test_sty_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x31};
-    SystemMemory program_code {0xA2, 0x58, 0xA0, 0x31, 0x84, 0xF6, 0x00};
+    SystemMemory program_code {0xA2, 0x57, 0xA0, 0x31, 0x94, 0xF6, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -324,7 +324,7 @@ void test_sty_zpx_behaviour()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0xF6) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0x4D) == target_result);
 }
 
 
