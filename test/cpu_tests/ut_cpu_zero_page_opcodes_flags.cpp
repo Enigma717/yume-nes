@@ -1223,10 +1223,6 @@ void test_ror_zpg_negative_flag_set_false()
     MY_ASSERT(bus.cpu.status.flag.negative == 0);
 }
 
-
-
-
-
 void test_sbc_zpg_carry_flag_set_true()
 {
     SystemBus bus;
