@@ -31,6 +31,8 @@ void ut_cpu_zero_page_x_opcodes_flags();
 void ut_cpu_zero_page_y_opcodes_behaviour();
 void ut_cpu_zero_page_y_opcodes_flags();
 void ut_cpu_relative_opcodes_behaviour();
+void ut_cpu_absolute_opcodes_behaviour();
+void ut_cpu_absolute_opcodes_flags();
 void ut_cpu_perform_cycle_correctness();
 
 
