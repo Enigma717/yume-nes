@@ -1,14 +1,29 @@
-#include "./cpu_tests.h"
+#include "../cpu_tests.h"
 
-#include "../test_main.h"
-#include "../../include/bus.h"
+#include "../../test_main.h"
+#include "../../../include/bus.h"
 
 
-void test_adc_abx_behaviour_with_carry()
+void test_zpx_page_wrapping()
+{
+    SystemBus bus;
+    uint8_t target_address {0x7F};
+    SystemMemory program_code {0xA2, 0x80, 0xA9, 0x21, 0x95, 0xFF, 0x00};
+
+    bus.ram->memory_load_program(program_code, bus.cpu.pc);
+
+    do {
+        bus.cpu.perform_cycle();
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
+
+    MY_ASSERT(bus.ram->memory_read(target_address) == 0x21);
+}
+
+void test_adc_zpx_behaviour_with_carry()
 {
     SystemBus bus;
     uint8_t target_result {0x9C};
-    SystemMemory program_code {0xA2, 0x91, 0xA9, 0x28, 0x8D, 0xB2, 0x61, 0xA9, 0x73, 0x7D, 0x21, 0x61, 0x00};
+    SystemMemory program_code {0xA2, 0x80, 0xA9, 0x28, 0x85, 0xA1, 0xA9, 0x73, 0x75, 0x21, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
     bus.cpu.status.flag.carry = 1;
@@ -20,11 +35,11 @@ void test_adc_abx_behaviour_with_carry()
     MY_ASSERT(bus.cpu.acc == target_result);
 }
 
-void test_adc_abx_behaviour_without_carry()
+void test_adc_zpx_behaviour_without_carry()
 {
     SystemBus bus;
     uint8_t target_result {0x9B};
-    SystemMemory program_code {0xA2, 0x92, 0xA9, 0x28, 0x8D, 0xB4, 0x62, 0xA9, 0x73, 0x7D, 0x22, 0x62, 0x00};
+    SystemMemory program_code {0xA2, 0x81, 0xA9, 0x28, 0x85, 0xA3, 0xA9, 0x73, 0x75, 0x22, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
     bus.cpu.status.flag.carry = 0;
@@ -36,11 +51,11 @@ void test_adc_abx_behaviour_without_carry()
     MY_ASSERT(bus.cpu.acc == target_result);
 }
 
-void test_and_abx_behaviour()
+void test_and_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x22};
-    SystemMemory program_code {0xA2, 0x93, 0xA9, 0xAA, 0x8D, 0xB6, 0x63, 0xA9, 0x33, 0x3D, 0x23, 0x63, 0x00};
+    SystemMemory program_code {0xA2, 0x82, 0xA9, 0xAA, 0x85, 0xA5, 0xA9, 0x33, 0x35, 0x23, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -51,11 +66,11 @@ void test_and_abx_behaviour()
     MY_ASSERT(bus.cpu.acc == target_result);
 }
 
-void test_asl_abx_behaviour()
+void test_asl_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x94};
-    SystemMemory program_code {0xA2, 0x94, 0xA9, 0xCA, 0x8D, 0xB8, 0x64, 0x1E, 0x24, 0x64, 0x00};
+    SystemMemory program_code {0xA2, 0x83, 0xA9, 0xCA, 0x85, 0xA7, 0x16, 0x24, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -63,14 +78,14 @@ void test_asl_abx_behaviour()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0x64B8) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0xA7) == target_result);
 }
 
-void test_cmp_abx_behaviour()
+void test_cmp_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_word {0x37};
-    SystemMemory program_code {0xA2, 0x96, 0xA9, 0x77, 0x8D, 0xBC, 0x66, 0xDD, 0x26, 0x66, 0x00};
+    SystemMemory program_code {0xA2, 0x84, 0xA9, 0x77, 0x85, 0xAA, 0xD5, 0x26, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -81,11 +96,11 @@ void test_cmp_abx_behaviour()
     MY_ASSERT(bus.cpu.status.word == target_word);
 }
 
-void test_dec_abx_behaviour()
+void test_dec_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x32};
-    SystemMemory program_code {0xA2, 0x99, 0xA9, 0x33, 0x8D, 0xC2, 0x69, 0xDE, 0x29, 0x69, 0x00};
+    SystemMemory program_code {0xA2, 0x85, 0xA9, 0x33, 0x85, 0xAE, 0xD6, 0x29, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -93,14 +108,14 @@ void test_dec_abx_behaviour()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0x69C2) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0xAE) == target_result);
 }
 
-void test_eor_abx_behaviour()
+void test_eor_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x99};
-    SystemMemory program_code {0xA2, 0x9A, 0xA9, 0xAA, 0x8D, 0xC4, 0x6A, 0xA9, 0x33, 0x5D, 0x2A, 0x6A, 0x00};
+    SystemMemory program_code {0xA2, 0x86, 0xA9, 0xAA, 0x85, 0xB0, 0xA9, 0x33, 0x55, 0x2A, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -111,11 +126,11 @@ void test_eor_abx_behaviour()
     MY_ASSERT(bus.cpu.acc == target_result);
 }
 
-void test_inc_abx_behaviour()
+void test_inc_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x34};
-    SystemMemory program_code {0xA2, 0x9B, 0xA9, 0x33, 0x8D, 0xC6, 0x6B, 0xFE, 0x2B, 0x6B, 0x00};
+    SystemMemory program_code {0xA2, 0x87, 0xA9, 0x33, 0x85, 0xB2, 0xF6, 0x2B, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -123,14 +138,14 @@ void test_inc_abx_behaviour()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0x6BC6) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0xB2) == target_result);
 }
 
-void test_lda_abx_behaviour()
+void test_lda_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_value {0xAE};
-    SystemMemory program_code {0xA2, 0x9C, 0xA9, 0xAE, 0x8D, 0xC8, 0x6C, 0xA9, 0x00, 0xBD, 0x2C, 0x6C, 0x00};
+    SystemMemory program_code {0xA2, 0x88, 0xA9, 0xAE, 0x85, 0xB4, 0xA9, 0x00, 0xB5, 0x2C, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -141,11 +156,11 @@ void test_lda_abx_behaviour()
     MY_ASSERT(bus.cpu.acc == target_value);
 }
 
-void test_ldy_abx_behaviour()
+void test_ldy_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_value {0xEA};
-    SystemMemory program_code {0xA2, 0x9E, 0xA0, 0xEA, 0x8C, 0xCC, 0x6E, 0xA0, 0x00, 0xBC, 0x2E, 0x6E, 0x00};
+    SystemMemory program_code {0xA2, 0x89, 0xA0, 0xEA, 0x84, 0xB7, 0xA0, 0x00, 0xB4, 0x2E, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -156,11 +171,11 @@ void test_ldy_abx_behaviour()
     MY_ASSERT(bus.cpu.y_reg == target_value);
 }
 
-void test_lsr_abx_behaviour()
+void test_lsr_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x4B};
-    SystemMemory program_code {0xA2, 0x9F, 0xA9, 0x97, 0x8D, 0xCE, 0x6F, 0x5E, 0x2F, 0x6F, 0x00};
+    SystemMemory program_code {0xA2, 0x8A, 0xA9, 0x97, 0x85, 0xB9, 0x56, 0x2F, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -168,14 +183,14 @@ void test_lsr_abx_behaviour()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0x6FCE) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0xB9) == target_result);
 }
 
-void test_ora_abx_behaviour()
+void test_ora_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0xBB};
-    SystemMemory program_code {0xA2, 0xAF, 0xA9, 0xAA, 0x8D, 0xAE, 0xD0, 0xA9, 0x33, 0x1D, 0xFF, 0xCF, 0x00};
+    SystemMemory program_code {0xA2, 0x60, 0xA9, 0xAA, 0x85, 0x5F, 0xA9, 0x33, 0x15, 0xFF, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -186,11 +201,11 @@ void test_ora_abx_behaviour()
     MY_ASSERT(bus.cpu.acc == target_result);
 }
 
-void test_rol_abx_behaviour_with_carry()
+void test_rol_zpx_behaviour_with_carry()
 {
     SystemBus bus;
     uint8_t target_result {0x3D};
-    SystemMemory program_code {0xA2, 0xAE, 0xA9, 0x9E, 0x8D, 0xAC, 0xCF, 0x3E, 0xFE, 0xCE, 0x00};
+    SystemMemory program_code {0xA2, 0x5F, 0xA9, 0x9E, 0x85, 0x5D, 0x36, 0xFE, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
     bus.cpu.status.flag.carry = 1;
@@ -199,14 +214,14 @@ void test_rol_abx_behaviour_with_carry()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0xCFAC) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0x5D) == target_result);
 }
 
-void test_rol_abx_behaviour_without_carry()
+void test_rol_zpx_behaviour_without_carry()
 {
     SystemBus bus;
     uint8_t target_result {0x3C};
-    SystemMemory program_code {0xA2, 0xAD, 0xA9, 0x9E, 0x8D, 0xAA, 0xCE, 0x3E, 0xFD, 0xCD, 0x00};
+    SystemMemory program_code {0xA2, 0x5E, 0xA9, 0x9E, 0x85, 0x5C, 0x36, 0xFE, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
     bus.cpu.status.flag.carry = 0;
@@ -215,14 +230,14 @@ void test_rol_abx_behaviour_without_carry()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0xCEAA) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0x5C) == target_result);
 }
 
-void test_ror_abx_behaviour_with_carry()
+void test_ror_zpx_behaviour_with_carry()
 {
     SystemBus bus;
     uint8_t target_result {0xA6};
-    SystemMemory program_code {0xA2, 0xAC, 0xA9, 0x4D, 0x8D, 0xA8, 0xCD, 0x7E, 0xFC, 0xCC, 0x00};
+    SystemMemory program_code {0xA2, 0x5D, 0xA9, 0x4D, 0x85, 0x59, 0x76, 0xFC, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
     bus.cpu.status.flag.carry = 1;
@@ -231,14 +246,14 @@ void test_ror_abx_behaviour_with_carry()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0xCDA8) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0x59) == target_result);
 }
 
-void test_ror_abx_behaviour_without_carry()
+void test_ror_zpx_behaviour_without_carry()
 {
     SystemBus bus;
     uint8_t target_result {0x26};
-    SystemMemory program_code {0xA2, 0xAB, 0xA9, 0x4D, 0x8D, 0xA6, 0xCC, 0x7E, 0xFB, 0xCB, 0x00};
+    SystemMemory program_code {0xA2, 0x5C, 0xA9, 0x4D, 0x85, 0x57, 0x76, 0xFB, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
     bus.cpu.status.flag.carry = 0;
@@ -247,14 +262,14 @@ void test_ror_abx_behaviour_without_carry()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0xCCA6) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0x57) == target_result);
 }
 
-void test_sbc_abx_behaviour_with_carry()
+void test_sbc_zpx_behaviour_with_carry()
 {
     SystemBus bus;
     uint8_t target_result {0x4B};
-    SystemMemory program_code {0xA2, 0xAA, 0xA9, 0x28, 0x8D, 0xA4, 0xCB, 0xA9, 0x73, 0xFD, 0xFA, 0xCA, 0x00};
+    SystemMemory program_code {0xA2, 0x5B, 0xA9, 0x28, 0x85, 0x55, 0xA9, 0x73, 0xF5, 0xFA, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
     bus.cpu.status.flag.carry = 1;
@@ -266,11 +281,11 @@ void test_sbc_abx_behaviour_with_carry()
     MY_ASSERT(bus.cpu.acc == target_result);
 }
 
-void test_sbc_abx_behaviour_without_carry()
+void test_sbc_zpx_behaviour_without_carry()
 {
     SystemBus bus;
     uint8_t target_result {0x4A};
-    SystemMemory program_code {0xA2, 0xA9, 0xA9, 0x28, 0x8D, 0xA2, 0xCA, 0xA9, 0x73, 0xFD, 0xF9, 0xC9, 0x00};
+    SystemMemory program_code {0xA2, 0x5A, 0xA9, 0x28, 0x85, 0x53, 0xA9, 0x73, 0xF5, 0xF9, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
     bus.cpu.status.flag.carry = 0;
@@ -282,11 +297,11 @@ void test_sbc_abx_behaviour_without_carry()
     MY_ASSERT(bus.cpu.acc == target_result);
 }
 
-void test_sta_abx_behaviour()
+void test_sta_zpx_behaviour()
 {
     SystemBus bus;
     uint8_t target_result {0x31};
-    SystemMemory program_code {0xA2, 0xA8, 0xA9, 0x31, 0x9D, 0xF8, 0xC8, 0x00};
+    SystemMemory program_code {0xA2, 0x59, 0xA9, 0x31, 0x95, 0xF8, 0x00};
 
     bus.ram->memory_load_program(program_code, bus.cpu.pc);
 
@@ -294,31 +309,48 @@ void test_sta_abx_behaviour()
         bus.cpu.perform_cycle();
     } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.ram->memory_read(0xC9A0) == target_result);
+    MY_ASSERT(bus.ram->memory_read(0x51) == target_result);
+}
+
+void test_sty_zpx_behaviour()
+{
+    SystemBus bus;
+    uint8_t target_result {0x31};
+    SystemMemory program_code {0xA2, 0x57, 0xA0, 0x31, 0x94, 0xF6, 0x00};
+
+    bus.ram->memory_load_program(program_code, bus.cpu.pc);
+
+    do {
+        bus.cpu.perform_cycle();
+    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
+
+    MY_ASSERT(bus.ram->memory_read(0x4D) == target_result);
 }
 
 
-void ut_cpu_absolute_x_opcodes_behaviour()
+void ut_cpu_zero_page_x_opcodes_behaviour()
 {
     TEST_SET;
 
-    test_adc_abx_behaviour_with_carry();
-    test_adc_abx_behaviour_without_carry();
-    test_and_abx_behaviour();
-    test_asl_abx_behaviour();
-    test_cmp_abx_behaviour();
-    test_dec_abx_behaviour();
-    test_eor_abx_behaviour();
-    test_inc_abx_behaviour();
-    test_lda_abx_behaviour();
-    test_ldy_abx_behaviour();
-    test_lsr_abx_behaviour();
-    test_ora_abx_behaviour();
-    test_rol_abx_behaviour_with_carry();
-    test_rol_abx_behaviour_without_carry();
-    test_ror_abx_behaviour_with_carry();
-    test_ror_abx_behaviour_without_carry();
-    test_sbc_abx_behaviour_with_carry();
-    test_sbc_abx_behaviour_without_carry();
-    test_sta_abx_behaviour();
+    test_zpx_page_wrapping();
+    test_adc_zpx_behaviour_with_carry();
+    test_adc_zpx_behaviour_without_carry();
+    test_and_zpx_behaviour();
+    test_asl_zpx_behaviour();
+    test_cmp_zpx_behaviour();
+    test_dec_zpx_behaviour();
+    test_eor_zpx_behaviour();
+    test_inc_zpx_behaviour();
+    test_lda_zpx_behaviour();
+    test_ldy_zpx_behaviour();
+    test_lsr_zpx_behaviour();
+    test_ora_zpx_behaviour();
+    test_rol_zpx_behaviour_with_carry();
+    test_rol_zpx_behaviour_without_carry();
+    test_ror_zpx_behaviour_with_carry();
+    test_ror_zpx_behaviour_without_carry();
+    test_sbc_zpx_behaviour_with_carry();
+    test_sbc_zpx_behaviour_without_carry();
+    test_sta_zpx_behaviour();
+    test_sty_zpx_behaviour();
 }

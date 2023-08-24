@@ -1,7 +1,7 @@
-#include "./cpu_tests.h"
+#include "../cpu_tests.h"
 
-#include "../test_main.h"
-#include "../../include/bus.h"
+#include "../../test_main.h"
+#include "../../../include/bus.h"
 
 
 void test_bcc_rel_behaviour()
