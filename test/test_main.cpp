@@ -32,6 +32,7 @@ void run_cpu_tests()
     ut_cpu_absolute_y_opcodes_flags();
     ut_cpu_indirect_opcodes_behaviour();
     ut_cpu_indirect_x_opcodes_behaviour();
+    ut_cpu_indirect_x_opcodes_flags();
     ut_cpu_perform_cycle_correctness();
 }
 
