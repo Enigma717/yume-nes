@@ -11,6 +11,11 @@ void run_cpu_tests()
     ut_cpu_bus_memory_connection();
     ut_cpu_status_register();
     ut_cpu_lookup_table_correctness();
+    ut_cpu_perform_cycle_correctness();
+}
+
+void run_opcodes_tests()
+{
     ut_cpu_implied_opcodes_behaviour();
     ut_cpu_implied_opcodes_flags();
     ut_cpu_accumulator_opcodes_behaviour();
@@ -33,12 +38,15 @@ void run_cpu_tests()
     ut_cpu_indirect_opcodes_behaviour();
     ut_cpu_indirect_x_opcodes_behaviour();
     ut_cpu_indirect_x_opcodes_flags();
-    ut_cpu_perform_cycle_correctness();
+    ut_cpu_indirect_y_opcodes_behaviour();
+    ut_cpu_indirect_y_opcodes_flags();
+
 }
 
 void run_all_tests()
 {
     run_cpu_tests();
+    run_opcodes_tests();
 }
 
 
