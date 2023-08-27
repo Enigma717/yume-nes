@@ -9,6 +9,7 @@
 #include <iostream>
 #include <iomanip>
 #include <memory>
+#include <sys/types.h>
 
 
 namespace MC = MemoryConsts;
@@ -372,8 +373,13 @@ void CPU::address_mode_absolute_x()
     uint8_t msb {cpu_memory_read(pc)};
     pc++;
 
-    arg_address = (msb << 8) | lsb;
-    arg_address += x_reg;
+    uint16_t new_address = (msb << 8) | lsb;
+    new_address += x_reg;
+
+    if (check_for_page_crossing(arg_address, new_address))
+        cycles_queued += 1;
+
+    arg_address = new_address;
 }
 
 void CPU::address_mode_absolute_y()
@@ -383,8 +389,13 @@ void CPU::address_mode_absolute_y()
     uint8_t msb {cpu_memory_read(pc)};
     pc++;
 
-    arg_address = (msb << 8) | lsb;
-    arg_address += y_reg;
+    uint16_t new_address = (msb << 8) | lsb;
+    new_address += y_reg;
+
+    if (check_for_page_crossing(arg_address, new_address))
+        cycles_queued += 1;
+
+    arg_address = new_address;
 }
 
 void CPU::address_mode_indirect()
@@ -421,8 +432,13 @@ void CPU::address_mode_indirect_y()
     uint8_t lsb {cpu_memory_read(temp_address & Masks::zero_page_mask)};
     uint8_t msb {cpu_memory_read((temp_address + 1) & Masks::zero_page_mask)};
 
-    arg_address = (msb << 8) | lsb;
-    arg_address += y_reg;
+    uint16_t new_address = (msb << 8) | lsb;
+    new_address += y_reg;
+
+    if (check_for_page_crossing(arg_address, new_address))
+        cycles_queued += 1;
+
+    arg_address = new_address;
 }
 
 
