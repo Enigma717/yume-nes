@@ -407,8 +407,14 @@ void CPU::address_mode_indirect()
 
     uint16_t temp_address = (msb << 8) | lsb;
 
+    // Original 6502 CPU's indirect jump page crossing bug reproduction:
+    // https://www.nesdev.org/obelisk-6502-guide/reference.html#JMP
+    if (lsb == 0xFF)
+        msb = cpu_memory_read(temp_address & 0xFF00);
+    else
+        msb = cpu_memory_read(temp_address + 1);
+
     lsb = cpu_memory_read(temp_address);
-    msb = cpu_memory_read(temp_address + 1);
 
     arg_address = (msb << 8) | lsb;
 }
