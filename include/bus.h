@@ -2,6 +2,7 @@
 #define BUS_H
 
 
+#include "./cartridge.h"
 #include "./cpu.h"
 #include "./memory.h"
 
@@ -14,6 +15,7 @@ public:
 
     std::shared_ptr<Memory> ram;
     CPU cpu;
+    std::shared_ptr<Cartridge> cartridge;
 };
 
 

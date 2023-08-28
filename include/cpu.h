@@ -14,8 +14,10 @@
 
 
 class Memory;
+class Cartridge;
 
 using MemoryPtr = std::weak_ptr<Memory>;
+using CartridgePtr = std::weak_ptr<Cartridge>;
 
 
 class CPU {
@@ -49,8 +51,10 @@ public:
     Instruction curr_instruction {};
 
 
-    void      connect_with_memory(std::shared_ptr<Memory> ram);
-    MemoryPtr get_memory_address() const;
+    void         connect_with_memory(std::shared_ptr<Memory> ram);
+    void         connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
+    MemoryPtr    get_memory_pointer() const;
+    CartridgePtr get_cartridge_pointer() const;
 
     void    cpu_memory_write(uint16_t address, uint8_t value) const;
     uint8_t cpu_memory_read(uint16_t address) const;
@@ -105,6 +109,7 @@ public:
 
 private:
     MemoryPtr ram_ptr {};
+    CartridgePtr cartridge_ptr {};
 
 
     uint16_t read_nmi_vector() const;

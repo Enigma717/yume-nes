@@ -13,7 +13,6 @@ void Memory::memory_load_program(SystemMemory program, uint16_t offset)
     std::copy(program.begin(), program.end(), memory.begin() + offset);
 }
 
-
 void Memory::memory_write(uint16_t address, uint8_t value)
 {
     memory[address] = value;

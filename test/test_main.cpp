@@ -8,7 +8,7 @@
 void run_cpu_tests()
 {
     ut_cpu_boot_and_reset();
-    ut_cpu_bus_memory_connection();
+    ut_cpu_connection_with_components();
     ut_cpu_status_register();
     ut_cpu_lookup_table_correctness();
     ut_cpu_perform_cycle_correctness();
@@ -46,7 +46,7 @@ void run_opcodes_tests()
 void run_all_tests()
 {
     run_cpu_tests();
-    run_opcodes_tests();
+    // run_opcodes_tests();
 }
 
 

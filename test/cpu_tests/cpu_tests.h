@@ -15,7 +15,7 @@ namespace InstrLookup
 
 
 void ut_cpu_boot_and_reset();
-void ut_cpu_bus_memory_connection();
+void ut_cpu_connection_with_components();
 void ut_cpu_status_register();
 void ut_cpu_lookup_table_correctness();
 void ut_cpu_implied_opcodes_behaviour();

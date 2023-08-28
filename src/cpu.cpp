@@ -9,7 +9,6 @@
 #include <iostream>
 #include <iomanip>
 #include <memory>
-#include <sys/types.h>
 
 
 namespace MC = MemoryConsts;
@@ -27,9 +26,19 @@ void CPU::connect_with_memory(std::shared_ptr<Memory> ram)
     ram_ptr = ram;
 }
 
-MemoryPtr CPU::get_memory_address() const
+void CPU::connect_with_cartridge(std::shared_ptr<Cartridge> cartridge)
+{
+    cartridge_ptr = cartridge;
+}
+
+MemoryPtr CPU::get_memory_pointer() const
 {
     return ram_ptr;
+}
+
+CartridgePtr CPU::get_cartridge_pointer() const
+{
+    return cartridge_ptr;
 }
 
 void CPU::cpu_memory_write(uint16_t address, uint8_t value) const

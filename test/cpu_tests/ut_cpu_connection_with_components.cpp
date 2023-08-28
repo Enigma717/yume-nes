@@ -4,11 +4,18 @@
 #include "../../include/bus.h"
 
 
-void test_same_memory_address()
+void test_same_memory_object()
 {
     SystemBus bus;
 
-    MY_ASSERT(bus.ram == bus.cpu.get_memory_address().lock());
+    MY_ASSERT(bus.ram == bus.cpu.get_memory_pointer().lock());
+}
+
+void test_same_cartridge_object()
+{
+    SystemBus bus;
+
+    MY_ASSERT(bus.cartridge == bus.cpu.get_cartridge_pointer().lock());
 }
 
 void test_direct_memory_access()
@@ -45,11 +52,12 @@ void test_shared_memory_access()
 }
 
 
-void ut_cpu_bus_memory_connection()
+void ut_cpu_connection_with_components()
 {
     TEST_SET;
 
-    test_same_memory_address();
+    test_same_memory_object();
+    test_same_cartridge_object();
     test_direct_memory_access();
     test_cpu_memory_access();
     test_shared_memory_access();
