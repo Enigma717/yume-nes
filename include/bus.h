@@ -14,8 +14,8 @@ public:
     SystemBus();
 
     std::shared_ptr<Memory> ram;
-    CPU cpu;
     std::shared_ptr<Cartridge> cartridge;
+    CPU cpu;
 };
 
 
