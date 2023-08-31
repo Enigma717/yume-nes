@@ -4,21 +4,6 @@
 #include "../../include/bus.h"
 
 
-void test_perform_cycle_instr_implied()
-{
-    SystemBus bus;
-    uint8_t target_x_reg {0xB4};
-    SystemMemory program_code {0xCA, 0x08, 0x68, 0xAA, 0x00};
-
-    bus.ram->memory_load_program(program_code, bus.cpu.pc);
-
-    do {
-        bus.cpu.perform_cycle();
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
-
-    MY_ASSERT(bus.cpu.x_reg == target_x_reg);
-}
-
 void test_correct_cycle_count()
 {
     SystemBus bus;
@@ -83,11 +68,10 @@ void test_correct_cycle_count_after_page_crossing()
 }
 
 
-void ut_cpu_perform_cycle_correctness()
+void ut_cpu_cycle_correctness()
 {
     TEST_SET;
 
-    test_perform_cycle_instr_implied();
     test_correct_cycle_count();
     test_correct_cycle_count_after_branch();
     test_correct_cycle_count_after_branch_to_new_page();

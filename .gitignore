@@ -5,6 +5,9 @@ main.cpp
 emu
 run_tests
 
+# ROM test files
+.nes
+
 # notes and scripts
 *.txt
 *.sh

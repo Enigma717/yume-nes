@@ -42,7 +42,7 @@ void ut_cpu_indirect_x_opcodes_behaviour();
 void ut_cpu_indirect_x_opcodes_flags();
 void ut_cpu_indirect_y_opcodes_behaviour();
 void ut_cpu_indirect_y_opcodes_flags();
-void ut_cpu_perform_cycle_correctness();
+void ut_cpu_cycle_correctness();
 
 
 #endif
