@@ -6,7 +6,7 @@ emu
 run_tests
 
 # ROM test files
-.nes
+*.nes
 
 # notes and scripts
 *.txt
