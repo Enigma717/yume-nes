@@ -51,6 +51,18 @@ void test_shared_memory_access()
     MY_ASSERT(bus.cpu.cpu_memory_read(address) == data);
 }
 
+void test_cpu_ram_memory_mirroring()
+{
+    SystemBus bus;
+    uint16_t target_address {0x02FA};
+    uint16_t actual_address {0x0AFA};
+    uint8_t data {0xFF};
+
+    bus.ram->memory_write(actual_address, data);
+
+    MY_ASSERT(bus.cpu.cpu_memory_read(target_address) == data);
+}
+
 
 void ut_cpu_connection_with_components()
 {
@@ -61,4 +73,5 @@ void ut_cpu_connection_with_components()
     test_direct_memory_access();
     test_cpu_memory_access();
     test_shared_memory_access();
+    test_cpu_ram_memory_mirroring();
 }
