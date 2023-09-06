@@ -13,10 +13,10 @@
 namespace MC = MemoryConsts;
 namespace Masks
 {
-    constexpr uint8_t carry_flag_mask    {0b0000'0001};
-    constexpr uint8_t overflow_flag_mask {0b0100'0000};
-    constexpr uint8_t negative_flag_mask {0b1000'0000};
-    constexpr uint16_t zero_page_mask    {0x00FF};
+    constexpr uint8_t  carry_flag_mask    {0b0000'0001};
+    constexpr uint8_t  overflow_flag_mask {0b0100'0000};
+    constexpr uint8_t  negative_flag_mask {0b1000'0000};
+    constexpr uint16_t zero_page_mask     {0x00FF};
 }
 
 

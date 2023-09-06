@@ -23,8 +23,10 @@ public:
     CartridgeContents cartridge_dump {};
     CartridgeContents header {CartridgeContents(CartridgeConsts::header_size, 0x00)};
 
-    int prg_rom_banks_count {0};
-    int chr_rom_banks_count {0};
+    int    prg_rom_banks_count {0};
+    int    chr_rom_banks_count {0};
+    int    current_mapper      {0};
+    bool   trainer_presence    {false};
 
 
     void dump_cartridge_into_vector(const std::string &cartridge_path);

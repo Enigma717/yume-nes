@@ -50,5 +50,13 @@ bool Cartridge::decode_header()
         return false;
     }
 
+    int flag6 {header[6]};
+    int flag7 {header[7]};
+
+    uint8_t mapper_lsb = (flag6 & 0xF0) >> 4;
+    uint8_t mapper_msb = (flag7 & 0xF0) >> 4;
+
+    current_mapper = (mapper_msb << 4) | mapper_lsb;
+
     return true;
 }
