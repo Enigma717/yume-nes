@@ -1,5 +1,6 @@
 #include "../include/cartridge.h"
 
+#include <cstdint>
 #include <iostream>
 #include <iterator>
 #include <filesystem>
@@ -36,27 +37,59 @@ void Cartridge::load_header()
     std::copy(cartridge_dump.begin(), cartridge_dump.begin() + CartridgeConsts::header_size, header.begin());
 }
 
-bool Cartridge::check_nes_logo_in_header()
+void Cartridge::decode_header()
+{
+    if (check_for_nes_logo_in_header() == false) {
+        std::cout << "Nes logo in cartridge is not correct\n";
+        return;
+    }
+
+    mapper.prg_rom_banks_count = header[4];
+    mapper.chr_rom_banks_count = header[5];
+
+    uint8_t flags6 {header[6]};
+    uint8_t flags7 {header[7]};
+
+    current_mapper_id = calculate_mapper_id(flags6, flags7);
+    mapper.trainer_presence = check_for_trainer_presence(flags6);
+
+    if (check_for_ignoring_mirroring(flags6)) {
+        mirroring_mode = MirroringType::four_screen;
+    }
+    else {
+        mirroring_mode = check_for_mirroring_mode(flags6) ?
+                         Cartridge::MirroringType::vertical :
+                         Cartridge::MirroringType::horizontal;
+    }
+}
+
+
+uint8_t Cartridge::calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) const
+{
+    uint8_t mapper_lsb = (first_flag & CartridgeConsts::mapper_mask) >> 4;
+    uint8_t mapper_msb = (second_flag & CartridgeConsts::mapper_mask) >> 4;
+
+    return (mapper_msb << 4) | mapper_lsb;
+}
+
+bool Cartridge::check_for_nes_logo_in_header()
 {
     CartridgeContents nes_logo_in_header {header.begin(), header.begin() + CartridgeConsts::nes_logo.size()};
 
     return nes_logo_in_header == CartridgeConsts::nes_logo;
 }
 
-bool Cartridge::decode_header()
+bool Cartridge::check_for_mirroring_mode(uint8_t flag) const
 {
-    if (check_nes_logo_in_header() == false) {
-        std::cout << "Nes logo in cartridge is not correct\n";
-        return false;
-    }
+    return flag & CartridgeConsts::mirroring_mask;
+}
 
-    int flag6 {header[6]};
-    int flag7 {header[7]};
+bool Cartridge::check_for_ignoring_mirroring(uint8_t flag) const
+{
+    return flag & CartridgeConsts::ignore_mirroring_mask;
+}
 
-    uint8_t mapper_lsb = (flag6 & 0xF0) >> 4;
-    uint8_t mapper_msb = (flag7 & 0xF0) >> 4;
-
-    current_mapper = (mapper_msb << 4) | mapper_lsb;
-
-    return true;
+bool Cartridge::check_for_trainer_presence(uint8_t flag) const
+{
+    return flag & CartridgeConsts::trainer_mask;
 }

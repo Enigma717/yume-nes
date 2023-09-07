@@ -2,11 +2,10 @@
 #define CARTRIDGE_H
 
 
-#include <cstdint>
-#include <string>
-#include <vector>
+#include "./mapper_nrom.h"
 
-using CartridgeContents = std::vector<uint8_t>;
+#include <string>
+
 
 namespace CartridgeConsts
 {
@@ -14,26 +13,45 @@ namespace CartridgeConsts
     constexpr size_t prg_rom_size {16384};
     constexpr size_t chr_rom_size {8192};
 
+    constexpr uint8_t mapper_mask           {0b1111'0000};
+    constexpr uint8_t mirroring_mask        {0b0000'0001};
+    constexpr uint8_t trainer_mask          {0b0000'0100};
+    constexpr uint8_t ignore_mirroring_mask {0b0000'1000};
+
     const CartridgeContents nes_logo {0x4E, 0x45, 0x53, 0x1A};
 }
 
 
 class Cartridge {
 public:
+    enum class MirroringType {
+        horizontal,
+        vertical,
+        single_screen,
+        four_screen
+    };
+
+    MapperNROM mapper {};
+
     CartridgeContents cartridge_dump {};
     CartridgeContents header {CartridgeContents(CartridgeConsts::header_size, 0x00)};
 
-    int    prg_rom_banks_count {0};
-    int    chr_rom_banks_count {0};
-    int    current_mapper      {0};
-    bool   trainer_presence    {false};
+    int current_mapper_id {0};
+    MirroringType mirroring_mode {Cartridge::MirroringType::horizontal};
 
 
     void dump_cartridge_into_vector(const std::string &cartridge_path);
     void load_header();
 
-    bool check_nes_logo_in_header();
-    bool decode_header();
+    void decode_header();
+
+private:
+    uint8_t calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) const;
+
+    bool    check_for_nes_logo_in_header();
+    bool    check_for_mirroring_mode(uint8_t flag) const;
+    bool    check_for_ignoring_mirroring(uint8_t flag) const;
+    bool    check_for_trainer_presence(uint8_t flag) const;
 };
 
 
