@@ -45,7 +45,7 @@ void run_opcodes_tests()
 
 void run_cartridge_tests()
 {
-    ut_cartridge_header_load_test();
+    ut_cartridge_header_decoding();
 }
 
 void run_all_tests()

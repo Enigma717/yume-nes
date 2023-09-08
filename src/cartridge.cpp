@@ -7,13 +7,34 @@
 #include <fstream>
 
 
+void Cartridge::load_cartridge(const std::string &cartridge_path)
+{
+    dump_cartridge_into_vector(cartridge_path);
+    decode_header();
+
+    auto final_prg_rom_size {MapperConsts::prg_rom_bank_size * mapper.prg_rom_banks_count};
+    auto final_chr_rom_size {MapperConsts::chr_rom_bank_size * mapper.chr_rom_banks_count};
+
+    mapper.prg_rom_memory.resize(final_prg_rom_size);
+    mapper.chr_rom_memory.resize(final_chr_rom_size);
+
+    auto actual_trainer_size {mapper.trainer_presence ? MapperConsts::trainer_size : 0};
+    auto default_offset {CartridgeConsts::header_size + actual_trainer_size};
+    auto roms_crossing_point {default_offset + final_prg_rom_size};
+
+    std::copy(cartridge_dump.begin() + default_offset,
+        cartridge_dump.begin() + roms_crossing_point,
+        mapper.prg_rom_memory);
+    std::copy(cartridge_dump.begin() + roms_crossing_point,
+        cartridge_dump.begin() + roms_crossing_point + final_chr_rom_size,
+        mapper.chr_rom_memory);
+}
+
 void Cartridge::dump_cartridge_into_vector(const std::string &cartridge_path)
 {
-    if(std::filesystem::exists(cartridge_path)) {
-        std::cout << "Loaded cartridge: " << cartridge_path << "\n";
-    }
-    else {
-        std::cout << "Cartridge has not been loaded\n";
+    if(!(std::filesystem::exists(cartridge_path))) {
+        std::cout << "Cartridge hasn't been loaded\n" << "Searched path: " << cartridge_path << "\n";
+
         return;
     }
 
@@ -24,23 +45,22 @@ void Cartridge::dump_cartridge_into_vector(const std::string &cartridge_path)
     std::streampos cartridge_size = game.tellg();
     game.seekg(0, std::ios::beg);
 
-    std::cout << "Cartridge size: " << cartridge_size << " bytes\n";
-
     cartridge_dump.reserve(cartridge_size);
     cartridge_dump.insert(cartridge_dump.begin(),
         std::istream_iterator<uint8_t>(game),
         std::istream_iterator<uint8_t>());
 }
 
-void Cartridge::load_header()
-{
-    std::copy(cartridge_dump.begin(), cartridge_dump.begin() + CartridgeConsts::header_size, header.begin());
-}
-
 void Cartridge::decode_header()
 {
+    std::copy(
+        cartridge_dump.begin(),
+        cartridge_dump.begin() + CartridgeConsts::header_size,
+        header.begin());
+
     if (check_for_nes_logo_in_header() == false) {
-        std::cout << "Nes logo in cartridge is not correct\n";
+        std::cout << "Nes logo in header is not correct\n";
+
         return;
     }
 
@@ -58,11 +78,9 @@ void Cartridge::decode_header()
     }
     else {
         mirroring_mode = check_for_mirroring_mode(flags6) ?
-                         Cartridge::MirroringType::vertical :
-                         Cartridge::MirroringType::horizontal;
+            Cartridge::MirroringType::vertical : Cartridge::MirroringType::horizontal;
     }
 }
-
 
 uint8_t Cartridge::calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) const
 {
@@ -74,7 +92,8 @@ uint8_t Cartridge::calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) 
 
 bool Cartridge::check_for_nes_logo_in_header()
 {
-    CartridgeContents nes_logo_in_header {header.begin(), header.begin() + CartridgeConsts::nes_logo.size()};
+    CartridgeContents nes_logo_in_header {
+        header.begin(), header.begin() + CartridgeConsts::nes_logo.size()};
 
     return nes_logo_in_header == CartridgeConsts::nes_logo;
 }

@@ -9,9 +9,7 @@
 
 namespace CartridgeConsts
 {
-    constexpr size_t header_size  {16};
-    constexpr size_t prg_rom_size {16384};
-    constexpr size_t chr_rom_size {8192};
+    constexpr size_t header_size {16};
 
     constexpr uint8_t mapper_mask           {0b1111'0000};
     constexpr uint8_t mirroring_mask        {0b0000'0001};
@@ -40,9 +38,8 @@ public:
     MirroringType mirroring_mode {Cartridge::MirroringType::horizontal};
 
 
+    void load_cartridge(const std::string &cartridge_path);
     void dump_cartridge_into_vector(const std::string &cartridge_path);
-    void load_header();
-
     void decode_header();
 
 private:
