@@ -67,11 +67,12 @@ void CPU::perform_cycle(bool debug_mode)
 {
     status.flag.unused = 1;
 
-    if (debug_mode)
-        log_debug_info();
+    if (cycles_queued == 0) {
+        if (debug_mode)
+            log_debug_info();
 
-    if (cycles_queued == 0)
         next_instruction();
+    }
 
     cycles_queued--;
     cycles_executed++;
@@ -684,7 +685,7 @@ void CPU::INC()
 
 void CPU::INX()
 {
-    x_reg++;
+    x_reg += 2;
 
     status.flag.zero = check_for_zero_flag(x_reg);
     status.flag.negative = check_for_negative_flag(x_reg);
