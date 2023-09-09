@@ -45,10 +45,10 @@ public:
 private:
     uint8_t calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) const;
 
-    bool    check_for_nes_logo_in_header();
-    bool    check_for_mirroring_mode(uint8_t flag) const;
-    bool    check_for_ignoring_mirroring(uint8_t flag) const;
-    bool    check_for_trainer_presence(uint8_t flag) const;
+    bool check_for_nes_logo_in_header() const;
+    bool check_for_mirroring_mode(uint8_t flag) const;
+    bool check_for_ignoring_mirroring(uint8_t flag) const;
+    bool check_for_trainer_presence(uint8_t flag) const;
 };
 
 

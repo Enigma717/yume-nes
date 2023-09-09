@@ -15,8 +15,8 @@ void Cartridge::load_cartridge(const std::string &cartridge_path)
     auto final_prg_rom_size {MapperConsts::prg_rom_bank_size * mapper.prg_rom_banks_count};
     auto final_chr_rom_size {MapperConsts::chr_rom_bank_size * mapper.chr_rom_banks_count};
 
-    mapper.prg_rom_memory.resize(final_prg_rom_size);
-    mapper.chr_rom_memory.resize(final_chr_rom_size);
+    mapper.prg_rom_memory.reserve(final_prg_rom_size);
+    mapper.chr_rom_memory.reserve(final_chr_rom_size);
 
     auto actual_trainer_size {mapper.trainer_presence ? MapperConsts::trainer_size : 0};
     auto default_offset {CartridgeConsts::header_size + actual_trainer_size};
@@ -24,10 +24,10 @@ void Cartridge::load_cartridge(const std::string &cartridge_path)
 
     std::copy(cartridge_dump.begin() + default_offset,
         cartridge_dump.begin() + roms_crossing_point,
-        mapper.prg_rom_memory);
+        mapper.prg_rom_memory.begin());
     std::copy(cartridge_dump.begin() + roms_crossing_point,
         cartridge_dump.begin() + roms_crossing_point + final_chr_rom_size,
-        mapper.chr_rom_memory);
+        mapper.chr_rom_memory.begin());
 }
 
 void Cartridge::dump_cartridge_into_vector(const std::string &cartridge_path)
@@ -53,8 +53,7 @@ void Cartridge::dump_cartridge_into_vector(const std::string &cartridge_path)
 
 void Cartridge::decode_header()
 {
-    std::copy(
-        cartridge_dump.begin(),
+    std::copy(cartridge_dump.begin(),
         cartridge_dump.begin() + CartridgeConsts::header_size,
         header.begin());
 
@@ -90,7 +89,7 @@ uint8_t Cartridge::calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) 
     return (mapper_msb << 4) | mapper_lsb;
 }
 
-bool Cartridge::check_for_nes_logo_in_header()
+bool Cartridge::check_for_nes_logo_in_header() const
 {
     CartridgeContents nes_logo_in_header {
         header.begin(), header.begin() + CartridgeConsts::nes_logo.size()};

@@ -943,7 +943,7 @@ void CPU::TAY()
 
 void CPU::TSX()
 {
-    x_reg = cpu_memory_read(MC::stack_offset + stack_ptr);
+    x_reg = stack_ptr;
 
     status.flag.zero = check_for_zero_flag(x_reg);
     status.flag.negative = check_for_negative_flag(x_reg);
@@ -959,7 +959,7 @@ void CPU::TXA()
 
 void CPU::TXS()
 {
-    cpu_memory_write(MC::stack_offset + stack_ptr, x_reg);
+    stack_ptr = x_reg;
 }
 
 void CPU::TYA()

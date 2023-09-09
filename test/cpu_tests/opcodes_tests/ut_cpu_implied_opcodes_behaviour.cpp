@@ -322,13 +322,13 @@ void test_tay_behaviour()
 
 void test_tsx_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_value {0x99};
 
-    bus.ram->memory_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, target_value);
-    bus.cpu.TSX();
+    cpu.stack_ptr = target_value;
+    cpu.TSX();
 
-    MY_ASSERT(bus.cpu.x_reg == target_value);
+    MY_ASSERT(cpu.x_reg == target_value);
 }
 
 void test_txa_behaviour()
@@ -344,15 +344,13 @@ void test_txa_behaviour()
 
 void test_txs_behaviour()
 {
-    SystemBus bus;
+    CPU cpu;
     uint8_t target_value {0xBB};
 
-    bus.cpu.x_reg = target_value;
-    bus.cpu.TXS();
+    cpu.x_reg = target_value;
+    cpu.TXS();
 
-    uint8_t value_from_stack {bus.ram->memory_read(MemoryConsts::stack_offset + bus.cpu.stack_ptr)};
-
-    MY_ASSERT(value_from_stack == target_value);
+    MY_ASSERT(cpu.stack_ptr == target_value);
 }
 
 void test_tya_behaviour()

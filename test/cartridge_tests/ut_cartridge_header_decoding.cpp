@@ -12,12 +12,11 @@ namespace
 void test_decoding_nes_logo()
 {
     Cartridge cartridge;
-    CartridgeContents correct_nes_logo {0x4E, 0x45, 0x53, 0x1A};
 
     cartridge.load_cartridge("./cartridge_tests/roms/nestest.nes");
     CartridgeContents logo_in_header {cartridge.header.begin(), cartridge.header.begin() + 4};
 
-    MY_ASSERT(logo_in_header == correct_nes_logo);
+    MY_ASSERT(logo_in_header == nes_logo);
 }
 
 void test_decoding_prg_rom_banks_count()
@@ -77,7 +76,7 @@ void test_prg_rom_memory_resizing()
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
-    MY_ASSERT(cartridge.mapper.prg_rom_memory.size() == target_prg_rom_size);
+    MY_ASSERT(cartridge.mapper.prg_rom_memory.capacity() == target_prg_rom_size);
 }
 
 void test_chr_rom_memory_resizing()
@@ -87,7 +86,7 @@ void test_chr_rom_memory_resizing()
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
-    MY_ASSERT(cartridge.mapper.chr_rom_memory.size() == target_chr_rom_size);
+    MY_ASSERT(cartridge.mapper.chr_rom_memory.capacity() == target_chr_rom_size);
 }
 
 
