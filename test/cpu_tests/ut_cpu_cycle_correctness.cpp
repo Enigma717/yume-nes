@@ -1,70 +1,70 @@
 #include "./cpu_tests.h"
 
 #include "../test_main.h"
-#include "../../include/bus.h"
+#include "../../include/system.h"
 
 
 void test_correct_cycle_count()
 {
-    SystemBus bus;
+    System nes;
     int target_cycles_executed {36};
     SystemMemory program_code {0xA9, 0x40, 0x8D, 0x00, 0x30, 0xA9, 0x80, 0x8D, 0xFF, 0x30,
         0xA9, 0x50, 0x8D, 0x00, 0x31, 0xA9, 0x00, 0x8D, 0x80,
         0x40, 0xA9, 0x37, 0x8D, 0x80, 0x50, 0x6C, 0xFF, 0x30};
 
-    bus.ram->memory_load_program(program_code, bus.cpu.pc);
-    bus.cpu.status.flag.carry = 0;
+    nes.ram->memory_load_program(program_code, nes.cpu.pc);
+    nes.cpu.status.flag.carry = 0;
 
     do {
-        bus.cpu.perform_cycle();
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
+        nes.cpu.perform_cycle();
+    } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.cpu.cycles_executed == target_cycles_executed);
+    MY_ASSERT(nes.cpu.cycles_executed == target_cycles_executed);
 }
 
 void test_correct_cycle_count_after_branch()
 {
-    SystemBus bus;
+    System nes;
     int target_cycles_executed {8};
     SystemMemory program_code {0xA9, 0x37, 0xC9, 0xAD, 0xD0, 0x02, 0xA9, 0x00, 0x00};
 
-    bus.ram->memory_load_program(program_code, bus.cpu.pc);
+    nes.ram->memory_load_program(program_code, nes.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
+        nes.cpu.perform_cycle();
+    } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.cpu.cycles_executed == target_cycles_executed);
+    MY_ASSERT(nes.cpu.cycles_executed == target_cycles_executed);
 }
 
 void test_correct_cycle_count_after_branch_to_new_page()
 {
-    SystemBus bus;
+    System nes;
     int target_cycles_executed {9};
     SystemMemory program_code {0xA9, 0x37, 0xC9, 0xAD, 0xD0, 0xFF, 0xA9, 0x00, 0x00};
 
-    bus.ram->memory_load_program(program_code, bus.cpu.pc);
+    nes.ram->memory_load_program(program_code, nes.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
+        nes.cpu.perform_cycle();
+    } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.cpu.cycles_executed == target_cycles_executed);
+    MY_ASSERT(nes.cpu.cycles_executed == target_cycles_executed);
 }
 
 void test_correct_cycle_count_after_page_crossing()
 {
-    SystemBus bus;
+    System nes;
     int target_cycles_executed {14};
     SystemMemory program_code {0xA2, 0x96, 0xA9, 0x77, 0x8D, 0x3C, 0x67, 0xDD, 0xA6, 0x66, 0x00};
 
-    bus.ram->memory_load_program(program_code, bus.cpu.pc);
+    nes.ram->memory_load_program(program_code, nes.cpu.pc);
 
     do {
-        bus.cpu.perform_cycle();
-    } while (!(bus.cpu.curr_instruction == InstrLookup::brk_instruction));
+        nes.cpu.perform_cycle();
+    } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(bus.cpu.cycles_executed == target_cycles_executed);
+    MY_ASSERT(nes.cpu.cycles_executed == target_cycles_executed);
 }
 
 

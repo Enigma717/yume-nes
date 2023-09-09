@@ -9,9 +9,9 @@
 #include <memory>
 
 
-class SystemBus {
+class System {
 public:
-    SystemBus();
+    System();
 
     std::shared_ptr<Memory> ram;
     std::shared_ptr<Cartridge> cartridge;

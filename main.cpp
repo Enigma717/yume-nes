@@ -1,4 +1,4 @@
-#include "./include/bus.h"
+#include "./include/system.h"
 
 #include <cstdint>
 #include <iostream>
@@ -14,17 +14,17 @@ namespace
 
 int main()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.cartridge->load_cartridge("./test/cartridge_tests/roms/nestest.nes");
-    bus.ram->memory_load_program(bus.cartridge->mapper.prg_rom_memory, 0xC000);
-    bus.cpu.pc = 0xC000;
+    nes.cartridge->load_cartridge("./test/cartridge_tests/roms/nestest.nes");
+    nes.ram->memory_load_program(nes.cartridge->mapper.prg_rom_memory, 0xC000);
+    nes.cpu.pc = 0xC000;
 
     do {
-        bus.cpu.perform_cycle(true);
-    } while (!(bus.cpu.curr_instruction == ill_instruction));
+        nes.cpu.perform_cycle(true);
+    } while (!(nes.cpu.curr_instruction == ill_instruction));
 
-    std::cout << "\nTest result: " << static_cast<int>(bus.ram->memory_read(0x0002)) << "\n";
+    std::cout << "\nTest result: " << static_cast<int>(nes.ram->memory_read(0x0002)) << "\n";
 
     return 0;
 }

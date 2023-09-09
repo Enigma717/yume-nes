@@ -1,7 +1,7 @@
 #include "../cpu_tests.h"
 
 #include "../../test_main.h"
-#include "../../../include/bus.h"
+#include "../../../include/system.h"
 
 
 void test_dex_zero_flag_set_true()
@@ -166,50 +166,50 @@ void test_iny_negative_flag_set_false()
 
 void test_pla_zero_flag_set_true()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.cpu.acc = 0x00;
-    bus.cpu.PHA();
+    nes.cpu.acc = 0x00;
+    nes.cpu.PHA();
 
-    bus.cpu.PLA();
+    nes.cpu.PLA();
 
-    MY_ASSERT(bus.cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_pla_zero_flag_set_false()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.cpu.acc = 0x77;
-    bus.cpu.PHA();
+    nes.cpu.acc = 0x77;
+    nes.cpu.PHA();
 
-    bus.cpu.PLA();
+    nes.cpu.PLA();
 
-    MY_ASSERT(bus.cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_pla_negative_flag_set_true()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.cpu.acc = 0xAA;
-    bus.cpu.PHA();
+    nes.cpu.acc = 0xAA;
+    nes.cpu.PHA();
 
-    bus.cpu.PLA();
+    nes.cpu.PLA();
 
-    MY_ASSERT(bus.cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_pla_negative_flag_set_false()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.cpu.acc = 0x77;
-    bus.cpu.PHA();
+    nes.cpu.acc = 0x77;
+    nes.cpu.PHA();
 
-    bus.cpu.PLA();
+    nes.cpu.PLA();
 
-    MY_ASSERT(bus.cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_tax_zero_flag_set_true()
@@ -294,42 +294,42 @@ void test_tay_negative_flag_set_false()
 
 void test_tsx_zero_flag_set_true()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.ram->memory_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, 0x00);
-    bus.cpu.TSX();
+    nes.ram->memory_write(MemoryConsts::stack_offset + nes.cpu.stack_ptr, 0x00);
+    nes.cpu.TSX();
 
-    MY_ASSERT(bus.cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_tsx_zero_flag_set_false()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.ram->memory_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, 0x77);
-    bus.cpu.TSX();
+    nes.ram->memory_write(MemoryConsts::stack_offset + nes.cpu.stack_ptr, 0x77);
+    nes.cpu.TSX();
 
-    MY_ASSERT(bus.cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_tsx_negative_flag_set_true()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.ram->memory_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, 0xAA);
-    bus.cpu.TSX();
+    nes.ram->memory_write(MemoryConsts::stack_offset + nes.cpu.stack_ptr, 0xAA);
+    nes.cpu.TSX();
 
-    MY_ASSERT(bus.cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_tsx_negative_flag_set_false()
 {
-    SystemBus bus;
+    System nes;
 
-    bus.ram->memory_write(MemoryConsts::stack_offset + bus.cpu.stack_ptr, 0x77);
-    bus.cpu.TSX();
+    nes.ram->memory_write(MemoryConsts::stack_offset + nes.cpu.stack_ptr, 0x77);
+    nes.cpu.TSX();
 
-    MY_ASSERT(bus.cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_txa_zero_flag_set_true()

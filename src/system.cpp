@@ -1,7 +1,7 @@
-#include "../include/bus.h"
+#include "../include/system.h"
 
 
-SystemBus::SystemBus()
+System::System()
 {
     ram = std::make_shared<Memory>();
     cartridge = std::make_shared<Cartridge>();
