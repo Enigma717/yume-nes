@@ -362,6 +362,7 @@ void CPU::address_mode_zero_page_y()
 void CPU::address_mode_relative()
 {
     branch_offset = cpu_memory_read(pc);
+    arg_address = branch_offset;
     pc++;
 }
 
@@ -685,7 +686,7 @@ void CPU::INC()
 
 void CPU::INX()
 {
-    x_reg += 2;
+    x_reg++;
 
     status.flag.zero = check_for_zero_flag(x_reg);
     status.flag.negative = check_for_negative_flag(x_reg);

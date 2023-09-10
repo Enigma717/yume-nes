@@ -158,6 +158,13 @@ namespace Lookup
         {MN::DEC, AM::zero_page, 0xC6, 2, 5}, {MN::DEC, AM::zero_page_x, 0xD6, 2, 6},
         {MN::DEC, AM::absolute, 0xCE, 3, 6}, {MN::DEC, AM::absolute_x, 0xDE, 3, 7},
         {MN::DEX, AM::implied, 0xCA, 1, 2}, {MN::DEY, AM::implied, 0x88, 1, 2},
+        {MN::DOP, AM::immediate, 0x80, 2, 2}, {MN::DOP, AM::immediate, 0x82, 2, 2},
+        {MN::DOP, AM::immediate, 0x89, 2, 2}, {MN::DOP, AM::immediate, 0xC2, 2, 2},
+        {MN::DOP, AM::immediate, 0xE2, 2, 2}, {MN::DOP, AM::zero_page, 0x04, 2, 3},
+        {MN::DOP, AM::zero_page, 0x44, 2, 3}, {MN::DOP, AM::zero_page, 0x64, 2, 3},
+        {MN::DOP, AM::zero_page_x, 0x14, 2, 4}, {MN::DOP, AM::zero_page_x, 0x34, 2, 4},
+        {MN::DOP, AM::zero_page_x, 0x54, 2, 4}, {MN::DOP, AM::zero_page_x, 0x74, 2, 4},
+        {MN::DOP, AM::zero_page_x, 0xD4, 2, 4}, {MN::DOP, AM::zero_page_x, 0xF4, 2, 4},
         {MN::EOR, AM::immediate, 0x49, 2, 2}, {MN::EOR, AM::zero_page, 0x45, 2, 3},
         {MN::EOR, AM::zero_page_x, 0x55, 2, 4}, {MN::EOR, AM::absolute, 0x4D, 3, 4},
         {MN::EOR, AM::absolute_x, 0x5D, 3, 4}, {MN::EOR, AM::absolute_y, 0x59, 3, 4},
@@ -178,7 +185,10 @@ namespace Lookup
         {MN::LDY, AM::absolute_x, 0xBC, 3, 4}, {MN::LSR, AM::accumulator, 0x4A, 1, 2},
         {MN::LSR, AM::zero_page, 0x46, 2, 5}, {MN::LSR, AM::zero_page_x, 0x56, 2, 6},
         {MN::LSR, AM::absolute, 0x4E, 3, 6}, {MN::LSR, AM::absolute_x, 0x5E, 3, 7},
-        {MN::NOP, AM::implied, 0xEA, 1, 2}, {MN::ORA, AM::immediate, 0x09, 2, 2},
+        {MN::NOP, AM::implied, 0x1A, 1, 2}, {MN::NOP, AM::implied, 0x3A, 1, 2},
+        {MN::NOP, AM::implied, 0x5A, 1, 2}, {MN::NOP, AM::implied, 0x7A, 1, 2},
+        {MN::NOP, AM::implied, 0xDA, 1, 2}, {MN::NOP, AM::implied, 0xEA, 1, 2},
+        {MN::NOP, AM::implied, 0xFA, 1, 2}, {MN::ORA, AM::immediate, 0x09, 2, 2},
         {MN::ORA, AM::zero_page, 0x05, 2, 3}, {MN::ORA, AM::zero_page_x, 0x15, 2, 4},
         {MN::ORA, AM::absolute, 0x0D, 3, 4}, {MN::ORA, AM::absolute_x, 0x1D, 3, 4},
         {MN::ORA, AM::absolute_y, 0x19, 3, 4}, {MN::ORA, AM::indirect_x, 0x01, 2, 6},
@@ -203,9 +213,13 @@ namespace Lookup
         {MN::STX, AM::zero_page_y, 0x96, 2, 4}, {MN::STX, AM::absolute, 0x8E, 3, 4},
         {MN::STY, AM::zero_page, 0x84, 2, 3}, {MN::STY, AM::zero_page_x, 0x94, 2, 4},
         {MN::STY, AM::absolute, 0x8C, 3, 4}, {MN::TAX, AM::implied, 0xAA, 1, 2},
-        {MN::TAY, AM::implied, 0xA8, 1, 2}, {MN::TSX, AM::implied, 0xBA, 1, 2},
-        {MN::TXA, AM::implied, 0x8A, 1, 2}, {MN::TXS, AM::implied, 0x9A, 1, 2},
-        {MN::TYA, AM::implied, 0x98, 1, 2}, {MN::ILL, AM::illegal, 0x02, 1, 1}
+        {MN::TAY, AM::implied, 0xA8, 1, 2}, {MN::TOP, AM::absolute, 0x0C, 3, 4},
+        {MN::TOP, AM::absolute_x, 0x1C, 3, 4}, {MN::TOP, AM::absolute_x, 0x3C, 3, 4},
+        {MN::TOP, AM::absolute_x, 0x5C, 3, 4}, {MN::TOP, AM::absolute_x, 0x7C, 3, 4},
+        {MN::TOP, AM::absolute_x, 0xDC, 3, 4}, {MN::TOP, AM::absolute_x, 0xFC, 3, 4},
+        {MN::TSX, AM::implied, 0xBA, 1, 2}, {MN::TXA, AM::implied, 0x8A, 1, 2},
+        {MN::TXS, AM::implied, 0x9A, 1, 2}, {MN::TYA, AM::implied, 0x98, 1, 2},
+        {MN::ILL, AM::illegal, 0x02, 1, 1}
     };
 }
 

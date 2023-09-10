@@ -22,7 +22,7 @@ int main()
 
     do {
         nes.cpu.perform_cycle(true);
-    } while (!(nes.cpu.curr_instruction == ill_instruction));
+    } while (!(nes.cpu.cycles_executed == 30000));
 
     std::cout << "\nTest result: " << static_cast<int>(nes.ram->memory_read(0x0002)) << "\n";
 
