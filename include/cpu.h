@@ -44,7 +44,7 @@ public:
     uint16_t pc        {0x8000};
     Status   status    {};
 
-    uint8_t     branch_offset    {0x00};
+    uint16_t    branch_offset    {0x0000};
     uint16_t    arg_address      {0x0000};
     int         cycles_queued    {0};
     int         cycles_executed  {0};

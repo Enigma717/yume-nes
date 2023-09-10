@@ -13,10 +13,11 @@
 namespace MC = MemoryConsts;
 namespace Masks
 {
-    constexpr uint8_t  carry_flag_mask    {0b0000'0001};
-    constexpr uint8_t  overflow_flag_mask {0b0100'0000};
-    constexpr uint8_t  negative_flag_mask {0b1000'0000};
-    constexpr uint16_t zero_page_mask     {0x00FF};
+    constexpr uint8_t  carry_flag_mask     {0b0000'0001};
+    constexpr uint8_t  overflow_flag_mask  {0b0100'0000};
+    constexpr uint8_t  negative_flag_mask  {0b1000'0000};
+    constexpr uint16_t zero_page_mask      {0x00FF};
+    constexpr uint16_t uint8_overflow_mask {0xFF00};
 }
 
 
@@ -314,6 +315,9 @@ bool CPU::check_for_sign_change(bool a, bool b, bool c) const
 
 void CPU::perform_branching()
 {
+    if (branch_offset & Masks::negative_flag_mask)
+        branch_offset = branch_offset | Masks::uint8_overflow_mask;
+
     uint16_t new_pc = pc + branch_offset;
 
     if (check_for_page_crossing(pc, new_pc))
@@ -417,7 +421,7 @@ void CPU::address_mode_indirect()
     // Original 6502 CPU's indirect jump page crossing bug reproduction:
     // https://www.nesdev.org/obelisk-6502-guide/reference.html#JMP
     if (lsb == 0xFF)
-        msb = cpu_memory_read(temp_address & 0xFF00);
+        msb = cpu_memory_read(temp_address & Masks::uint8_overflow_mask);
     else
         msb = cpu_memory_read(temp_address + 1);
 
@@ -468,7 +472,7 @@ void CPU::ADC()
 
     acc = static_cast<uint8_t>(result);
 
-    status.flag.carry = check_for_flag_with_mask(result, 0xFF00);
+    status.flag.carry = check_for_flag_with_mask(result, Masks::uint8_overflow_mask);
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.overflow = check_for_sign_change(acc_sign, value_sign, result_sign);
     status.flag.negative = check_for_negative_flag(acc);
@@ -891,7 +895,7 @@ void CPU::SBC()
 
     acc = static_cast<uint8_t>(result);
 
-    status.flag.carry = check_for_flag_with_mask(result, 0xFF00);
+    status.flag.carry = check_for_flag_with_mask(result, Masks::uint8_overflow_mask);
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.overflow = check_for_sign_change(acc_sign, value_sign, result_sign);
     status.flag.negative = check_for_negative_flag(acc);
