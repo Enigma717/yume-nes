@@ -15,19 +15,27 @@ public:
         BVS, CLC, CLD,
         CLI, CLV, CMP,
         CPX, CPY, DEC,
-        DEX, DEY, DOP,
-        EOR, INC, INX,
-        INY, JMP, JSR,
-        LDA, LDX, LDY,
-        LSR, NOP, ORA,
-        PHA, PHP, PLA,
-        PLP, ROL, ROR,
-        RTI, RTS, SBC,
-        SEC, SED, SEI,
-        STA, STX, STY,
-        TAX, TAY, TOP,
-        TSX, TXA, TXS,
-        TYA, ILL
+        DEX, DEY, EOR,
+        INC, INX, INY,
+        JMP, JSR, LDA,
+        LDX, LDY, LSR,
+        NOP, ORA, PHA,
+        PHP, PLA, PLP,
+        ROL, ROR, RTI,
+        RTS, SBC, SEC,
+        SED, SEI, STA,
+        STX, STY, TAX,
+        TAY, TSX, TXA,
+        TXS, TYA,
+        // Illegal opcodes (subject to future implementation)
+        AAC, AAX, ARR,
+        ASR, ATX, AXA,
+        AXS, DCP, DOP,
+        ISC, KIL, LAR,
+        LAX, RLA, RRA,
+        SLO, SRE, SXA,
+        SYA, TOP, XAA,
+        XAS
     };
 
     enum class AddressingMode {
@@ -44,11 +52,10 @@ public:
         indirect,
         indirect_x,
         indirect_y,
-        illegal
     };
 
-    MnemonicName   mnemonic {MnemonicName::ILL};
-    AddressingMode address_mode {AddressingMode::illegal};
+    MnemonicName   mnemonic {MnemonicName::KIL};
+    AddressingMode address_mode {AddressingMode::implied};
     uint8_t        opcode {0x02};
     int            bytes {1};
     int            cycles {1};

@@ -8,7 +8,7 @@ namespace
     using MN = Instruction::MnemonicName;
     using AM = Instruction::AddressingMode;
 
-    constexpr Instruction ill_instruction {MN::ILL, AM::illegal, 0x02, 1, 1};
+    constexpr Instruction rts_instruction {MN::RTS, AM::implied, 0x60, 1, 6};
 }
 
 
@@ -22,7 +22,7 @@ int main()
 
     do {
         nes.cpu.perform_cycle(true);
-    } while (!(nes.cpu.cycles_executed == 30000));
+    } while (!(nes.cpu.curr_instruction == rts_instruction && nes.cpu.arg_address == 0xC66E));
 
     std::cout << "\nTest result: " << static_cast<int>(nes.ram->memory_read(0x0002)) << "\n";
 
