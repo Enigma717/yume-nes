@@ -10,12 +10,6 @@
 namespace CartridgeConsts
 {
     constexpr size_t header_size {16};
-
-    constexpr uint8_t mapper_mask           {0b1111'0000};
-    constexpr uint8_t mirroring_mask        {0b0000'0001};
-    constexpr uint8_t trainer_mask          {0b0000'0100};
-    constexpr uint8_t ignore_mirroring_mask {0b0000'1000};
-
     const CartridgeContents nes_logo {0x4E, 0x45, 0x53, 0x1A};
 }
 

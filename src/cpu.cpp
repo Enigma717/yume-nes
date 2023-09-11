@@ -48,6 +48,9 @@ void CPU::cpu_memory_write(uint16_t address, uint8_t value) const
 
 uint8_t CPU::cpu_memory_read(uint16_t address) const
 {
+    if (address >= MC::cartridge_space_start)
+        return cartridge_ptr.lock()->mapper.map_prg_rom_read(address);
+
     return ram_ptr.lock()->memory_read(address);
 }
 

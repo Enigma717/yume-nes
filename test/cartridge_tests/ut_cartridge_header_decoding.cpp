@@ -4,11 +4,6 @@
 #include "../../include/cartridge.h"
 
 
-namespace
-{
-    CartridgeContents nes_logo {0x4E, 0x45, 0x53, 0x1A};
-}
-
 void test_decoding_nes_logo()
 {
     Cartridge cartridge;
@@ -16,7 +11,7 @@ void test_decoding_nes_logo()
     cartridge.load_cartridge("./cartridge_tests/roms/nestest.nes");
     CartridgeContents logo_in_header {cartridge.header.begin(), cartridge.header.begin() + 4};
 
-    MY_ASSERT(logo_in_header == nes_logo);
+    MY_ASSERT(logo_in_header == CartridgeConsts::nes_logo);
 }
 
 void test_decoding_prg_rom_banks_count()

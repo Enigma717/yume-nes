@@ -7,10 +7,22 @@
 #include <fstream>
 
 
+namespace
+{
+    constexpr size_t trainer_size {512};
+
+    constexpr uint8_t mapper_mask           {0b1111'0000};
+    constexpr uint8_t mirroring_mask        {0b0000'0001};
+    constexpr uint8_t trainer_mask          {0b0000'0100};
+    constexpr uint8_t ignore_mirroring_mask {0b0000'1000};
+}
+
+
 void Cartridge::load_cartridge(const std::string &cartridge_path)
 {
     dump_cartridge_into_vector(cartridge_path);
     decode_header();
+
 
     auto final_prg_rom_size {MapperConsts::prg_rom_bank_size * mapper.prg_rom_banks_count};
     auto final_chr_rom_size {MapperConsts::chr_rom_bank_size * mapper.chr_rom_banks_count};
@@ -18,7 +30,7 @@ void Cartridge::load_cartridge(const std::string &cartridge_path)
     mapper.prg_rom_memory.reserve(final_prg_rom_size);
     mapper.chr_rom_memory.reserve(final_chr_rom_size);
 
-    auto actual_trainer_size {mapper.trainer_presence ? MapperConsts::trainer_size : 0};
+    auto actual_trainer_size {mapper.trainer_presence ? trainer_size : 0};
     auto default_offset {CartridgeConsts::header_size + actual_trainer_size};
     auto roms_crossing_point {default_offset + final_prg_rom_size};
 
@@ -77,14 +89,14 @@ void Cartridge::decode_header()
     }
     else {
         mirroring_mode = check_for_mirroring_mode(flags6) ?
-            Cartridge::MirroringType::vertical : Cartridge::MirroringType::horizontal;
+            MirroringType::vertical : MirroringType::horizontal;
     }
 }
 
 uint8_t Cartridge::calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) const
 {
-    uint8_t mapper_lsb = (first_flag & CartridgeConsts::mapper_mask) >> 4;
-    uint8_t mapper_msb = (second_flag & CartridgeConsts::mapper_mask) >> 4;
+    uint8_t mapper_lsb = (first_flag & mapper_mask) >> 4;
+    uint8_t mapper_msb = (second_flag & mapper_mask) >> 4;
 
     return (mapper_msb << 4) | mapper_lsb;
 }
@@ -99,15 +111,15 @@ bool Cartridge::check_for_nes_logo_in_header() const
 
 bool Cartridge::check_for_mirroring_mode(uint8_t flag) const
 {
-    return flag & CartridgeConsts::mirroring_mask;
+    return flag & mirroring_mask;
 }
 
 bool Cartridge::check_for_ignoring_mirroring(uint8_t flag) const
 {
-    return flag & CartridgeConsts::ignore_mirroring_mask;
+    return flag & ignore_mirroring_mask;
 }
 
 bool Cartridge::check_for_trainer_presence(uint8_t flag) const
 {
-    return flag & CartridgeConsts::trainer_mask;
+    return flag & trainer_mask;
 }

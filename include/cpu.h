@@ -6,7 +6,8 @@
 #define CPU_H
 
 
-#include "../include/instruction.h"
+#include "./instruction.h"
+#include "./cartridge.h"
 
 #include <cstdint>
 #include <memory>
@@ -129,6 +130,7 @@ namespace Lookup
 {
     using MN = Instruction::MnemonicName;
     using AM = Instruction::AddressingMode;
+
     static const std::vector<Instruction> instructions_table {
         {MN::AAC, AM::immediate, 0x0B, 2, 2}, {MN::AAC, AM::immediate, 0x2B, 2, 3},
         {MN::AAX, AM::zero_page, 0x87, 2, 3}, {MN::AAX, AM::zero_page_y, 0x97, 2, 4},

@@ -8,11 +8,11 @@
 
 namespace MemoryConsts
 {
-    constexpr size_t   memory_size         {65536};
-    constexpr size_t   cpu_ram_bank_size   {2048};
-    constexpr uint16_t cpu_ram_upper_bound {0x1FFF};
+    constexpr size_t memory_size {65536};
 
-    constexpr uint16_t stack_offset     {0x0100};
+    constexpr uint16_t cartridge_space_start {0x8000};
+    constexpr uint16_t stack_offset          {0x0100};
+
     constexpr uint16_t nmi_vector_lsb   {0xFFFA};
     constexpr uint16_t nmi_vector_msb   {0xFFFB};
     constexpr uint16_t reset_vector_lsb {0xFFFC};

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <iostream>
 
+
 namespace
 {
     using MN = Instruction::MnemonicName;
@@ -17,7 +18,6 @@ int main()
     System nes;
 
     nes.cartridge->load_cartridge("./test/cartridge_tests/roms/nestest.nes");
-    nes.ram->memory_load_program(nes.cartridge->mapper.prg_rom_memory, 0xC000);
     nes.cpu.pc = 0xC000;
 
     do {

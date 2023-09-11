@@ -5,11 +5,11 @@
 #include <cstdint>
 #include <vector>
 
+
 namespace MapperConsts
 {
     constexpr size_t prg_rom_bank_size {16384};
     constexpr size_t chr_rom_bank_size {8192};
-    constexpr size_t trainer_size      {512};
 }
 
 using CartridgeContents = std::vector<uint8_t>;
@@ -27,8 +27,7 @@ public:
         CartridgeContents(MapperConsts::chr_rom_bank_size, 0x00)};
 
 
-    uint8_t map_cpu_read();
-    void    map_cpu_write();
+    uint8_t map_prg_rom_read(uint16_t address) const;
 };
 
 
