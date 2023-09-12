@@ -1,6 +1,4 @@
-#ifndef INSTRUCTION_H
-#define INSTRUCTION_H
-
+#pragma once
 
 #include <cstdint>
 
@@ -62,6 +60,3 @@ public:
 
     bool operator==(const Instruction& rhs) const;
 };
-
-
-#endif

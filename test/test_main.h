@@ -1,6 +1,4 @@
-#ifndef TEST_MAIN_H
-#define TEST_MAIN_H
-
+#pragma once
 
 #include <iomanip>
 #include <iostream>
@@ -28,6 +26,3 @@ inline int failed = 0;
     std::cout << c_blue << "\n===== Test set: " << __FUNCTION__ << " ===== " << c_reset << "\n"
 
 #define MY_ASSERT(expr) (expr ? TEST_PASS : TEST_FAIL)
-
-
-#endif

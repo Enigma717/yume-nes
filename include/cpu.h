@@ -2,9 +2,7 @@
 //  Main reference: https://www.nesdev.org/obelisk-6502-guide/index.html  //
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef CPU_H
-#define CPU_H
-
+#pragma once
 
 #include "./instruction.h"
 #include "./cartridge.h"
@@ -262,6 +260,3 @@ namespace Lookup
         {MN::XAA, AM::immediate, 0x8B, 2, 2}, {MN::XAS, AM::absolute_y, 0x9B, 3, 5}
     };
 }
-
-
-#endif

@@ -1,6 +1,4 @@
-#ifndef CPU_TESTS_H
-#define CPU_TESTS_H
-
+#pragma once
 
 #include "../../include/instruction.h"
 
@@ -43,6 +41,3 @@ void ut_cpu_indirect_x_opcodes_flags();
 void ut_cpu_indirect_y_opcodes_behaviour();
 void ut_cpu_indirect_y_opcodes_flags();
 void ut_cpu_cycle_correctness();
-
-
-#endif

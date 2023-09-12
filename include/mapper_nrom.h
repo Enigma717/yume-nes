@@ -1,6 +1,4 @@
-#ifndef MAPPER_NROM_H
-#define MAPPER_NROM_H
-
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -37,6 +35,3 @@ public:
     uint8_t map_prg_ram_read(uint16_t address) const;
     uint8_t map_prg_rom_read(uint16_t address) const;
 };
-
-
-#endif

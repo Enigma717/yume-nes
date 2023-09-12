@@ -1,6 +1,4 @@
-#ifndef MEMORY_H
-#define MEMORY_H
-
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -37,6 +35,3 @@ public:
 private:
     SystemMemory memory {SystemMemory(MemoryConsts::memory_size, 0x00)};
 };
-
-
-#endif

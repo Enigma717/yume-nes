@@ -1,6 +1,4 @@
-#ifndef BUS_H
-#define BUS_H
-
+#pragma once
 
 #include "./cartridge.h"
 #include "./cpu.h"
@@ -17,6 +15,3 @@ public:
     std::shared_ptr<Cartridge> cartridge;
     CPU cpu;
 };
-
-
-#endif

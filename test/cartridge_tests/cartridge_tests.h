@@ -1,8 +1,3 @@
-#ifndef CARTRIDGE_TESTS_H
-#define CARTRIDGE_TESTS_H
-
+#pragma once
 
 void ut_cartridge_header_decoding();
-
-
-#endif

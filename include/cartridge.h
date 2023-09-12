@@ -1,6 +1,4 @@
-#ifndef CARTRIDGE_H
-#define CARTRIDGE_H
-
+#pragma once
 
 #include "./mapper_nrom.h"
 
@@ -44,6 +42,3 @@ private:
     bool    check_for_ignoring_mirroring() const;
     uint8_t calculate_mapper_id() const;
 };
-
-
-#endif
