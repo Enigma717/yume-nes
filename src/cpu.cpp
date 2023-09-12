@@ -43,15 +43,20 @@ CartridgePtr CPU::get_cartridge_pointer() const
 
 void CPU::cpu_memory_write(uint16_t address, uint8_t value) const
 {
-    ram_ptr.lock()->memory_write(address, value);
+    if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
+        cartridge_ptr.lock()->mapper.map_prg_ram_write(address, value);
+    else
+        ram_ptr.lock()->memory_write(address, value);
 }
 
 uint8_t CPU::cpu_memory_read(uint16_t address) const
 {
-    if (address >= MC::cartridge_space_start)
+    if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
+        return cartridge_ptr.lock()->mapper.map_prg_ram_read(address);
+    else if (address >= MC::prg_rom_space_start)
         return cartridge_ptr.lock()->mapper.map_prg_rom_read(address);
-
-    return ram_ptr.lock()->memory_read(address);
+    else
+        return ram_ptr.lock()->memory_read(address);
 }
 
 void CPU::cpu_stack_push(uint8_t value)
@@ -308,7 +313,7 @@ bool CPU::check_for_flag_with_mask(uint16_t reg, uint16_t mask) const
 
 bool CPU::check_for_page_crossing(uint16_t address1, uint16_t address2) const
 {
-    return (address1 & ~Masks::zero_page_mask) != (address2 & ~Masks::zero_page_mask);
+    return (address1 & Masks::uint8_overflow_mask) != (address2 & Masks::uint8_overflow_mask);
 }
 
 bool CPU::check_for_sign_change(bool a, bool b, bool c) const

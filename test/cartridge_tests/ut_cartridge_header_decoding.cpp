@@ -17,7 +17,7 @@ void test_decoding_nes_logo()
 void test_decoding_prg_rom_banks_count()
 {
     Cartridge cartridge;
-    auto target_banks_count {3};
+    constexpr auto target_banks_count {3};
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
@@ -27,27 +27,27 @@ void test_decoding_prg_rom_banks_count()
 void test_decoding_chr_rom_banks_count()
 {
     Cartridge cartridge;
-    auto target_banks_count {4};
+    constexpr auto target_banks_count {4};
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
     MY_ASSERT(cartridge.mapper.chr_rom_banks_count == target_banks_count);
 }
 
-void test_decoding_mapper_id()
+void test_decoding_prg_ram_presence()
 {
     Cartridge cartridge;
-    auto target_mapper_id {105};
+    constexpr auto target_prg_ram_presence {true};
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
-    MY_ASSERT(cartridge.current_mapper_id == target_mapper_id);
+    MY_ASSERT(cartridge.mapper.prg_ram_presence == target_trainer_presence);
 }
 
 void test_decoding_trainer_presence()
 {
     Cartridge cartridge;
-    auto target_trainer_presence {true};
+    constexpr auto target_trainer_presence {true};
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
@@ -57,17 +57,27 @@ void test_decoding_trainer_presence()
 void test_decoding_mirroring_mode()
 {
     Cartridge cartridge;
-    auto target_mirroring_mode {Cartridge::MirroringType::vertical};
+    constexpr auto target_mirroring_mode {Cartridge::MirroringType::vertical};
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
     MY_ASSERT(cartridge.mirroring_mode == target_mirroring_mode);
 }
 
+void test_decoding_mapper_id()
+{
+    Cartridge cartridge;
+    constexpr auto target_mapper_id {105};
+
+    cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
+
+    MY_ASSERT(cartridge.current_mapper_id == target_mapper_id);
+}
+
 void test_prg_rom_memory_resizing()
 {
     Cartridge cartridge;
-    auto target_prg_rom_size {MapperConsts::prg_rom_bank_size * 3};
+    constexpr auto target_prg_rom_size {MapperConsts::prg_rom_bank_size * 3};
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
@@ -77,7 +87,7 @@ void test_prg_rom_memory_resizing()
 void test_chr_rom_memory_resizing()
 {
     Cartridge cartridge;
-    auto target_chr_rom_size {MapperConsts::chr_rom_bank_size * 4};
+    constexpr auto target_chr_rom_size {MapperConsts::chr_rom_bank_size * 4};
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 

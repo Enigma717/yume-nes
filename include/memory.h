@@ -10,8 +10,9 @@ namespace MemoryConsts
 {
     constexpr size_t memory_size {65536};
 
-    constexpr uint16_t cartridge_space_start {0x8000};
-    constexpr uint16_t stack_offset          {0x0100};
+    constexpr uint16_t stack_offset        {0x0100};
+    constexpr uint16_t prg_ram_space_start {0x6000};
+    constexpr uint16_t prg_rom_space_start {0x8000};
 
     constexpr uint16_t nmi_vector_lsb   {0xFFFA};
     constexpr uint16_t nmi_vector_msb   {0xFFFB};

@@ -13,22 +13,26 @@ namespace
 
     constexpr uint8_t mapper_mask           {0b1111'0000};
     constexpr uint8_t mirroring_mask        {0b0000'0001};
+    constexpr uint8_t prg_ram_mask          {0b0000'0010};
     constexpr uint8_t trainer_mask          {0b0000'0100};
     constexpr uint8_t ignore_mirroring_mask {0b0000'1000};
 }
 
 
-void Cartridge::load_cartridge(const std::string &cartridge_path)
+void Cartridge::load_cartridge(const std::string& cartridge_path)
 {
     dump_cartridge_into_vector(cartridge_path);
     decode_header();
 
 
+    auto final_prg_ram_size {MapperConsts::prg_ram_bank_size * mapper.prg_ram_banks_count};
     auto final_prg_rom_size {MapperConsts::prg_rom_bank_size * mapper.prg_rom_banks_count};
     auto final_chr_rom_size {MapperConsts::chr_rom_bank_size * mapper.chr_rom_banks_count};
 
+    mapper.prg_rom_memory.reserve(final_prg_ram_size);
     mapper.prg_rom_memory.reserve(final_prg_rom_size);
     mapper.chr_rom_memory.reserve(final_chr_rom_size);
+
 
     auto actual_trainer_size {mapper.trainer_presence ? trainer_size : 0};
     auto default_offset {CartridgeConsts::header_size + actual_trainer_size};
@@ -42,10 +46,10 @@ void Cartridge::load_cartridge(const std::string &cartridge_path)
         mapper.chr_rom_memory.begin());
 }
 
-void Cartridge::dump_cartridge_into_vector(const std::string &cartridge_path)
+void Cartridge::dump_cartridge_into_vector(const std::string& cartridge_path)
 {
     if(!(std::filesystem::exists(cartridge_path))) {
-        std::cout << "Cartridge hasn't been loaded\n" << "Searched path: " << cartridge_path << "\n";
+        std::cout << "Cartridge hasn't been loaded\nSearched path: " << cartridge_path << "\n";
 
         return;
     }
@@ -77,28 +81,22 @@ void Cartridge::decode_header()
 
     mapper.prg_rom_banks_count = header[4];
     mapper.chr_rom_banks_count = header[5];
+    mapper.trainer_presence = check_for_trainer_presence();
 
-    uint8_t flags6 {header[6]};
-    uint8_t flags7 {header[7]};
+    if (check_for_prg_ram_presence()) {
+        mapper.prg_ram_presence = true;
+        mapper.prg_ram_banks_count = header[8];
+    }
 
-    current_mapper_id = calculate_mapper_id(flags6, flags7);
-    mapper.trainer_presence = check_for_trainer_presence(flags6);
-
-    if (check_for_ignoring_mirroring(flags6)) {
+    if (check_for_ignoring_mirroring()) {
         mirroring_mode = MirroringType::four_screen;
     }
     else {
-        mirroring_mode = check_for_mirroring_mode(flags6) ?
+        mirroring_mode = check_for_mirroring_mode() ?
             MirroringType::vertical : MirroringType::horizontal;
     }
-}
 
-uint8_t Cartridge::calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) const
-{
-    uint8_t mapper_lsb = (first_flag & mapper_mask) >> 4;
-    uint8_t mapper_msb = (second_flag & mapper_mask) >> 4;
-
-    return (mapper_msb << 4) | mapper_lsb;
+    current_mapper_id = calculate_mapper_id();
 }
 
 bool Cartridge::check_for_nes_logo_in_header() const
@@ -109,17 +107,30 @@ bool Cartridge::check_for_nes_logo_in_header() const
     return nes_logo_in_header == CartridgeConsts::nes_logo;
 }
 
-bool Cartridge::check_for_mirroring_mode(uint8_t flag) const
+bool Cartridge::check_for_mirroring_mode() const
 {
-    return flag & mirroring_mask;
+    return header[6] & mirroring_mask;
 }
 
-bool Cartridge::check_for_ignoring_mirroring(uint8_t flag) const
+bool Cartridge::check_for_prg_ram_presence() const
 {
-    return flag & ignore_mirroring_mask;
+    return header[6] & prg_ram_mask;
 }
 
-bool Cartridge::check_for_trainer_presence(uint8_t flag) const
+bool Cartridge::check_for_trainer_presence() const
 {
-    return flag & trainer_mask;
+    return header[6] & trainer_mask;
+}
+
+bool Cartridge::check_for_ignoring_mirroring() const
+{
+    return header[6] & ignore_mirroring_mask;
+}
+
+uint8_t Cartridge::calculate_mapper_id() const
+{
+    uint8_t mapper_lsb = (header[6] & mapper_mask) >> 4;
+    uint8_t mapper_msb = (header[7] & mapper_mask) >> 4;
+
+    return (mapper_msb << 4) | mapper_lsb;
 }

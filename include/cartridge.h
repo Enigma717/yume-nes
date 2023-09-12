@@ -28,21 +28,21 @@ public:
     CartridgeContents cartridge_dump {};
     CartridgeContents header {CartridgeContents(CartridgeConsts::header_size, 0x00)};
 
-    int current_mapper_id {0};
     MirroringType mirroring_mode {Cartridge::MirroringType::horizontal};
+    int current_mapper_id {0};
 
 
-    void load_cartridge(const std::string &cartridge_path);
-    void dump_cartridge_into_vector(const std::string &cartridge_path);
+    void load_cartridge(const std::string& cartridge_path);
+    void dump_cartridge_into_vector(const std::string& cartridge_path);
     void decode_header();
 
 private:
-    uint8_t calculate_mapper_id(uint8_t first_flag, uint8_t second_flag) const;
-
-    bool check_for_nes_logo_in_header() const;
-    bool check_for_mirroring_mode(uint8_t flag) const;
-    bool check_for_ignoring_mirroring(uint8_t flag) const;
-    bool check_for_trainer_presence(uint8_t flag) const;
+    bool    check_for_nes_logo_in_header() const;
+    bool    check_for_mirroring_mode() const;
+    bool    check_for_prg_ram_presence() const;
+    bool    check_for_trainer_presence() const;
+    bool    check_for_ignoring_mirroring() const;
+    uint8_t calculate_mapper_id() const;
 };
 
 
