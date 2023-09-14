@@ -199,36 +199,19 @@ Instruction CPU::deduce_instruction_from_opcode(uint8_t opcode) const
 
 void CPU::interrupt_nmi()
 {
-    uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
-    uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
-
-    status.flag.brk = 0;
-    status.flag.unused = 1;
-    status.flag.interrupt = 1;
-
-    cpu_stack_push(pc_msb);
-    cpu_stack_push(pc_lsb);
-    cpu_stack_push(status.word);
+    process_interrupt();
 
     pc = read_nmi_vector();
 }
 
 void CPU::interrupt_irq()
 {
-    if (status.flag.interrupt == 0) {
-        uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
-        uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
+    if (status.flag.interrupt == 1)
+        return;
 
-        status.flag.brk = 0;
-        status.flag.unused = 1;
-        status.flag.interrupt = 1;
+    process_interrupt();
 
-        cpu_stack_push(pc_msb);
-        cpu_stack_push(pc_lsb);
-        cpu_stack_push(status.word);
-
-        pc = read_irq_vector();
-    }
+    pc = read_irq_vector();
 }
 
 void CPU::interrupt_reset()
@@ -265,6 +248,10 @@ void CPU::log_debug_info()
         << std::dec << "\n";
 }
 
+
+////////////////////////
+//  Helper functions  //
+////////////////////////
 
 uint16_t CPU::read_nmi_vector() const
 {
@@ -311,14 +298,28 @@ bool CPU::check_for_flag_with_mask(uint16_t reg, uint16_t mask) const
     return (reg & mask) > 0;
 }
 
-bool CPU::check_for_page_crossing(uint16_t address1, uint16_t address2) const
+bool CPU::check_for_page_crossing(uint16_t first_address, uint16_t second_address) const
 {
-    return (address1 & Masks::uint8_overflow_mask) != (address2 & Masks::uint8_overflow_mask);
+    return (first_address & Masks::uint8_overflow_mask) != (second_address & Masks::uint8_overflow_mask);
 }
 
 bool CPU::check_for_sign_change(bool a, bool b, bool c) const
 {
     return ((a && b) && !c) || (!(a || b) && c);
+}
+
+void CPU:process_interrupt(bool brk_flag_state = 0);
+{
+    uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
+    uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
+
+    status.flag.brk = brk_flag_state;
+    status.flag.unused = 1;
+    status.flag.interrupt = 1;
+
+    cpu_stack_push(pc_msb);
+    cpu_stack_push(pc_lsb);
+    cpu_stack_push(status.word);
 }
 
 void CPU::perform_branching()
@@ -566,16 +567,9 @@ void CPU::BPL()
 
 void CPU::BRK()
 {
-    uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
-    uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
+    bool brk_flag_state = 1;
 
-    status.flag.brk = 1;
-    status.flag.unused = 1;
-    status.flag.interrupt = 1;
-
-    cpu_stack_push(pc_msb);
-    cpu_stack_push(pc_lsb);
-    cpu_stack_push(status.word);
+    process_interrupt(brk_flag_state);
 
     pc = read_irq_vector();
 }
