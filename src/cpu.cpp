@@ -84,9 +84,10 @@ void CPU::perform_cycle(bool debug_mode)
         if (debug_mode)
             log_debug_info();
     }
-
-    cycles_queued--;
-    cycles_executed++;
+    else {
+        cycles_queued--;
+        cycles_executed++;
+    }
 }
 
 void CPU::next_instruction()
@@ -236,17 +237,17 @@ void CPU::hard_reset()
 
 void CPU::log_debug_info()
 {
-    std::cout << "[DEBUG] "
-        << "CYCLE: " << std::setw(6) << std::left << cycles_executed << std::hex << std::uppercase
-        << "| OPCODE: 0x" << std::setw(3) << std::left << static_cast<short>(curr_instruction.opcode)
-        << "| ARG: 0x" << std::setw(5) << std::left << static_cast<short>(arg_address)
-        << "| MEM[ARG]: 0x" << std::setw(5) << std::left << static_cast<short>(cpu_memory_read(arg_address))
-        << "|| A: 0x" << std::setw(3) << std::left << static_cast<short>(acc)
-        << "| X: 0x" << std::setw(3) << std::left << static_cast<short>(x_reg)
-        << "| Y: 0x" << std::setw(3) << std::left << static_cast<short>(y_reg)
-        << "| S: 0x" << std::setw(3) << std::left << static_cast<short>(stack_ptr)
-        << "| PC: 0x" << std::setw(5) << std::left << static_cast<short>(pc)
-        << "| P: 0b" << std::setw(9) << std::left << std::bitset<8>(status.word)
+    std::cout << "[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
+    std::cout << std::hex << std::uppercase << std::setfill('0')
+        << " | OPCODE: 0x" << std::setw(2) << std::right << static_cast<short>(curr_instruction.opcode)
+        << " | ARG: 0x" << std::setw(4) << std::right << static_cast<short>(arg_address)
+        << " | MEM[ARG]: 0x" << std::setw(4) << std::right << static_cast<short>(cpu_memory_read(arg_address))
+        << " || A: 0x" << std::setw(2) << std::right << static_cast<short>(acc)
+        << " | X: 0x" << std::setw(2) << std::right << static_cast<short>(x_reg)
+        << " | Y: 0x" << std::setw(2) << std::right << static_cast<short>(y_reg)
+        << " | S: 0x" << std::setw(2) << std::right << static_cast<short>(stack_ptr)
+        << " | PC: 0x" << std::setw(4) << std::right << static_cast<short>(pc)
+        << " | P: 0b" << std::setw(8) << std::left << std::bitset<8>(status.word)
         << std::dec << "\n";
 }
 
