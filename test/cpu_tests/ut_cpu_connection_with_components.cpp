@@ -26,7 +26,7 @@ void test_direct_memory_access()
 
     nes.ram->memory_write(address, data);
 
-    MY_ASSERT(nes.ram->memory_read(address) == data);
+    MY_ASSERT(nes.cpu.cpu_memory_read(address) == data);
 }
 
 void test_cpu_memory_access()

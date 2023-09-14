@@ -63,7 +63,7 @@ void test_asl_abs_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0x6424) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0x6424) == target_result);
 }
 
 void test_bit_abs_behaviour()
@@ -138,7 +138,7 @@ void test_dec_abs_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0x6929) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0x6929) == target_result);
 }
 
 void test_eor_abs_behaviour()
@@ -168,7 +168,7 @@ void test_inc_abs_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0x6B2B) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0x6B2B) == target_result);
 }
 
 void test_jmp_abs_behaviour()
@@ -258,7 +258,7 @@ void test_lsr_abs_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0x6F2F) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0x6F2F) == target_result);
 }
 
 void test_ora_abs_behaviour()
@@ -289,7 +289,7 @@ void test_rol_abs_behaviour_with_carry()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0xCEFE) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0xCEFE) == target_result);
 }
 
 void test_rol_abs_behaviour_without_carry()
@@ -305,7 +305,7 @@ void test_rol_abs_behaviour_without_carry()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0xCDFD) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0xCDFD) == target_result);
 }
 
 void test_ror_abs_behaviour_with_carry()
@@ -321,7 +321,7 @@ void test_ror_abs_behaviour_with_carry()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0xCCFC) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0xCCFC) == target_result);
 }
 
 void test_ror_abs_behaviour_without_carry()
@@ -337,7 +337,7 @@ void test_ror_abs_behaviour_without_carry()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0xCBFB) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0xCBFB) == target_result);
 }
 
 void test_sbc_abs_behaviour_with_carry()
@@ -384,7 +384,7 @@ void test_sta_abs_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0xC8F8) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0xC8F8) == target_result);
 }
 
 void test_stx_abs_behaviour()
@@ -399,7 +399,7 @@ void test_stx_abs_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0xC7F7) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0xC7F7) == target_result);
 }
 
 void test_sty_abs_behaviour()
@@ -414,7 +414,7 @@ void test_sty_abs_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0xC6F6) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0xC6F6) == target_result);
 }
 
 

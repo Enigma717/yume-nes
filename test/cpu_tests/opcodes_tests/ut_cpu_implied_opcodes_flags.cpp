@@ -296,7 +296,7 @@ void test_tsx_zero_flag_set_true()
 {
     System nes;
 
-    nes.ram->memory_write(MemoryConsts::stack_offset + nes.cpu.stack_ptr, 0x00);
+    nes.cpu.stack_ptr = 0x00;
     nes.cpu.TSX();
 
     MY_ASSERT(nes.cpu.status.flag.zero == 1);
@@ -306,7 +306,7 @@ void test_tsx_zero_flag_set_false()
 {
     System nes;
 
-    nes.ram->memory_write(MemoryConsts::stack_offset + nes.cpu.stack_ptr, 0x77);
+    nes.cpu.stack_ptr = 0x77;
     nes.cpu.TSX();
 
     MY_ASSERT(nes.cpu.status.flag.zero == 0);
@@ -316,7 +316,7 @@ void test_tsx_negative_flag_set_true()
 {
     System nes;
 
-    nes.ram->memory_write(MemoryConsts::stack_offset + nes.cpu.stack_ptr, 0xAA);
+    nes.cpu.stack_ptr = 0xAA;
     nes.cpu.TSX();
 
     MY_ASSERT(nes.cpu.status.flag.negative == 1);
@@ -326,7 +326,7 @@ void test_tsx_negative_flag_set_false()
 {
     System nes;
 
-    nes.ram->memory_write(MemoryConsts::stack_offset + nes.cpu.stack_ptr, 0x77);
+    nes.cpu.stack_ptr = 0x77;
     nes.cpu.TSX();
 
     MY_ASSERT(nes.cpu.status.flag.negative == 0);

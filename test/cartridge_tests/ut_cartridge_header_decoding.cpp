@@ -37,11 +37,11 @@ void test_decoding_chr_rom_banks_count()
 void test_decoding_prg_ram_presence()
 {
     Cartridge cartridge;
-    constexpr auto target_prg_ram_presence {true};
+    constexpr auto target_prg_ram_presence {false};
 
     cartridge.load_cartridge("./cartridge_tests/roms/dummy_header.nes");
 
-    MY_ASSERT(cartridge.mapper.prg_ram_presence == target_trainer_presence);
+    MY_ASSERT(cartridge.mapper.prg_ram_presence == target_prg_ram_presence);
 }
 
 void test_decoding_trainer_presence()

@@ -16,7 +16,7 @@ void test_correct_cycle_count()
     nes.cpu.status.flag.carry = 0;
 
     do {
-        nes.cpu.perform_cycle();
+        nes.cpu.perform_cycle(true);
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
     MY_ASSERT(nes.cpu.cycles_executed == target_cycles_executed);
@@ -40,10 +40,12 @@ void test_correct_cycle_count_after_branch()
 void test_correct_cycle_count_after_branch_to_new_page()
 {
     System nes;
-    int target_cycles_executed {9};
-    SystemMemory program_code {0xA9, 0x37, 0xC9, 0xAD, 0xD0, 0xFF, 0xA9, 0x00, 0x00};
+    int target_cycles_executed {16};
+    SystemMemory program_code {0xA9, 0x37, 0xC9, 0xAD, 0xD0, 0x7F};
 
     nes.ram->memory_load_program(program_code, nes.cpu.pc);
+    nes.ram->memory_load_program(program_code, nes.cpu.pc + 0x85);
+    nes.cpu.cpu_memory_write(0x010A, 0x00);
 
     do {
         nes.cpu.perform_cycle();

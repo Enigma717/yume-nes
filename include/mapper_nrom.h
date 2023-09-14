@@ -20,7 +20,7 @@ public:
     int  prg_rom_banks_count {0};
     int  chr_rom_banks_count {0};
 
-    bool prg_ram_presence {false};
+    bool prg_ram_presence {true};
     bool trainer_presence {false};
 
     CartridgeContents prg_ram_memory {
@@ -33,5 +33,6 @@ public:
 
     void    map_prg_ram_write(uint16_t address, uint8_t value);
     uint8_t map_prg_ram_read(uint16_t address) const;
+    void    map_prg_rom_write(uint16_t address, uint8_t value);
     uint8_t map_prg_rom_read(uint16_t address) const;
 };

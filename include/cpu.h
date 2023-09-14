@@ -121,7 +121,7 @@ private:
     bool check_for_page_crossing(uint16_t old_address, uint16_t new_address) const;
     bool check_for_sign_change(bool a, bool b, bool c) const;
 
-    void process_interrupt(bool brk_flag_state);
+    void process_interrupt(bool brk_flag_state = 0);
     void perform_branching();
 };
 

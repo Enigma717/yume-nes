@@ -170,7 +170,7 @@ void test_sta_aby_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.ram->memory_read(0xC9A0) == target_result);
+    MY_ASSERT(nes.cpu.cpu_memory_read(0xC9A0) == target_result);
 }
 
 

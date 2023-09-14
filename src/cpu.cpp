@@ -45,6 +45,8 @@ void CPU::cpu_memory_write(uint16_t address, uint8_t value) const
 {
     if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
         cartridge_ptr.lock()->mapper.map_prg_ram_write(address, value);
+    else if (address >= MC::prg_rom_space_start)
+        cartridge_ptr.lock()->mapper.map_prg_rom_write(address, value);
     else
         ram_ptr.lock()->memory_write(address, value);
 }
@@ -77,10 +79,10 @@ void CPU::perform_cycle(bool debug_mode)
     status.flag.unused = 1;
 
     if (cycles_queued == 0) {
+        next_instruction();
+
         if (debug_mode)
             log_debug_info();
-
-        next_instruction();
     }
 
     cycles_queued--;
@@ -308,7 +310,7 @@ bool CPU::check_for_sign_change(bool a, bool b, bool c) const
     return ((a && b) && !c) || (!(a || b) && c);
 }
 
-void CPU:process_interrupt(bool brk_flag_state = 0);
+void CPU::process_interrupt(bool brk_flag_state)
 {
     uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
     uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
