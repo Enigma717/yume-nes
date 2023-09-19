@@ -5,7 +5,7 @@
 
 namespace
 {
-    constexpr size_t   cpu_ram_bank_size   {2048};
+    constexpr size_t   cpu_ram_bank_size {2048};
     constexpr uint16_t cpu_ram_upper_bound {0x1FFF};
 }
 

@@ -2,6 +2,7 @@
 
 #include "./cartridge.h"
 #include "./cpu.h"
+#include "./ppu.h"
 #include "./memory.h"
 
 #include <memory>

@@ -7,9 +7,7 @@
 #include "./instruction.h"
 #include "./cartridge.h"
 
-#include <cstdint>
 #include <memory>
-#include <vector>
 
 
 class Memory;
@@ -36,17 +34,17 @@ public:
         uint8_t word {0x34};
     };
 
-    uint8_t  acc       {0x00};
-    uint8_t  x_reg     {0x00};
-    uint8_t  y_reg     {0x00};
+    uint8_t  acc {0x00};
+    uint8_t  x_reg {0x00};
+    uint8_t  y_reg {0x00};
     uint8_t  stack_ptr {0xFD};
-    uint16_t pc        {0x8000};
-    Status   status    {};
+    uint16_t pc {0x8000};
+    Status   status {};
 
-    uint16_t    branch_offset    {0x0000};
-    uint16_t    arg_address      {0x0000};
-    int         cycles_queued    {0};
-    int         cycles_executed  {0};
+    uint16_t    branch_offset {0x0000};
+    uint16_t    arg_address {0x0000};
+    int         cycles_queued {0};
+    int         cycles_executed {0};
     Instruction curr_instruction {};
 
 

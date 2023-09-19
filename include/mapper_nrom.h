@@ -16,9 +16,9 @@ using CartridgeContents = std::vector<uint8_t>;
 
 class MapperNROM {
 public:
-    int  prg_ram_banks_count {0};
-    int  prg_rom_banks_count {0};
-    int  chr_rom_banks_count {0};
+    int prg_ram_banks_count {0};
+    int prg_rom_banks_count {0};
+    int chr_rom_banks_count {0};
 
     bool prg_ram_presence {true};
     bool trainer_presence {false};
