@@ -5,9 +5,9 @@
 #pragma once
 
 #include "./instruction.h"
-#include "./cartridge.h"
 
 #include <memory>
+#include <vector>
 
 
 class Memory;

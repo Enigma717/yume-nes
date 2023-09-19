@@ -2,6 +2,7 @@
 
 
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 
@@ -9,6 +10,10 @@ namespace
 {
     constexpr size_t oam_size {64};
 }
+
+class Cartridge;
+
+using CartridgePtr = std::weak_ptr<Cartridge>;
 
 
 class PPU {
@@ -83,4 +88,10 @@ public:
     uint8_t    oam_mdma {0x00};
 
     std::vector<OAMEntry> oam {std::vector<OAMEntry>(oam_size)};
+
+
+    void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
+
+private:
+    CartridgePtr cartridge_ptr {};
 };

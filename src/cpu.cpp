@@ -1,5 +1,6 @@
 #include "../include/cpu.h"
 
+#include "../include/cartridge.h"
 #include "../include/instruction.h"
 #include "../include/memory.h"
 

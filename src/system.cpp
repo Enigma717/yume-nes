@@ -9,4 +9,6 @@ System::System()
     cpu.connect_with_memory(ram);
     cpu.connect_with_cartridge(cartridge);
     cpu.hard_reset();
+
+    ppu.connect_with_cartridge(cartridge);
 }
