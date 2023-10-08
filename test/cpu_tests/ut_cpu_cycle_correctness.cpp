@@ -45,7 +45,7 @@ void test_correct_cycle_count_after_branch_to_new_page()
 
     nes.ram->memory_load_program(program_code, nes.cpu.pc);
     nes.ram->memory_load_program(program_code, nes.cpu.pc + 0x85);
-    nes.cpu.cpu_memory_write(0x010A, 0x00);
+    nes.cpu.memory_write(0x010A, 0x00);
 
     do {
         nes.cpu.perform_cycle();

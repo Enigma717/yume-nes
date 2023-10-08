@@ -31,7 +31,7 @@ void test_stx_zpy_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0x4F) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0x4F) == target_result);
 }
 
 

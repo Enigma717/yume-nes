@@ -11,8 +11,8 @@ void test_brk_behaviour()
     uint8_t target_stack_ptr {0xFA};
     uint16_t target_pc {0x2731};
 
-    nes.cpu.cpu_memory_write(MemoryConsts::irq_vector_msb, 0x27);
-    nes.cpu.cpu_memory_write(MemoryConsts::irq_vector_lsb, 0x31);
+    nes.cpu.memory_write(MemoryConsts::irq_vector_msb, 0x27);
+    nes.cpu.memory_write(MemoryConsts::irq_vector_lsb, 0x31);
 
     nes.cpu.pc = 0x01FF;
     nes.cpu.status.word = 0x89;
@@ -22,9 +22,9 @@ void test_brk_behaviour()
     bool stack_ptr_check {nes.cpu.stack_ptr == target_stack_ptr};
     bool pc_check {nes.cpu.pc == target_pc};
 
-    bool stack_msb_check {nes.cpu.cpu_memory_read(0x01FD) == 0x01};
-    bool stack_lsb_check {nes.cpu.cpu_memory_read(0x01FC) == 0xFF};
-    bool stack_status_check {nes.cpu.cpu_memory_read(0x01FB) == target_word};
+    bool stack_msb_check {nes.cpu.memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {nes.cpu.memory_read(0x01FC) == 0xFF};
+    bool stack_status_check {nes.cpu.memory_read(0x01FB) == target_word};
 
     bool stack_check {stack_msb_check && stack_lsb_check && stack_status_check};
     bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
@@ -127,8 +127,8 @@ void test_irq_behaviour()
     uint8_t target_stack_ptr {0xFA};
     uint16_t target_pc {0x2731};
 
-    nes.cpu.cpu_memory_write(MemoryConsts::irq_vector_msb, 0x27);
-    nes.cpu.cpu_memory_write(MemoryConsts::irq_vector_lsb, 0x31);
+    nes.cpu.memory_write(MemoryConsts::irq_vector_msb, 0x27);
+    nes.cpu.memory_write(MemoryConsts::irq_vector_lsb, 0x31);
 
     nes.cpu.pc = 0x01FF;
     nes.cpu.status.word = 0x89;
@@ -138,9 +138,9 @@ void test_irq_behaviour()
     bool stack_ptr_check {nes.cpu.stack_ptr == target_stack_ptr};
     bool pc_check {nes.cpu.pc == target_pc};
 
-    bool stack_msb_check {nes.cpu.cpu_memory_read(0x01FD) == 0x01};
-    bool stack_lsb_check {nes.cpu.cpu_memory_read(0x01FC) == 0xFF};
-    bool stack_status_check {nes.cpu.cpu_memory_read(0x01FB) == target_word};
+    bool stack_msb_check {nes.cpu.memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {nes.cpu.memory_read(0x01FC) == 0xFF};
+    bool stack_status_check {nes.cpu.memory_read(0x01FB) == target_word};
 
     bool stack_check {stack_msb_check && stack_lsb_check && stack_status_check};
     bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
@@ -155,8 +155,8 @@ void test_nmi_behaviour()
     uint8_t target_stack_ptr {0xFA};
     uint16_t target_pc {0x2731};
 
-    nes.cpu.cpu_memory_write(MemoryConsts::nmi_vector_msb, 0x27);
-    nes.cpu.cpu_memory_write(MemoryConsts::nmi_vector_lsb, 0x31);
+    nes.cpu.memory_write(MemoryConsts::nmi_vector_msb, 0x27);
+    nes.cpu.memory_write(MemoryConsts::nmi_vector_lsb, 0x31);
 
     nes.cpu.pc = 0x01FF;
     nes.cpu.status.word = 0x89;
@@ -166,9 +166,9 @@ void test_nmi_behaviour()
     bool stack_ptr_check {nes.cpu.stack_ptr == target_stack_ptr};
     bool pc_check {nes.cpu.pc == target_pc};
 
-    bool stack_msb_check {nes.cpu.cpu_memory_read(0x01FD) == 0x01};
-    bool stack_lsb_check {nes.cpu.cpu_memory_read(0x01FC) == 0xFF};
-    bool stack_status_check {nes.cpu.cpu_memory_read(0x01FB) == target_word};
+    bool stack_msb_check {nes.cpu.memory_read(0x01FD) == 0x01};
+    bool stack_lsb_check {nes.cpu.memory_read(0x01FC) == 0xFF};
+    bool stack_status_check {nes.cpu.memory_read(0x01FB) == target_word};
 
     bool stack_check {stack_msb_check && stack_lsb_check && stack_status_check};
     bool all_check {status_check && stack_ptr_check && pc_check && stack_check};
@@ -185,7 +185,7 @@ void test_pha_behaviour()
     nes.cpu.acc = acc_init_value;
     nes.cpu.PHA();
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(MemoryConsts::stack_offset + stack_ptr_init) == acc_init_value);
+    MY_ASSERT(nes.cpu.memory_read(MemoryConsts::stack_offset + stack_ptr_init) == acc_init_value);
 }
 
 void test_php_behaviour()
@@ -198,7 +198,7 @@ void test_php_behaviour()
     nes.cpu.status.word = status_init_mask;
     nes.cpu.PHP();
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(MemoryConsts::stack_offset + stack_ptr_init) == status_final_mask);
+    MY_ASSERT(nes.cpu.memory_read(MemoryConsts::stack_offset + stack_ptr_init) == status_final_mask);
 }
 
 void test_pla_behaviour()

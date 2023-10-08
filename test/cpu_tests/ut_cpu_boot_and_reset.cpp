@@ -101,8 +101,8 @@ void test_check_pc_address_after_reset()
     System nes;
     uint16_t target_pc {0xABCD};
 
-    nes.cpu.cpu_memory_write(MemoryConsts::reset_vector_lsb, 0xCD);
-    nes.cpu.cpu_memory_write(MemoryConsts::reset_vector_msb, 0xAB);
+    nes.cpu.memory_write(MemoryConsts::reset_vector_lsb, 0xCD);
+    nes.cpu.memory_write(MemoryConsts::reset_vector_msb, 0xAB);
     nes.cpu.hard_reset();
 
     MY_ASSERT(nes.cpu.pc == target_pc);

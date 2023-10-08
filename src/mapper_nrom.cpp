@@ -43,3 +43,13 @@ uint8_t MapperNROM::map_prg_rom_read(uint16_t address) const
 
     return prg_rom_memory[mapped_address];
 }
+
+void MapperNROM::map_chr_rom_write(uint16_t address, uint8_t value)
+{
+    chr_rom_memory[address] = value;
+}
+
+uint8_t MapperNROM::map_chr_rom_read(uint16_t address) const
+{
+    return chr_rom_memory[address];
+}

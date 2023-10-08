@@ -63,7 +63,7 @@ void test_asl_zpg_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0x24) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0x24) == target_result);
 }
 
 void test_bit_zpg_behaviour()
@@ -138,7 +138,7 @@ void test_dec_zpg_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0x29) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0x29) == target_result);
 }
 
 void test_eor_zpg_behaviour()
@@ -168,7 +168,7 @@ void test_inc_zpg_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0x2B) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0x2B) == target_result);
 }
 
 void test_lda_zpg_behaviour()
@@ -228,7 +228,7 @@ void test_lsr_zpg_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0x2F) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0x2F) == target_result);
 }
 
 void test_ora_zpg_behaviour()
@@ -259,7 +259,7 @@ void test_rol_zpg_behaviour_with_carry()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0xFE) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0xFE) == target_result);
 }
 
 void test_rol_zpg_behaviour_without_carry()
@@ -275,7 +275,7 @@ void test_rol_zpg_behaviour_without_carry()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0xFD) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0xFD) == target_result);
 }
 
 void test_ror_zpg_behaviour_with_carry()
@@ -291,7 +291,7 @@ void test_ror_zpg_behaviour_with_carry()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0xFC) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0xFC) == target_result);
 }
 
 void test_ror_zpg_behaviour_without_carry()
@@ -307,7 +307,7 @@ void test_ror_zpg_behaviour_without_carry()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0xFB) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0xFB) == target_result);
 }
 
 void test_sbc_zpg_behaviour_with_carry()
@@ -354,7 +354,7 @@ void test_sta_zpg_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0xF8) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0xF8) == target_result);
 }
 
 void test_stx_zpg_behaviour()
@@ -369,7 +369,7 @@ void test_stx_zpg_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0xF7) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0xF7) == target_result);
 }
 
 void test_sty_zpg_behaviour()
@@ -384,7 +384,7 @@ void test_sty_zpg_behaviour()
         nes.cpu.perform_cycle();
     } while (!(nes.cpu.curr_instruction == InstrLookup::brk_instruction));
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(0xF6) == target_result);
+    MY_ASSERT(nes.cpu.memory_read(0xF6) == target_result);
 }
 
 

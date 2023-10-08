@@ -53,10 +53,10 @@ public:
     MemoryPtr    get_memory_pointer() const;
     CartridgePtr get_cartridge_pointer() const;
 
-    void    cpu_memory_write(uint16_t address, uint8_t value) const;
-    uint8_t cpu_memory_read(uint16_t address) const;
-    void    cpu_stack_push(uint8_t value);
-    uint8_t cpu_stack_pop();
+    void    memory_write(uint16_t address, uint8_t value) const;
+    uint8_t memory_read(uint16_t address) const;
+    void    stack_push(uint8_t value);
+    uint8_t stack_pop();
 
     void        perform_cycle(bool debug_mode = false);
     void        next_instruction();

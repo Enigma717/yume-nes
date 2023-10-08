@@ -42,7 +42,7 @@ CartridgePtr CPU::get_cartridge_pointer() const
     return cartridge_ptr;
 }
 
-void CPU::cpu_memory_write(uint16_t address, uint8_t value) const
+void CPU::memory_write(uint16_t address, uint8_t value) const
 {
     if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
         cartridge_ptr.lock()->mapper.map_prg_ram_write(address, value);
@@ -52,7 +52,7 @@ void CPU::cpu_memory_write(uint16_t address, uint8_t value) const
         ram_ptr.lock()->memory_write(address, value);
 }
 
-uint8_t CPU::cpu_memory_read(uint16_t address) const
+uint8_t CPU::memory_read(uint16_t address) const
 {
     if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
         return cartridge_ptr.lock()->mapper.map_prg_ram_read(address);
@@ -62,16 +62,16 @@ uint8_t CPU::cpu_memory_read(uint16_t address) const
         return ram_ptr.lock()->memory_read(address);
 }
 
-void CPU::cpu_stack_push(uint8_t value)
+void CPU::stack_push(uint8_t value)
 {
-    cpu_memory_write(MC::stack_offset + stack_ptr, value);
+    memory_write(MC::stack_offset + stack_ptr, value);
     stack_ptr--;
 }
 
-uint8_t CPU::cpu_stack_pop()
+uint8_t CPU::stack_pop()
 {
     stack_ptr++;
-    return cpu_memory_read(MC::stack_offset + stack_ptr);
+    return memory_read(MC::stack_offset + stack_ptr);
 }
 
 
@@ -93,7 +93,7 @@ void CPU::perform_cycle(bool debug_mode)
 
 void CPU::next_instruction()
 {
-    uint8_t instr_opcode {cpu_memory_read(pc)};
+    uint8_t instr_opcode {memory_read(pc)};
     pc++;
 
     curr_instruction = deduce_instruction_from_opcode(instr_opcode);
@@ -242,7 +242,7 @@ void CPU::log_debug_info()
     std::cout << std::hex << std::uppercase << std::setfill('0')
         << " | OPCODE: 0x" << std::setw(2) << std::right << static_cast<short>(curr_instruction.opcode)
         << " | ARG: 0x" << std::setw(4) << std::right << static_cast<short>(arg_address)
-        << " | MEM[ARG]: 0x" << std::setw(4) << std::right << static_cast<short>(cpu_memory_read(arg_address))
+        << " | MEM[ARG]: 0x" << std::setw(4) << std::right << static_cast<short>(memory_read(arg_address))
         << " || A: 0x" << std::setw(2) << std::right << static_cast<short>(acc)
         << " | X: 0x" << std::setw(2) << std::right << static_cast<short>(x_reg)
         << " | Y: 0x" << std::setw(2) << std::right << static_cast<short>(y_reg)
@@ -259,8 +259,8 @@ void CPU::log_debug_info()
 
 uint16_t CPU::read_nmi_vector() const
 {
-    uint8_t lsb {cpu_memory_read(MC::nmi_vector_lsb)};
-    uint8_t msb {cpu_memory_read(MC::nmi_vector_msb)};
+    uint8_t lsb {memory_read(MC::nmi_vector_lsb)};
+    uint8_t msb {memory_read(MC::nmi_vector_msb)};
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -269,8 +269,8 @@ uint16_t CPU::read_nmi_vector() const
 
 uint16_t CPU::read_reset_vector() const
 {
-    uint8_t lsb {cpu_memory_read(MC::reset_vector_lsb)};
-    uint8_t msb {cpu_memory_read(MC::reset_vector_msb)};
+    uint8_t lsb {memory_read(MC::reset_vector_lsb)};
+    uint8_t msb {memory_read(MC::reset_vector_msb)};
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -279,8 +279,8 @@ uint16_t CPU::read_reset_vector() const
 
 uint16_t CPU::read_irq_vector() const
 {
-    uint8_t lsb {cpu_memory_read(MC::irq_vector_lsb)};
-    uint8_t msb {cpu_memory_read(MC::irq_vector_msb)};
+    uint8_t lsb {memory_read(MC::irq_vector_lsb)};
+    uint8_t msb {memory_read(MC::irq_vector_msb)};
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -321,9 +321,9 @@ void CPU::process_interrupt(bool brk_flag_state)
     status.flag.unused = 1;
     status.flag.interrupt = 1;
 
-    cpu_stack_push(pc_msb);
-    cpu_stack_push(pc_lsb);
-    cpu_stack_push(status.word);
+    stack_push(pc_msb);
+    stack_push(pc_lsb);
+    stack_push(status.word);
 }
 
 void CPU::perform_branching()
@@ -354,7 +354,7 @@ void CPU::address_mode_immediate()
 
 void CPU::address_mode_zero_page()
 {
-    arg_address = cpu_memory_read(pc);
+    arg_address = memory_read(pc);
     pc++;
 
     arg_address = arg_address & Masks::zero_page_mask;
@@ -362,7 +362,7 @@ void CPU::address_mode_zero_page()
 
 void CPU::address_mode_zero_page_x()
 {
-    arg_address = cpu_memory_read(pc) + x_reg;
+    arg_address = memory_read(pc) + x_reg;
     pc++;
 
     arg_address = arg_address & Masks::zero_page_mask;
@@ -370,7 +370,7 @@ void CPU::address_mode_zero_page_x()
 
 void CPU::address_mode_zero_page_y()
 {
-    arg_address = cpu_memory_read(pc) + y_reg;
+    arg_address = memory_read(pc) + y_reg;
     pc++;
 
     arg_address = arg_address & Masks::zero_page_mask;
@@ -378,16 +378,16 @@ void CPU::address_mode_zero_page_y()
 
 void CPU::address_mode_relative()
 {
-    branch_offset = cpu_memory_read(pc);
+    branch_offset = memory_read(pc);
     arg_address = branch_offset;
     pc++;
 }
 
 void CPU::address_mode_absolute()
 {
-    uint8_t lsb {cpu_memory_read(pc)};
+    uint8_t lsb {memory_read(pc)};
     pc++;
-    uint8_t msb {cpu_memory_read(pc)};
+    uint8_t msb {memory_read(pc)};
     pc++;
 
     arg_address = (msb << 8) | lsb;
@@ -395,9 +395,9 @@ void CPU::address_mode_absolute()
 
 void CPU::address_mode_absolute_x()
 {
-    uint8_t lsb {cpu_memory_read(pc)};
+    uint8_t lsb {memory_read(pc)};
     pc++;
-    uint8_t msb {cpu_memory_read(pc)};
+    uint8_t msb {memory_read(pc)};
     pc++;
 
     uint16_t read_address = (msb << 8) | lsb;
@@ -410,9 +410,9 @@ void CPU::address_mode_absolute_x()
 
 void CPU::address_mode_absolute_y()
 {
-    uint8_t lsb {cpu_memory_read(pc)};
+    uint8_t lsb {memory_read(pc)};
     pc++;
-    uint8_t msb {cpu_memory_read(pc)};
+    uint8_t msb {memory_read(pc)};
     pc++;
 
     uint16_t read_address = (msb << 8) | lsb;
@@ -424,9 +424,9 @@ void CPU::address_mode_absolute_y()
 
 void CPU::address_mode_indirect()
 {
-    uint8_t lsb {cpu_memory_read(pc)};
+    uint8_t lsb {memory_read(pc)};
     pc++;
-    uint8_t msb {cpu_memory_read(pc)};
+    uint8_t msb {memory_read(pc)};
     pc++;
 
     uint16_t temp_address = (msb << 8) | lsb;
@@ -434,33 +434,33 @@ void CPU::address_mode_indirect()
     // Original 6502 CPU's indirect jump page crossing bug reproduction:
     // https://www.nesdev.org/obelisk-6502-guide/reference.html#JMP
     if (lsb == 0xFF)
-        msb = cpu_memory_read(temp_address & Masks::uint8_overflow_mask);
+        msb = memory_read(temp_address & Masks::uint8_overflow_mask);
     else
-        msb = cpu_memory_read(temp_address + 1);
+        msb = memory_read(temp_address + 1);
 
-    lsb = cpu_memory_read(temp_address);
+    lsb = memory_read(temp_address);
 
     arg_address = (msb << 8) | lsb;
 }
 
 void CPU::address_mode_indirect_x()
 {
-    uint16_t temp_address = cpu_memory_read(pc) + x_reg;
+    uint16_t temp_address = memory_read(pc) + x_reg;
     pc++;
 
-    uint8_t lsb {cpu_memory_read(temp_address & Masks::zero_page_mask)};
-    uint8_t msb {cpu_memory_read((temp_address + 1) & Masks::zero_page_mask)};
+    uint8_t lsb {memory_read(temp_address & Masks::zero_page_mask)};
+    uint8_t msb {memory_read((temp_address + 1) & Masks::zero_page_mask)};
 
     arg_address = (msb << 8) | lsb;
 }
 
 void CPU::address_mode_indirect_y()
 {
-    uint16_t temp_address = cpu_memory_read(pc);
+    uint16_t temp_address = memory_read(pc);
     pc++;
 
-    uint8_t lsb {cpu_memory_read(temp_address & Masks::zero_page_mask)};
-    uint8_t msb {cpu_memory_read((temp_address + 1) & Masks::zero_page_mask)};
+    uint8_t lsb {memory_read(temp_address & Masks::zero_page_mask)};
+    uint8_t msb {memory_read((temp_address + 1) & Masks::zero_page_mask)};
 
     uint16_t read_address = (msb << 8) | lsb;
     arg_address = read_address + y_reg;
@@ -476,7 +476,7 @@ void CPU::address_mode_indirect_y()
 
 void CPU::ADC()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
     uint16_t result = static_cast<uint16_t>(acc + value + status.flag.carry);
 
     bool acc_sign {check_for_flag_with_mask(acc, Masks::negative_flag_mask)};
@@ -493,7 +493,7 @@ void CPU::ADC()
 
 void CPU::AND()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
 
     acc = acc & value;
 
@@ -512,11 +512,11 @@ void CPU::ASL()
         status.flag.negative = check_for_negative_flag(acc);
     }
     else {
-        uint8_t result {cpu_memory_read(arg_address)};
+        uint8_t result {memory_read(arg_address)};
         status.flag.carry = check_for_flag_with_mask(result, Masks::negative_flag_mask);
 
         result = result << 1;
-        cpu_memory_write(arg_address, result);
+        memory_write(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
         status.flag.negative = check_for_negative_flag(result);
@@ -543,7 +543,7 @@ void CPU::BEQ()
 
 void CPU::BIT()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
     uint8_t result = acc & value;
 
     status.flag.zero = check_for_zero_flag(result);
@@ -612,7 +612,7 @@ void CPU::CLV()
 
 void CPU::CMP()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
 
     status.flag.carry = acc >= value;
 
@@ -624,7 +624,7 @@ void CPU::CMP()
 
 void CPU::CPX()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
 
     status.flag.carry = x_reg >= value;
 
@@ -636,7 +636,7 @@ void CPU::CPX()
 
 void CPU::CPY()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
 
     status.flag.carry = y_reg >= value;
 
@@ -648,10 +648,10 @@ void CPU::CPY()
 
 void CPU::DEC()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
 
     value--;
-    cpu_memory_write(arg_address, value);
+    memory_write(arg_address, value);
 
     status.flag.zero = check_for_zero_flag(value);
     status.flag.negative = check_for_negative_flag(value);
@@ -675,7 +675,7 @@ void CPU::DEY()
 
 void CPU::EOR()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
 
     acc = acc ^ value;
 
@@ -685,10 +685,10 @@ void CPU::EOR()
 
 void CPU::INC()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
 
     value++;
-    cpu_memory_write(arg_address, value);
+    memory_write(arg_address, value);
 
     status.flag.zero = check_for_zero_flag(value);
     status.flag.negative = check_for_negative_flag(value);
@@ -722,15 +722,15 @@ void CPU::JSR()
     uint8_t pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
     uint8_t pc_msb = static_cast<uint8_t>(pc >> 8);
 
-    cpu_stack_push(pc_msb);
-    cpu_stack_push(pc_lsb);
+    stack_push(pc_msb);
+    stack_push(pc_lsb);
 
     pc = arg_address;
 }
 
 void CPU::LDA()
 {
-    acc = cpu_memory_read(arg_address);
+    acc = memory_read(arg_address);
 
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.negative = check_for_negative_flag(acc);
@@ -738,7 +738,7 @@ void CPU::LDA()
 
 void CPU::LDX()
 {
-    x_reg = cpu_memory_read(arg_address);
+    x_reg = memory_read(arg_address);
 
     status.flag.zero = check_for_zero_flag(x_reg);
     status.flag.negative = check_for_negative_flag(x_reg);
@@ -746,7 +746,7 @@ void CPU::LDX()
 
 void CPU::LDY()
 {
-    y_reg = cpu_memory_read(arg_address);
+    y_reg = memory_read(arg_address);
 
     status.flag.zero = check_for_zero_flag(y_reg);
     status.flag.negative = check_for_negative_flag(y_reg);
@@ -763,11 +763,11 @@ void CPU::LSR()
         status.flag.negative = check_for_negative_flag(acc);
     }
     else {
-        uint8_t result {cpu_memory_read(arg_address)};
+        uint8_t result {memory_read(arg_address)};
         status.flag.carry = check_for_flag_with_mask(result, Masks::carry_flag_mask);
 
         result = result >> 1;
-        cpu_memory_write(arg_address, result);
+        memory_write(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
         status.flag.negative = check_for_negative_flag(result);
@@ -778,7 +778,7 @@ void CPU::NOP() {}
 
 void CPU::ORA()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
 
     acc = acc | value;
 
@@ -788,7 +788,7 @@ void CPU::ORA()
 
 void CPU::PHA()
 {
-    cpu_stack_push(acc);
+    stack_push(acc);
 }
 
 void CPU::PHP()
@@ -796,7 +796,7 @@ void CPU::PHP()
     status.flag.brk = 1;
     status.flag.unused = 1;
 
-    cpu_stack_push(status.word);
+    stack_push(status.word);
 
     status.flag.brk = 0;
     status.flag.unused = 0;
@@ -804,7 +804,7 @@ void CPU::PHP()
 
 void CPU::PLA()
 {
-    acc = cpu_stack_pop();
+    acc = stack_pop();
 
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.negative = check_for_negative_flag(acc);
@@ -812,7 +812,7 @@ void CPU::PLA()
 
 void CPU::PLP()
 {
-    status.word = cpu_stack_pop();
+    status.word = stack_pop();
 }
 
 void CPU::ROL()
@@ -829,12 +829,12 @@ void CPU::ROL()
         status.flag.negative = check_for_negative_flag(acc);
     }
     else {
-        uint8_t result {cpu_memory_read(arg_address)};
+        uint8_t result {memory_read(arg_address)};
         status.flag.carry = check_for_flag_with_mask(result, Masks::negative_flag_mask);
 
         result = result << 1;
         result = result | old_carry;
-        cpu_memory_write(arg_address, result);
+        memory_write(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
         status.flag.negative = check_for_negative_flag(result);
@@ -855,12 +855,12 @@ void CPU::ROR()
         status.flag.negative = check_for_negative_flag(acc);
     }
     else {
-        uint8_t result {cpu_memory_read(arg_address)};
+        uint8_t result {memory_read(arg_address)};
         status.flag.carry = check_for_flag_with_mask(result, Masks::carry_flag_mask);
 
         result = result >> 1;
         result = result | (old_carry << 7);
-        cpu_memory_write(arg_address, result);
+        memory_write(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
         status.flag.negative = check_for_negative_flag(result);
@@ -869,21 +869,21 @@ void CPU::ROR()
 
 void CPU::RTI()
 {
-    status.word = cpu_stack_pop();
+    status.word = stack_pop();
 
     status.flag.brk = 0;
     status.flag.unused = 0;
 
-    uint8_t pc_lsb {cpu_stack_pop()};
-    uint8_t pc_msb {cpu_stack_pop()};
+    uint8_t pc_lsb {stack_pop()};
+    uint8_t pc_msb {stack_pop()};
 
     pc = (pc_msb << 8) | pc_lsb;
 }
 
 void CPU::RTS()
 {
-    uint8_t pc_lsb {cpu_stack_pop()};
-    uint8_t pc_msb {cpu_stack_pop()};
+    uint8_t pc_lsb {stack_pop()};
+    uint8_t pc_msb {stack_pop()};
 
     pc = (pc_msb << 8) | pc_lsb;
     pc++;
@@ -891,7 +891,7 @@ void CPU::RTS()
 
 void CPU::SBC()
 {
-    uint8_t value {cpu_memory_read(arg_address)};
+    uint8_t value {memory_read(arg_address)};
     uint8_t value_neg = static_cast<uint8_t>(~value);
     uint16_t result = static_cast<uint16_t>(acc + value_neg + status.flag.carry);
 
@@ -924,17 +924,17 @@ void CPU::SEI()
 
 void CPU::STA()
 {
-    cpu_memory_write(arg_address, acc);
+    memory_write(arg_address, acc);
 }
 
 void CPU::STX()
 {
-    cpu_memory_write(arg_address, x_reg);
+    memory_write(arg_address, x_reg);
 }
 
 void CPU::STY()
 {
-    cpu_memory_write(arg_address, y_reg);
+    memory_write(arg_address, y_reg);
 }
 
 void CPU::TAX()

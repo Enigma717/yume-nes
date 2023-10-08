@@ -26,7 +26,7 @@ void test_direct_memory_access()
 
     nes.ram->memory_write(address, data);
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(address) == data);
+    MY_ASSERT(nes.cpu.memory_read(address) == data);
 }
 
 void test_cpu_memory_access()
@@ -35,9 +35,9 @@ void test_cpu_memory_access()
     uint16_t address {0x00DD};
     uint8_t data {0xFF};
 
-    nes.cpu.cpu_memory_write(address, data);
+    nes.cpu.memory_write(address, data);
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(address) == data);
+    MY_ASSERT(nes.cpu.memory_read(address) == data);
 }
 
 void test_shared_memory_access()
@@ -48,7 +48,7 @@ void test_shared_memory_access()
 
     nes.ram->memory_write(address, data);
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(address) == data);
+    MY_ASSERT(nes.cpu.memory_read(address) == data);
 }
 
 void test_cpu_ram_memory_mirroring()
@@ -60,7 +60,7 @@ void test_cpu_ram_memory_mirroring()
 
     nes.ram->memory_write(actual_address, data);
 
-    MY_ASSERT(nes.cpu.cpu_memory_read(target_address) == data);
+    MY_ASSERT(nes.cpu.memory_read(target_address) == data);
 }
 
 
