@@ -9,7 +9,7 @@
 namespace
 {
     constexpr size_t oam_size {64};
-    constexpr size_t nametable_size {2048};
+    constexpr size_t nametables_size {2048};
 }
 
 class Cartridge;
@@ -88,8 +88,8 @@ public:
     uint8_t    ppu_data {0x00};
     uint8_t    oam_mdma {0x00};
 
-    std::vector<OAMEntry> oam       {std::vector<OAMEntry>(oam_size)};
-    std::vector<uint8_t>  nametable {std::vector<uint8_t>(nametable_size)};
+    std::vector<OAMEntry> oam {std::vector<OAMEntry>(oam_size)};
+    std::vector<uint8_t>  nametables {std::vector<uint8_t>(nametables_size)};
 
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
@@ -99,6 +99,8 @@ public:
 
 private:
     CartridgePtr cartridge_ptr {};
+
+    uint16_t normalize_nametables_address(uint16_t address) const;
 
     void    process_nametables_write(uint16_t address, uint8_t value);
     uint8_t process_nametables_read(uint16_t address) const;
