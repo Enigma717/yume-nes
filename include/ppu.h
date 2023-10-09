@@ -10,6 +10,7 @@ namespace
 {
     constexpr size_t oam_size {64};
     constexpr size_t nametables_size {2048};
+    constexpr size_t palettes_size {32};
 }
 
 class Cartridge;
@@ -90,6 +91,7 @@ public:
 
     std::vector<OAMEntry> oam {std::vector<OAMEntry>(oam_size)};
     std::vector<uint8_t>  nametables {std::vector<uint8_t>(nametables_size)};
+    std::vector<uint8_t>  palettes {std::vector<uint8_t>(palettes_size)};
 
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
@@ -100,7 +102,10 @@ public:
 private:
     CartridgePtr cartridge_ptr {};
 
+
     uint16_t normalize_nametables_address(uint16_t address) const;
+    uint16_t normalize_palettes_address(uint16_t address) const;
+    bool     check_for_palette_mirroring(uint16_t address) const;
 
     void    process_nametables_write(uint16_t address, uint8_t value);
     uint8_t process_nametables_read(uint16_t address) const;

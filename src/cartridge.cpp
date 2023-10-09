@@ -73,7 +73,7 @@ void Cartridge::decode_header()
         cartridge_dump.begin() + CartridgeConsts::header_size,
         header.begin());
 
-    if (check_for_nes_logo_in_header() == false) {
+    if (!check_for_nes_logo_in_header()) {
         std::cout << "Nes logo in header is not correct\n";
 
         return;
