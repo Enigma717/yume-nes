@@ -22,6 +22,8 @@ namespace Masks
 }
 
 
+CPU::CPU(PPU& ppu) : ppu_ref{ppu} {};
+
 void CPU::connect_with_memory(std::shared_ptr<Memory> ram)
 {
     ram_ptr = ram;

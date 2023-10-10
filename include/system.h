@@ -14,6 +14,6 @@ public:
 
     std::shared_ptr<Memory> ram;
     std::shared_ptr<Cartridge> cartridge;
-    CPU cpu;
     PPU ppu;
+    CPU cpu;
 };

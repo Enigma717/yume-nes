@@ -12,6 +12,7 @@
 
 class Memory;
 class Cartridge;
+class PPU;
 
 using MemoryPtr = std::weak_ptr<Memory>;
 using CartridgePtr = std::weak_ptr<Cartridge>;
@@ -19,6 +20,10 @@ using CartridgePtr = std::weak_ptr<Cartridge>;
 
 class CPU {
 public:
+    CPU() = delete;
+    CPU(PPU& ppu_ref);
+
+
     union Status {
         struct {
             uint8_t carry     : 1;
@@ -107,6 +112,7 @@ public:
 private:
     MemoryPtr ram_ptr {};
     CartridgePtr cartridge_ptr {};
+    PPU& ppu_ref;
 
 
     uint16_t read_nmi_vector() const;
