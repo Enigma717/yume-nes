@@ -96,28 +96,28 @@ bool PPU::check_for_palette_mirroring(uint16_t address) const
 
 void PPU::process_nametables_write(uint16_t address, uint8_t value)
 {
-    const uint16_t normalized_address {normalize_nametables_address(address)};
+    const auto normalized_address {normalize_nametables_address(address)};
 
     nametables[normalized_address] = value;
 }
 
 uint8_t PPU::process_nametables_read(uint16_t address) const
 {
-    const uint16_t normalized_address {normalize_nametables_address(address)};
+    const auto normalized_address {normalize_nametables_address(address)};
 
     return nametables[normalized_address];
 }
 
 void PPU::process_palettes_write(uint16_t address, uint8_t value)
 {
-    const uint16_t normalized_address {normalize_palettes_address(address)};
+    const auto normalized_address {normalize_palettes_address(address)};
 
-    nametables[normalized_address] = value;
+    palettes[normalized_address] = value;
 }
 
 uint8_t PPU::process_palettes_read(uint16_t address) const
 {
-    const uint16_t normalized_address {normalize_palettes_address(address)};
+    const auto normalized_address {normalize_palettes_address(address)};
 
-    return nametables[normalized_address];
+    return palettes[normalized_address];
 }
