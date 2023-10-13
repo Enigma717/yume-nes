@@ -33,7 +33,7 @@ void PPU::memory_write(uint16_t address, uint8_t value)
     else if (address >= nametables_space_start && address < palettes_space_start)
         process_nametables_write(address, value);
     else
-        process_palettes_write(address, value);
+        process_palettes_memory_write(address, value);
 }
 
 uint8_t PPU::memory_read(uint16_t address) const
@@ -43,7 +43,7 @@ uint8_t PPU::memory_read(uint16_t address) const
     else if (address >= nametables_space_start && address < palettes_space_start)
         return process_nametables_read(address);
     else
-        return process_palettes_read(address);
+        return process_palettes_memory_read(address);
 }
 
 
@@ -108,16 +108,16 @@ uint8_t PPU::process_nametables_read(uint16_t address) const
     return nametables[normalized_address];
 }
 
-void PPU::process_palettes_write(uint16_t address, uint8_t value)
+void PPU::process_palettes_memory_write(uint16_t address, uint8_t value)
 {
     const auto normalized_address {normalize_palettes_address(address)};
 
-    palettes[normalized_address] = value;
+    palettes_memory[normalized_address] = value;
 }
 
-uint8_t PPU::process_palettes_read(uint16_t address) const
+uint8_t PPU::process_palettes_memory_read(uint16_t address) const
 {
     const auto normalized_address {normalize_palettes_address(address)};
 
-    return palettes[normalized_address];
+    return palettes_memory[normalized_address];
 }

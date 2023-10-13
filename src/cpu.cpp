@@ -95,10 +95,10 @@ void CPU::perform_cycle(bool debug_mode)
 
 void CPU::next_instruction()
 {
-    uint8_t instr_opcode {memory_read(pc)};
+    uint8_t instruction_opcode {memory_read(pc)};
     pc++;
 
-    curr_instruction = deduce_instruction_from_opcode(instr_opcode);
+    curr_instruction = deduce_instruction_from_opcode(instruction_opcode);
     cycles_queued = curr_instruction.cycles;
 
     exec_address_mode();
@@ -195,9 +195,6 @@ Instruction CPU::deduce_instruction_from_opcode(uint8_t opcode) const
         Lookup::instructions_table.end(),
         [&] (const Instruction& instr) { return instr.opcode == opcode; }
         );
-
-    if (instruction_it == Lookup::instructions_table.end())
-        instruction_it = std::prev(instruction_it, 1);
 
     return *instruction_it;
 }

@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+#include <SFML/Graphics/Color.hpp>
+
 
 namespace
 {
@@ -91,7 +93,7 @@ public:
 
     std::vector<OAMEntry> oam {std::vector<OAMEntry>(oam_size)};
     std::vector<uint8_t>  nametables {std::vector<uint8_t>(nametables_size)};
-    std::vector<uint8_t>  palettes {std::vector<uint8_t>(palettes_size)};
+    std::vector<uint8_t>  palettes_memory {std::vector<uint8_t>(palettes_size)};
 
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
@@ -110,6 +112,14 @@ private:
     void    process_nametables_write(uint16_t address, uint8_t value);
     uint8_t process_nametables_read(uint16_t address) const;
 
-    void    process_palettes_write(uint16_t address, uint8_t value);
-    uint8_t process_palettes_read(uint16_t address) const;
+    void    process_palettes_memory_write(uint16_t address, uint8_t value);
+    uint8_t process_palettes_memory_read(uint16_t address) const;
 };
+
+
+namespace Colors
+{
+    using namespace sf;
+
+    static const std::vector<Color> available_colors {};
+}
