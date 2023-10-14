@@ -3,6 +3,7 @@
 #include "../include/cartridge.h"
 #include "../include/instruction.h"
 #include "../include/memory.h"
+#include "../include/ppu.h"
 
 #include <algorithm>
 #include <bitset>
@@ -46,22 +47,26 @@ CartridgePtr CPU::get_cartridge_pointer() const
 
 void CPU::memory_write(uint16_t address, uint8_t value) const
 {
-    if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
-        cartridge_ptr.lock()->mapper.map_prg_ram_write(address, value);
+    if (address >= MC::ppu_registers_space_start && address < MC::apu_and_io_space_start)
+        send_write_to_ppu(address, value);
+    else if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
+        send_write_to_mapper_prg_ram(address, value);
     else if (address >= MC::prg_rom_space_start)
-        cartridge_ptr.lock()->mapper.map_prg_rom_write(address, value);
+        send_write_to_mapper_prg_rom(address, value);
     else
-        ram_ptr.lock()->memory_write(address, value);
+        send_write_to_cpu_ram(address, value);
 }
 
 uint8_t CPU::memory_read(uint16_t address) const
 {
-    if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
-        return cartridge_ptr.lock()->mapper.map_prg_ram_read(address);
+    if (address >= MC::ppu_registers_space_start && address < MC::apu_and_io_space_start)
+        return send_read_to_ppu(address);
+    else if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
+        return send_read_to_mapper_prg_ram(address);
     else if (address >= MC::prg_rom_space_start)
-        return cartridge_ptr.lock()->mapper.map_prg_rom_read(address);
+        return send_read_to_mapper_prg_rom(address);
     else
-        return ram_ptr.lock()->memory_read(address);
+        return send_read_to_cpu_ram(address);
 }
 
 void CPU::stack_push(uint8_t value)
@@ -252,9 +257,45 @@ void CPU::log_debug_info()
 }
 
 
-////////////////////////
-//  Helper functions  //
-////////////////////////
+void CPU::send_write_to_ppu(uint16_t address, uint8_t value) const
+{
+    ppu_ref.handle_write_from_cpu(address, value);
+}
+
+void CPU::send_write_to_mapper_prg_ram(uint16_t address, uint8_t value) const
+{
+    cartridge_ptr.lock()->mapper.map_prg_ram_write(address, value);
+}
+
+void CPU::send_write_to_mapper_prg_rom(uint16_t address, uint8_t value) const
+{
+    cartridge_ptr.lock()->mapper.map_prg_rom_write(address, value);
+}
+
+void CPU::send_write_to_cpu_ram(uint16_t address, uint8_t value) const
+{
+    ram_ptr.lock()->memory_write(address, value);
+}
+
+uint8_t CPU::send_read_to_ppu(uint16_t address) const
+{
+    return ppu_ref.handle_read_from_cpu(address);
+}
+
+uint8_t CPU::send_read_to_mapper_prg_ram(uint16_t address) const
+{
+    return cartridge_ptr.lock()->mapper.map_prg_ram_read(address);
+}
+
+uint8_t CPU::send_read_to_mapper_prg_rom(uint16_t address) const
+{
+    return cartridge_ptr.lock()->mapper.map_prg_rom_read(address);
+}
+
+uint8_t CPU::send_read_to_cpu_ram(uint16_t address) const
+{
+    return ram_ptr.lock()->memory_read(address);
+}
 
 uint16_t CPU::read_nmi_vector() const
 {

@@ -101,6 +101,9 @@ public:
     void    memory_write(uint16_t address, uint8_t value);
     uint8_t memory_read(uint16_t address) const;
 
+    void    handle_write_from_cpu(uint16_t address, uint8_t value);
+    uint8_t handle_read_from_cpu(uint16_t address) const;
+
 private:
     CartridgePtr cartridge_ptr {};
 
@@ -108,6 +111,9 @@ private:
     uint16_t normalize_nametables_address(uint16_t address) const;
     uint16_t normalize_palettes_address(uint16_t address) const;
     bool     check_for_palette_mirroring(uint16_t address) const;
+
+    void    send_write_to_mapper_chr_rom(uint16_t address, uint8_t value) const;
+    uint8_t send_read_to_mapper_chr_rom(uint16_t address) const;
 
     void    process_nametables_write(uint16_t address, uint8_t value);
     uint8_t process_nametables_read(uint16_t address) const;
@@ -119,9 +125,7 @@ private:
 
 namespace PPUColors
 {
-    using namespace sf;
-
-    static const std::vector<Color> available_colors {
+    static const std::vector<sf::Color> available_colors {
         {0x7C, 0x7C, 0x7C}, {0x00, 0x00, 0xFC}, {0x00, 0x00, 0xBC}, {0x44, 0x28, 0xBC},
         {0x94, 0x00, 0x84}, {0xA8, 0x00, 0x20}, {0xA8, 0x10, 0x00}, {0x88, 0x14, 0x00},
         {0x50, 0x30, 0x00}, {0x00, 0x78, 0x00}, {0x00, 0x68, 0x00}, {0x00, 0x58, 0x00},

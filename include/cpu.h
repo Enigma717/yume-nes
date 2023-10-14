@@ -115,6 +115,16 @@ private:
     PPU& ppu_ref;
 
 
+    void send_write_to_ppu(uint16_t address, uint8_t value) const;
+    void send_write_to_mapper_prg_ram(uint16_t address, uint8_t value) const;
+    void send_write_to_mapper_prg_rom(uint16_t address, uint8_t value) const;
+    void send_write_to_cpu_ram(uint16_t address, uint8_t value) const;
+
+    uint8_t send_read_to_ppu(uint16_t address) const;
+    uint8_t send_read_to_mapper_prg_ram(uint16_t address) const;
+    uint8_t send_read_to_mapper_prg_rom(uint16_t address) const;
+    uint8_t send_read_to_cpu_ram(uint16_t address) const;
+
     uint16_t read_nmi_vector() const;
     uint16_t read_reset_vector() const;
     uint16_t read_irq_vector() const;
