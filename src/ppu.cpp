@@ -100,7 +100,7 @@ uint8_t PPU::handle_read_from_cpu(uint16_t address) const // TODO: Unfinished pl
 uint16_t PPU::normalize_nametables_address(uint16_t address) const
 {
     using Mirroring = Cartridge::MirroringType;
-    const auto& mirroring_mode {cartridge_ptr.lock()->mirroring_mode};
+    const auto mirroring_mode {cartridge_ptr.lock()->mirroring_mode};
     const uint16_t current_nametable = address & current_nametable_mask;
     uint16_t normalized_address {0x0000};
 

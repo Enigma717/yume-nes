@@ -2,6 +2,7 @@
 
 #include "./cpu_tests/cpu_tests.h"
 #include "./cartridge_tests/cartridge_tests.h"
+#include "./ppu_tests/ppu_tests.h"
 
 #include <iostream>
 
@@ -48,11 +49,17 @@ void run_cartridge_tests()
     ut_cartridge_header_decoding();
 }
 
+void run_ppu_tests()
+{
+    ut_ppu_handle_memory_reading();
+}
+
 void run_all_tests()
 {
-    run_cpu_tests();
+    // run_cpu_tests();
     // run_opcodes_tests();
-    run_cartridge_tests();
+    // run_cartridge_tests();
+    run_ppu_tests();
 }
 
 

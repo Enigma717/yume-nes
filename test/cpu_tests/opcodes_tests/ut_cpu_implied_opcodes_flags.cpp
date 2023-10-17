@@ -6,162 +6,162 @@
 
 void test_dex_zero_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0x01;
-    cpu.DEX();
+    nes.cpu.x_reg = 0x01;
+    nes.cpu.DEX();
 
-    MY_ASSERT(cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_dex_zero_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0xDA;
-    cpu.DEX();
+    nes.cpu.x_reg = 0xDA;
+    nes.cpu.DEX();
 
-    MY_ASSERT(cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_dex_negative_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0xAA;
-    cpu.DEX();
+    nes.cpu.x_reg = 0xAA;
+    nes.cpu.DEX();
 
-    MY_ASSERT(cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_dex_negative_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0x77;
-    cpu.DEX();
+    nes.cpu.x_reg = 0x77;
+    nes.cpu.DEX();
 
-    MY_ASSERT(cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_dey_zero_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0x01;
-    cpu.DEY();
+    nes.cpu.y_reg = 0x01;
+    nes.cpu.DEY();
 
-    MY_ASSERT(cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_dey_zero_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0xAA;
-    cpu.DEY();
+    nes.cpu.y_reg = 0xAA;
+    nes.cpu.DEY();
 
-    MY_ASSERT(cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_dey_negative_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0xAA;
-    cpu.DEY();
+    nes.cpu.y_reg = 0xAA;
+    nes.cpu.DEY();
 
-    MY_ASSERT(cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_dey_negative_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0x77;
-    cpu.DEY();
+    nes.cpu.y_reg = 0x77;
+    nes.cpu.DEY();
 
-    MY_ASSERT(cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_inx_zero_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0xFF;
-    cpu.INX();
+    nes.cpu.x_reg = 0xFF;
+    nes.cpu.INX();
 
-    MY_ASSERT(cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_inx_zero_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0xAA;
-    cpu.INX();
+    nes.cpu.x_reg = 0xAA;
+    nes.cpu.INX();
 
-    MY_ASSERT(cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_inx_negative_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0xAA;
-    cpu.INX();
+    nes.cpu.x_reg = 0xAA;
+    nes.cpu.INX();
 
-    MY_ASSERT(cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_inx_negative_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0x77;
-    cpu.INX();
+    nes.cpu.x_reg = 0x77;
+    nes.cpu.INX();
 
-    MY_ASSERT(cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_iny_zero_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0xFF;
-    cpu.INY();
+    nes.cpu.y_reg = 0xFF;
+    nes.cpu.INY();
 
-    MY_ASSERT(cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_iny_zero_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0xAA;
-    cpu.INY();
+    nes.cpu.y_reg = 0xAA;
+    nes.cpu.INY();
 
-    MY_ASSERT(cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_iny_negative_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0xAA;
-    cpu.INY();
+    nes.cpu.y_reg = 0xAA;
+    nes.cpu.INY();
 
-    MY_ASSERT(cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_iny_negative_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0x77;
-    cpu.INY();
+    nes.cpu.y_reg = 0x77;
+    nes.cpu.INY();
 
-    MY_ASSERT(cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_pla_zero_flag_set_true()
@@ -214,82 +214,82 @@ void test_pla_negative_flag_set_false()
 
 void test_tax_zero_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.acc = 0x00;
-    cpu.TAX();
+    nes.cpu.acc = 0x00;
+    nes.cpu.TAX();
 
-    MY_ASSERT(cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_tax_zero_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.acc = 0x77;
-    cpu.TAX();
+    nes.cpu.acc = 0x77;
+    nes.cpu.TAX();
 
-    MY_ASSERT(cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_tax_negative_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.acc = 0xAA;
-    cpu.TAX();
+    nes.cpu.acc = 0xAA;
+    nes.cpu.TAX();
 
-    MY_ASSERT(cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_tax_negative_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.acc = 0x77;
-    cpu.TAX();
+    nes.cpu.acc = 0x77;
+    nes.cpu.TAX();
 
-    MY_ASSERT(cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_tay_zero_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.acc = 0x00;
-    cpu.TAY();
+    nes.cpu.acc = 0x00;
+    nes.cpu.TAY();
 
-    MY_ASSERT(cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_tay_zero_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.acc = 0x77;
-    cpu.TAY();
+    nes.cpu.acc = 0x77;
+    nes.cpu.TAY();
 
-    MY_ASSERT(cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_tay_negative_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.acc = 0xAA;
-    cpu.TAY();
+    nes.cpu.acc = 0xAA;
+    nes.cpu.TAY();
 
-    MY_ASSERT(cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_tay_negative_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.acc = 0x77;
-    cpu.TAY();
+    nes.cpu.acc = 0x77;
+    nes.cpu.TAY();
 
-    MY_ASSERT(cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_tsx_zero_flag_set_true()
@@ -334,82 +334,82 @@ void test_tsx_negative_flag_set_false()
 
 void test_txa_zero_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0x00;
-    cpu.TXA();
+    nes.cpu.x_reg = 0x00;
+    nes.cpu.TXA();
 
-    MY_ASSERT(cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_txa_zero_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0x77;
-    cpu.TXA();
+    nes.cpu.x_reg = 0x77;
+    nes.cpu.TXA();
 
-    MY_ASSERT(cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_txa_negative_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0xAA;
-    cpu.TXA();
+    nes.cpu.x_reg = 0xAA;
+    nes.cpu.TXA();
 
-    MY_ASSERT(cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_txa_negative_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.x_reg = 0x77;
-    cpu.TXA();
+    nes.cpu.x_reg = 0x77;
+    nes.cpu.TXA();
 
-    MY_ASSERT(cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 void test_tya_zero_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0x00;
-    cpu.TYA();
+    nes.cpu.y_reg = 0x00;
+    nes.cpu.TYA();
 
-    MY_ASSERT(cpu.status.flag.zero == 1);
+    MY_ASSERT(nes.cpu.status.flag.zero == 1);
 }
 
 void test_tya_zero_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0x77;
-    cpu.TYA();
+    nes.cpu.y_reg = 0x77;
+    nes.cpu.TYA();
 
-    MY_ASSERT(cpu.status.flag.zero == 0);
+    MY_ASSERT(nes.cpu.status.flag.zero == 0);
 }
 
 void test_tya_negative_flag_set_true()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0xAA;
-    cpu.TYA();
+    nes.cpu.y_reg = 0xAA;
+    nes.cpu.TYA();
 
-    MY_ASSERT(cpu.status.flag.negative == 1);
+    MY_ASSERT(nes.cpu.status.flag.negative == 1);
 }
 
 void test_tya_negative_flag_set_false()
 {
-    CPU cpu;
+    System nes;
 
-    cpu.y_reg = 0x77;
-    cpu.TYA();
+    nes.cpu.y_reg = 0x77;
+    nes.cpu.TYA();
 
-    MY_ASSERT(cpu.status.flag.negative == 0);
+    MY_ASSERT(nes.cpu.status.flag.negative == 0);
 }
 
 
