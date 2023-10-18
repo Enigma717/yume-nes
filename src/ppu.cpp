@@ -96,6 +96,11 @@ uint8_t PPU::handle_read_from_cpu(uint16_t address) const // TODO: Unfinished pl
     }
 }
 
+void perform_cycle()
+{
+    current_cycle++;
+}
+
 
 uint16_t PPU::normalize_nametables_address(uint16_t address) const
 {

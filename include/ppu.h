@@ -74,13 +74,6 @@ public:
         uint16_t word {0x0000};
     };
 
-    struct OAMEntry {
-        uint8_t position_y {0x00};
-        uint8_t tile_index {0x00};
-        uint8_t attributes {0x00};
-        uint8_t position_x {0x00};
-    };
-
     Controller ppu_ctrl {};
     Mask       ppu_mask {};
     Status     ppu_status {};
@@ -90,6 +83,16 @@ public:
     Loopy      ppu_addr {};
     uint8_t    ppu_data {0x00};
     uint8_t    oam_mdma {0x00};
+
+    int current_cycle {0};
+    int current_scanline {0};
+
+    struct OAMEntry {
+        uint8_t position_y {0x00};
+        uint8_t tile_index {0x00};
+        uint8_t attributes {0x00};
+        uint8_t position_x {0x00};
+    };
 
     std::vector<OAMEntry> oam {std::vector<OAMEntry>(oam_size)};
     std::vector<uint8_t>  nametables {std::vector<uint8_t>(nametables_size)};
@@ -103,6 +106,8 @@ public:
 
     void    handle_write_from_cpu(uint16_t address, uint8_t value);
     uint8_t handle_read_from_cpu(uint16_t address) const;
+
+    void perform_cycle();
 
 private:
     CartridgePtr cartridge_ptr {};

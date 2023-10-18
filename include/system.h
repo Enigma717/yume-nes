@@ -16,4 +16,7 @@ public:
     std::shared_ptr<Cartridge> cartridge;
     PPU ppu;
     CPU cpu;
+
+private:
+    int system_cycles_executed {0};
 };
