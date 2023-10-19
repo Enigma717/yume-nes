@@ -96,7 +96,7 @@ uint8_t PPU::handle_read_from_cpu(uint16_t address) const // TODO: Unfinished pl
     }
 }
 
-void perform_cycle()
+void PPU::perform_cycle()
 {
     current_cycle++;
 }
