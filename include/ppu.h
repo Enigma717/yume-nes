@@ -1,5 +1,6 @@
 #pragma once
 
+#include "./renderer.h"
 
 #include <cstdint>
 #include <memory>
@@ -8,7 +9,7 @@
 #include <SFML/Graphics/Color.hpp>
 
 
-namespace
+namespace PPUConsts
 {
     constexpr size_t oam_size {64};
     constexpr size_t nametables_size {2048};
@@ -18,6 +19,7 @@ namespace
 class Cartridge;
 
 using CartridgePtr = std::weak_ptr<Cartridge>;
+using ScreenPtr = std::unique_ptr<sf::RenderWindow>;
 
 
 class PPU {
@@ -94,9 +96,11 @@ public:
         uint8_t position_x {0x00};
     };
 
-    std::vector<OAMEntry> oam {std::vector<OAMEntry>(oam_size)};
-    std::vector<uint8_t>  nametables {std::vector<uint8_t>(nametables_size)};
-    std::vector<uint8_t>  palettes_memory {std::vector<uint8_t>(palettes_size)};
+    std::vector<OAMEntry> oam {std::vector<OAMEntry>(PPUConsts::oam_size)};
+    std::vector<uint8_t>  nametables {std::vector<uint8_t>(PPUConsts::nametables_size)};
+    std::vector<uint8_t>  palettes_memory {std::vector<uint8_t>(PPUConsts::palettes_size)};
+
+    ScreenPtr screen;
 
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
@@ -111,6 +115,7 @@ public:
 
 private:
     CartridgePtr cartridge_ptr {};
+    Renderer renderer;
 
 
     uint16_t normalize_nametables_address(uint16_t address) const;
