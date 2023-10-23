@@ -85,8 +85,10 @@ public:
     uint8_t    ppu_data {0x00};
     uint8_t    oam_mdma {0x00};
 
-    int current_cycle {0};
-    int current_scanline {0};
+    int     current_cycle {0};
+    int     current_scanline {0};
+    bool    first_read_done_latch {false};
+    uint8_t data_read_buffer {0x00};
 
     struct OAMEntry {
         uint8_t position_y {0x00};
@@ -142,6 +144,8 @@ private:
 
     void    process_palettes_memory_write(uint16_t address, uint8_t value);
     uint8_t process_palettes_memory_read(uint16_t address) const;
+
+    uint8_t process_ppu_status_read();
 };
 
 

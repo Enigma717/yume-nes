@@ -87,7 +87,6 @@ void PPU::handle_write_from_cpu(uint16_t address, uint8_t value) // TODO: Unfini
     switch (address) {
         case RA::PPUCTRL:   ppu_ctrl.word = value;   break;
         case RA::PPUMASK:   ppu_mask.word = value;   break;
-        case RA::PPUSTATUS: ppu_status.word = value; break;
         case RA::OAMADDR:   oam_address = value;     break;
         case RA::OAMDATA:   oam_data = value;        break;
         case RA::PPUSCROLL: ppu_scroll.word = value; break;
@@ -103,14 +102,9 @@ uint8_t PPU::handle_read_from_cpu(uint16_t address) const // TODO: Unfinished pl
 
     namespace RA = RegistersAddresses;
     switch (address) {
-        case RA::PPUCTRL:   return ppu_ctrl.word;   break;
-        case RA::PPUMASK:   return ppu_mask.word;   break;
-        case RA::PPUSTATUS: return ppu_status.word; break;
-        case RA::OAMADDR:   return oam_address;     break;
-        case RA::OAMDATA:   return oam_data;        break;
-        case RA::PPUSCROLL: return static_cast<uint8_t>(ppu_scroll.word); break;
-        case RA::PPUADDR:   return static_cast<uint8_t>(ppu_addr.word);   break;
-        case RA::PPUDATA:   return ppu_data;        break;
+        case RA::PPUSTATUS: return process_ppu_status_read(); break;
+        case RA::OAMDATA:   return oam_data; break;
+        case RA::PPUDATA:   return ppu_data; break;
         default: return 0x00; break;
     }
 }
@@ -252,4 +246,12 @@ uint8_t PPU::process_palettes_memory_read(uint16_t address) const
     const auto normalized_address {normalize_palettes_address(address)};
 
     return palettes_ram[normalized_address];
+}
+
+uint8_t PPU::process_ppu_status_read()
+{
+    ppu_status.vblank_start = 0;
+    first_read_done_latch = false;
+
+    return ppu_status.word;
 }
