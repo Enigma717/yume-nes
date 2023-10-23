@@ -259,6 +259,9 @@ void CPU::log_debug_info()
 
 void CPU::send_write_to_ppu(uint16_t address, uint8_t value) const
 {
+    std::cout << "\n[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
+    std::cout << " WRITE TO PPU REQUESTED" << std::dec << "\n";
+
     ppu_ref.handle_write_from_cpu(address, value);
 }
 
@@ -279,6 +282,9 @@ void CPU::send_write_to_cpu_ram(uint16_t address, uint8_t value) const
 
 uint8_t CPU::send_read_to_ppu(uint16_t address) const
 {
+    std::cout << "\n[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
+    std::cout << " READ FROM PPU REQUESTED" << std::dec << "\n";
+
     return ppu_ref.handle_read_from_cpu(address);
 }
 

@@ -6,14 +6,13 @@
 #include <memory>
 #include <vector>
 
-#include <SFML/Graphics/Color.hpp>
-
 
 namespace PPUConsts
 {
     constexpr size_t oam_size {64};
+    constexpr size_t sprites_tiles_size {512};
     constexpr size_t nametables_size {2048};
-    constexpr size_t palettes_size {32};
+    constexpr size_t palettes_ram_size {32};
 }
 
 class Cartridge;
@@ -96,14 +95,25 @@ public:
         uint8_t position_x {0x00};
     };
 
-    std::vector<OAMEntry> oam {std::vector<OAMEntry>(PPUConsts::oam_size)};
-    std::vector<uint8_t>  nametables {std::vector<uint8_t>(PPUConsts::nametables_size)};
-    std::vector<uint8_t>  palettes_memory {std::vector<uint8_t>(PPUConsts::palettes_size)};
+    struct Pixel {
+        sf::RectangleShape sfml_pixel;
+        int color_index;
+    };
 
-    ScreenPtr screen;
+    struct SpriteTile {
+        std::vector<Pixel> pixels;
+    };
+
+    std::vector<OAMEntry>   oam           {std::vector<OAMEntry>(PPUConsts::oam_size)};
+    std::vector<SpriteTile> sprites_tiles {std::vector<SpriteTile>(PPUConsts::sprites_tiles_size)};
+    std::vector<uint8_t>    nametables    {std::vector<uint8_t>(PPUConsts::nametables_size)};
+    std::vector<uint8_t>    palettes_ram  {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
+
+    ScreenPtr screen {};
 
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
+    void prepare_sprites_tiles_memory();
 
     void    memory_write(uint16_t address, uint8_t value);
     uint8_t memory_read(uint16_t address) const;
@@ -117,6 +127,8 @@ private:
     CartridgePtr cartridge_ptr {};
     Renderer renderer;
 
+
+    void prepare_pattern_table(int pattern_table_number);
 
     uint16_t normalize_nametables_address(uint16_t address) const;
     uint16_t normalize_palettes_address(uint16_t address) const;

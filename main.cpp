@@ -1,6 +1,8 @@
 #include "./include/system.h"
 
 #include <iostream>
+#include <bitset>
+#include <iomanip>
 
 #include <SFML/Graphics.hpp>
 
@@ -12,20 +14,22 @@ namespace
 
     constexpr Instruction rts_instruction {MN::RTS, AM::implied, 0x60, 1, 6};
 
-    constexpr auto scale {1};
-    constexpr auto screen_width {256 * scale};
-    constexpr auto screen_height {240 * scale};
-    constexpr auto square_size {8 * scale};
-    constexpr auto pixel_size {1 * scale};
+    constexpr auto screen_width {256};
+    constexpr auto screen_height {240};
+    constexpr auto pattern_table_screen_size {128};
 }
 
 
 int main()
 {
-    // System nes;
+    System nes;
 
-    // nes.cartridge->load_cartridge("./test/cartridge_tests/roms/nestest.nes");
-    // nes.cpu.pc = 0xC000;
+    nes.cartridge->load_cartridge("./test/cartridge_tests/roms/dk.nes");
+    nes.prepare_system_for_start();
+
+    do {
+        nes.cpu.perform_cycle(true);
+    } while (!(nes.cpu.cycles_executed == 10000));
 
     // do {
     //     nes.cpu.perform_cycle(true);
@@ -33,30 +37,18 @@ int main()
 
     // std::cout << "\nTest result: " << static_cast<int>(nes.ram->memory_read(0x0002)) << "\n";
 
+    // for (auto i {0}; i < (PPUConsts::nametables_size / 2); i++) {
+    //     const auto& read_byte {nes.ppu.nametables[i]};
 
-    sf::RenderWindow window(sf::VideoMode(screen_width, screen_height), "Yume NES");
-    std::vector<sf::RectangleShape> squares;
+    //     if (i % 8 == 0)
+    //         std::cout << std::dec << "\nTiles: " << i << "-" << i + 8 << ": " << std::hex;
 
-    auto color_index {0x00};
+    //     std::cout << std::setfill('0') << "0x" << std::setw(2) << std::right << (int) read_byte << "\t";
+    // }
 
-    for (auto i {0}; i < (screen_height / scale); i++) {
-        for (auto j {0}; j < (screen_width / scale); j++) {
-            if (color_index > 0x3F)
-                color_index = 0x00;
 
-            const auto x_coord = static_cast<float>(j * pixel_size);
-            const auto y_coord = static_cast<float>(i * pixel_size);
-            const auto current_color {PPUColors::available_colors[color_index]};
-
-            sf::RectangleShape square(sf::Vector2f(pixel_size, pixel_size));
-            square.setFillColor(current_color);
-            square.setPosition(x_coord, y_coord);
-
-            squares.push_back(square);
-
-            color_index++;
-        }
-    }
+    sf::RenderWindow window(sf::VideoMode(pattern_table_screen_size * 2, pattern_table_screen_size), "Yume NES");
+    window.setSize({pattern_table_screen_size * 8, pattern_table_screen_size * 4});
 
     while (window.isOpen()) {
         sf::Event event;
@@ -68,19 +60,25 @@ int main()
             }
         }
 
-        window.clear();
+        window.clear(PPUColors::available_colors[0x1D]);
 
-        for (auto i {0}; i < squares.size(); i++) {
-            const auto& square {squares[i]};
-            window.draw(square);
+        for (auto& tile : nes.ppu.sprites_tiles) {
+            for (auto& pixel : tile.pixels) {
+                const auto pixel_color_index {pixel.color_index};
+                if (pixel_color_index != 0) {
+                    sf::Color new_color;
 
-            // sf::Font font;
-            // font.loadFromFile("/usr/share/fonts/TTF/iosevka-medium.ttc");
-            // auto text = sf::Text{std::to_string(i), font, 10};
-            // text.setPosition((square.getPosition().x + square.getSize().x / 2) - (text.getLocalBounds().width / 2),
-            // (square.getPosition().y + square.getSize().y / 2) - (text.getLocalBounds().height / 2));
+                    switch (pixel_color_index) {
+                        case 0b01: new_color = PPUColors::available_colors[0x12]; break;
+                        case 0b10: new_color = PPUColors::available_colors[0x37]; break;
+                        case 0b11: new_color = PPUColors::available_colors[0x07]; break;
+                        default: break;
+                    }
 
-            // window.draw(text);
+                    pixel.sfml_pixel.setFillColor(new_color);
+                    window.draw(pixel.sfml_pixel);
+                }
+            }
         }
 
         window.display();

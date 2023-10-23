@@ -17,6 +17,9 @@ public:
     PPU ppu;
     CPU cpu;
 
+
+    void prepare_system_for_start();
+
 private:
     int system_cycles_executed {0};
 };
