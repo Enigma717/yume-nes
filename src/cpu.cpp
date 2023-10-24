@@ -45,16 +45,16 @@ CartridgePtr CPU::get_cartridge_pointer() const
     return cartridge_ptr;
 }
 
-void CPU::memory_write(uint16_t address, uint8_t value) const
+void CPU::memory_write(uint16_t address, uint8_t data) const
 {
     if (address >= MC::ppu_registers_space_start && address < MC::apu_and_io_space_start)
-        send_write_to_ppu(address, value);
+        send_write_to_ppu(address, data);
     else if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
-        send_write_to_mapper_prg_ram(address, value);
+        send_write_to_mapper_prg_ram(address, data);
     else if (address >= MC::prg_rom_space_start)
-        send_write_to_mapper_prg_rom(address, value);
+        send_write_to_mapper_prg_rom(address, data);
     else
-        send_write_to_cpu_ram(address, value);
+        send_write_to_cpu_ram(address, data);
 }
 
 uint8_t CPU::memory_read(uint16_t address) const
@@ -69,9 +69,9 @@ uint8_t CPU::memory_read(uint16_t address) const
         return send_read_to_cpu_ram(address);
 }
 
-void CPU::stack_push(uint8_t value)
+void CPU::stack_push(uint8_t data)
 {
-    memory_write(MC::stack_offset + stack_ptr, value);
+    memory_write(MC::stack_offset + stack_ptr, data);
     stack_ptr--;
 }
 
@@ -257,33 +257,33 @@ void CPU::log_debug_info()
 }
 
 
-void CPU::send_write_to_ppu(uint16_t address, uint8_t value) const
+void CPU::send_write_to_ppu(uint16_t address, uint8_t data) const
 {
-    std::cout << "\n[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
-    std::cout << " WRITE TO PPU REQUESTED" << std::dec << "\n";
+    // std::cout << "\n[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
+    // std::cout << " WRITE TO PPU REQUESTED" << std::dec << "\n";
 
-    ppu_ref.handle_write_from_cpu(address, value);
+    ppu_ref.handle_write_from_cpu(address, data);
 }
 
-void CPU::send_write_to_mapper_prg_ram(uint16_t address, uint8_t value) const
+void CPU::send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const
 {
-    cartridge_ptr.lock()->mapper.map_prg_ram_write(address, value);
+    cartridge_ptr.lock()->mapper.map_prg_ram_write(address, data);
 }
 
-void CPU::send_write_to_mapper_prg_rom(uint16_t address, uint8_t value) const
+void CPU::send_write_to_mapper_prg_rom(uint16_t address, uint8_t data) const
 {
-    cartridge_ptr.lock()->mapper.map_prg_rom_write(address, value);
+    cartridge_ptr.lock()->mapper.map_prg_rom_write(address, data);
 }
 
-void CPU::send_write_to_cpu_ram(uint16_t address, uint8_t value) const
+void CPU::send_write_to_cpu_ram(uint16_t address, uint8_t data) const
 {
-    ram_ptr.lock()->memory_write(address, value);
+    ram_ptr.lock()->memory_write(address, data);
 }
 
 uint8_t CPU::send_read_to_ppu(uint16_t address) const
 {
-    std::cout << "\n[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
-    std::cout << " READ FROM PPU REQUESTED" << std::dec << "\n";
+    // std::cout << "\n[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
+    // std::cout << " READ FROM PPU REQUESTED" << std::dec << "\n";
 
     return ppu_ref.handle_read_from_cpu(address);
 }

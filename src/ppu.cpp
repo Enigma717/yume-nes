@@ -18,6 +18,7 @@ namespace RegistersAddresses
 namespace
 {
     constexpr size_t ppu_registers_space_size {8};
+    constexpr size_t ppu_memory_size {16384};
 
     constexpr size_t pixel_size {1};
     constexpr size_t sprite_tile_size {8};
@@ -59,14 +60,14 @@ void PPU::prepare_sprites_tiles_memory()
     prepare_pattern_table(1);
 }
 
-void PPU::memory_write(uint16_t address, uint8_t value)
+void PPU::memory_write(uint16_t address, uint8_t data)
 {
     if (address < nametables_space_start)
-        send_write_to_mapper_chr_rom(address, value);
+        send_write_to_mapper_chr_rom(address, data);
     else if (address >= nametables_space_start && address < palettes_space_start)
-        process_nametables_write(address, value);
+        process_nametables_write(address, data);
     else
-        process_palettes_memory_write(address, value);
+        process_palettes_memory_write(address, data);
 }
 
 uint8_t PPU::memory_read(uint16_t address) const
@@ -79,24 +80,24 @@ uint8_t PPU::memory_read(uint16_t address) const
         return process_palettes_memory_read(address);
 }
 
-void PPU::handle_write_from_cpu(uint16_t address, uint8_t value) // TODO: Unfinished placeholders
+void PPU::handle_write_from_cpu(uint16_t address, uint8_t data) // TODO: Unfinished placeholders
 {
     address = address % ppu_registers_space_size;
 
     namespace RA = RegistersAddresses;
     switch (address) {
-        case RA::PPUCTRL:   ppu_ctrl.word = value;   break;
-        case RA::PPUMASK:   ppu_mask.word = value;   break;
-        case RA::OAMADDR:   oam_address = value;     break;
-        case RA::OAMDATA:   oam_data = value;        break;
-        case RA::PPUSCROLL: ppu_scroll.word = value; break;
-        case RA::PPUADDR:   ppu_addr.word = value;   break;
-        case RA::PPUDATA:   ppu_data = value;        break;
+        case RA::PPUCTRL:   ppu_ctrl.word = data;   break;
+        case RA::PPUMASK:   ppu_mask.word = data;   break;
+        case RA::OAMADDR:   oam_address = data;     break;
+        case RA::OAMDATA:   oam_data = data;        break;
+        case RA::PPUSCROLL: ppu_scroll.word = data; break;
+        case RA::PPUADDR:   ppu_addr.word = data;   break;
+        case RA::PPUDATA:   ppu_data = data;        break;
         default: break;
     }
 }
 
-uint8_t PPU::handle_read_from_cpu(uint16_t address) const // TODO: Unfinished placeholders
+uint8_t PPU::handle_read_from_cpu(uint16_t address) // TODO: Unfinished placeholders
 {
     address = address % ppu_registers_space_size;
 
@@ -141,7 +142,7 @@ void PPU::prepare_pattern_table(int pattern_table_number)
                     tile_row_msb >>= 1;
 
                     const auto pixel_x_coord = static_cast<float>(
-                        col_tile * sprite_tile_size + (7 - col_pixel) + (128 * pattern_table_number));
+                        col_tile * sprite_tile_size + ((sprite_tile_size - 1) - col_pixel) + (128 * pattern_table_number));
                     const auto pixel_y_coord = static_cast<float>(
                         row_tile * sprite_tile_size + row_pixel);
 
@@ -210,9 +211,9 @@ bool PPU::check_for_palette_mirroring(uint16_t address) const
         || address == (palette_mirror_mask + 0x000C);
 }
 
-void PPU::send_write_to_mapper_chr_rom(uint16_t address, uint8_t value) const
+void PPU::send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const
 {
-    cartridge_ptr.lock()->mapper.map_chr_rom_write(address, value);
+    cartridge_ptr.lock()->mapper.map_chr_rom_write(address, data);
 }
 
 uint8_t PPU::send_read_to_mapper_chr_rom(uint16_t address) const
@@ -220,11 +221,11 @@ uint8_t PPU::send_read_to_mapper_chr_rom(uint16_t address) const
     return cartridge_ptr.lock()->mapper.map_chr_rom_read(address);
 }
 
-void PPU::process_nametables_write(uint16_t address, uint8_t value)
+void PPU::process_nametables_write(uint16_t address, uint8_t data)
 {
     const auto normalized_address {normalize_nametables_address(address)};
 
-    nametables[normalized_address] = value;
+    nametables[normalized_address] = data;
 }
 
 uint8_t PPU::process_nametables_read(uint16_t address) const
@@ -234,11 +235,11 @@ uint8_t PPU::process_nametables_read(uint16_t address) const
     return nametables[normalized_address];
 }
 
-void PPU::process_palettes_memory_write(uint16_t address, uint8_t value)
+void PPU::process_palettes_memory_write(uint16_t address, uint8_t data)
 {
     const auto normalized_address {normalize_palettes_address(address)};
 
-    palettes_ram[normalized_address] = value;
+    palettes_ram[normalized_address] = data;
 }
 
 uint8_t PPU::process_palettes_memory_read(uint16_t address) const
@@ -248,10 +249,23 @@ uint8_t PPU::process_palettes_memory_read(uint16_t address) const
     return palettes_ram[normalized_address];
 }
 
+void PPU::process_ppu_address_write(uint8_t data)
+{
+    if (first_address_write_latch) {
+        temp_ppu_address_msb = data;
+        first_address_write_latch = !first_address_write_latch;
+    }
+    else {
+        ppu_addr.word = (temp_ppu_address_msb << 8) | data;
+        ppu_addr.word = ppu_addr.word % ppu_memory_size;
+        first_address_write_latch = !first_address_write_latch;
+    }
+}
+
 uint8_t PPU::process_ppu_status_read()
 {
-    ppu_status.vblank_start = 0;
-    first_read_done_latch = false;
+    ppu_status.flag.vblank_start = 0;
+    first_address_write_latch = false;
 
     return ppu_status.word;
 }

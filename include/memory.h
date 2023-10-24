@@ -29,7 +29,7 @@ class Memory {
 public:
     void    memory_clear();
     void    memory_load_program(SystemMemory program, uint16_t offset);
-    void    memory_write(uint16_t address, uint8_t value);
+    void    memory_write(uint16_t address, uint8_t data);
     uint8_t memory_read(uint16_t address) const;
 
     SystemMemory get_memory_copy() const;

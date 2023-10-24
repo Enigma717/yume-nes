@@ -58,9 +58,9 @@ public:
     MemoryPtr    get_memory_pointer() const;
     CartridgePtr get_cartridge_pointer() const;
 
-    void    memory_write(uint16_t address, uint8_t value) const;
+    void    memory_write(uint16_t address, uint8_t data) const;
     uint8_t memory_read(uint16_t address) const;
-    void    stack_push(uint8_t value);
+    void    stack_push(uint8_t data);
     uint8_t stack_pop();
 
     void        perform_cycle(bool debug_mode = false);
@@ -115,10 +115,10 @@ private:
     PPU& ppu_ref;
 
 
-    void send_write_to_ppu(uint16_t address, uint8_t value) const;
-    void send_write_to_mapper_prg_ram(uint16_t address, uint8_t value) const;
-    void send_write_to_mapper_prg_rom(uint16_t address, uint8_t value) const;
-    void send_write_to_cpu_ram(uint16_t address, uint8_t value) const;
+    void send_write_to_ppu(uint16_t address, uint8_t data) const;
+    void send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const;
+    void send_write_to_mapper_prg_rom(uint16_t address, uint8_t data) const;
+    void send_write_to_cpu_ram(uint16_t address, uint8_t data) const;
 
     uint8_t send_read_to_ppu(uint16_t address) const;
     uint8_t send_read_to_mapper_prg_ram(uint16_t address) const;

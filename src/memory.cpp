@@ -20,12 +20,12 @@ void Memory::memory_load_program(SystemMemory program, uint16_t offset)
     std::copy(program.begin(), program.end(), memory.begin() + offset);
 }
 
-void Memory::memory_write(uint16_t address, uint8_t value)
+void Memory::memory_write(uint16_t address, uint8_t data)
 {
     if (address <= cpu_ram_upper_bound)
-        memory[address % cpu_ram_bank_size] = value;
+        memory[address % cpu_ram_bank_size] = data;
     else
-        memory[address] = value;
+        memory[address] = data;
 }
 
 uint8_t Memory::memory_read(uint16_t address) const

@@ -85,10 +85,11 @@ public:
     uint8_t    ppu_data {0x00};
     uint8_t    oam_mdma {0x00};
 
-    int     current_cycle {0};
-    int     current_scanline {0};
-    bool    first_read_done_latch {false};
-    uint8_t data_read_buffer {0x00};
+    int      current_cycle {0};
+    int      current_scanline {0};
+    bool     first_address_write_latch {true};
+    uint8_t  temp_ppu_address_msb {0x00};
+    uint8_t  data_read_buffer {0x00};
 
     struct OAMEntry {
         uint8_t position_y {0x00};
@@ -117,11 +118,11 @@ public:
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
     void prepare_sprites_tiles_memory();
 
-    void    memory_write(uint16_t address, uint8_t value);
+    void    memory_write(uint16_t address, uint8_t data);
     uint8_t memory_read(uint16_t address) const;
 
-    void    handle_write_from_cpu(uint16_t address, uint8_t value);
-    uint8_t handle_read_from_cpu(uint16_t address) const;
+    void    handle_write_from_cpu(uint16_t address, uint8_t data);
+    uint8_t handle_read_from_cpu(uint16_t address);
 
     void perform_cycle();
 
@@ -136,15 +137,16 @@ private:
     uint16_t normalize_palettes_address(uint16_t address) const;
     bool     check_for_palette_mirroring(uint16_t address) const;
 
-    void    send_write_to_mapper_chr_rom(uint16_t address, uint8_t value) const;
+    void    send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const;
     uint8_t send_read_to_mapper_chr_rom(uint16_t address) const;
 
-    void    process_nametables_write(uint16_t address, uint8_t value);
+    void    process_nametables_write(uint16_t address, uint8_t data);
     uint8_t process_nametables_read(uint16_t address) const;
 
-    void    process_palettes_memory_write(uint16_t address, uint8_t value);
+    void    process_palettes_memory_write(uint16_t address, uint8_t data);
     uint8_t process_palettes_memory_read(uint16_t address) const;
 
+    void    process_ppu_address_write(uint8_t data);
     uint8_t process_ppu_status_read();
 };
 

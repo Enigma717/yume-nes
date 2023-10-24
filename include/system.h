@@ -1,9 +1,7 @@
 #pragma once
 
-#include "./cartridge.h"
 #include "./cpu.h"
 #include "./ppu.h"
-#include "./memory.h"
 
 #include <memory>
 
@@ -18,8 +16,10 @@ public:
     CPU cpu;
 
 
-    void prepare_system_for_start();
+    void boot_up(const std::string& cartridge_path);
 
 private:
     int system_cycles_executed {0};
+
+    void prepare_system_for_start();
 };

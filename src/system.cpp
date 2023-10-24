@@ -1,11 +1,21 @@
 #include "../include/system.h"
 
+#include "../include/cartridge.h"
+#include "../include/memory.h"
+
 
 System::System() : cpu{ppu}
 {
     ram = std::make_shared<Memory>();
     cartridge = std::make_shared<Cartridge>();
 }
+
+void System::boot_up(const std::string& cartridge_path)
+{
+    cartridge->load_cartridge(cartridge_path);
+    prepare_system_for_start();
+}
+
 
 void System::prepare_system_for_start()
 {

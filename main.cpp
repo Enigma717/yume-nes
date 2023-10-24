@@ -24,8 +24,7 @@ int main()
 {
     System nes;
 
-    nes.cartridge->load_cartridge("./test/cartridge_tests/roms/dk.nes");
-    nes.prepare_system_for_start();
+    nes.boot_up("./test/cartridge_tests/roms/dk.nes");
 
     do {
         nes.cpu.perform_cycle(true);
