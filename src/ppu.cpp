@@ -2,6 +2,10 @@
 
 #include "../include/cartridge.h"
 
+#include <bitset>
+#include <iostream>
+#include <iomanip>
+
 
 namespace RegistersAddresses
 {
@@ -28,9 +32,10 @@ namespace
     constexpr size_t sprite_tiles_col_offset {0x0010};
     constexpr size_t sprite_second_plane_offset {0x0008};
 
-    constexpr uint8_t transparent_pixel_value {0x00};
-
     constexpr uint8_t first_byte_mask {0b0000'0001};
+
+    constexpr uint8_t vram_increment_enabled_value {0x20};
+    constexpr uint8_t vram_increment_disabled_value {0x01};
 
     constexpr uint16_t second_nametable_offset {0x0400};
     constexpr uint16_t third_nametable_offset {0x0800};
@@ -82,32 +87,46 @@ uint8_t PPU::memory_read(uint16_t address) const
 
 void PPU::handle_write_from_cpu(uint16_t address, uint8_t data) // TODO: Unfinished placeholders
 {
+    std::cout << "[DEBUG PPU] WRITE REQUESTED FROM CPU" << std::hex
+        << " | ADDRESS: 0x" << static_cast<short>(address)
+        << " | DATA: 0x" << static_cast<short>(data)
+        << std::dec << "\n";
+
     address = address % ppu_registers_space_size;
 
     namespace RA = RegistersAddresses;
     switch (address) {
-        case RA::PPUCTRL:   ppu_ctrl.word = data;   break;
-        case RA::PPUMASK:   ppu_mask.word = data;   break;
-        case RA::OAMADDR:   oam_address = data;     break;
-        case RA::OAMDATA:   oam_data = data;        break;
-        case RA::PPUSCROLL: ppu_scroll.word = data; break;
-        case RA::PPUADDR:   ppu_addr.word = data;   break;
-        case RA::PPUDATA:   ppu_data = data;        break;
+        case RA::PPUCTRL:   process_ppu_controller_write(data); break;
+        case RA::PPUMASK:   process_ppu_mask_write(data);       break;
+        case RA::OAMADDR:   oam_address = data;                 break;
+        case RA::OAMDATA:   oam_data = data;                    break;
+        case RA::PPUSCROLL: ppu_scroll.word = data;             break;
+        case RA::PPUADDR:   process_ppu_address_write(data);    break;
+        case RA::PPUDATA:   process_ppu_data_write(data);       break;
         default: break;
     }
+
+    log_debug_info();
 }
 
 uint8_t PPU::handle_read_from_cpu(uint16_t address) // TODO: Unfinished placeholders
 {
+    std::cout << "[DEBUG PPU] READ REQUESTED FROM CPU" << std::hex
+        << " | AT ADDRESS: 0x" << static_cast<short>(address)
+        << std::dec << "\n";
+
     address = address % ppu_registers_space_size;
+
+    log_debug_info();
 
     namespace RA = RegistersAddresses;
     switch (address) {
         case RA::PPUSTATUS: return process_ppu_status_read(); break;
-        case RA::OAMDATA:   return oam_data; break;
-        case RA::PPUDATA:   return ppu_data; break;
+        case RA::OAMDATA:   return oam_data;                  break;
+        case RA::PPUDATA:   return process_ppu_data_read();   break;
         default: return 0x00; break;
     }
+
 }
 
 void PPU::perform_cycle()
@@ -115,6 +134,31 @@ void PPU::perform_cycle()
     current_cycle++;
 }
 
+
+void PPU::log_debug_info()
+{
+    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << current_cycle;
+    std::cout << std::hex << std::uppercase << std::setfill('0')
+        << " | PPUCTRL: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_ctrl.word)
+        << " | PPUMASK: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_mask.word)
+        << " | PPUSTATUS: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_status.word)
+        << " | OAMADDR: 0x" << std::setw(2) << std::right << static_cast<short>(oam_address)
+        << " | OAMDATA: 0x" << std::setw(2) << std::right << static_cast<short>(oam_data)
+        << " | PPUSCROLL: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_scroll.word)
+        << " | PPUADDR: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_addr.word)
+        << " | PPUDATA: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_data)
+        << std::dec << "\n";
+}
+
+void PPU::log_debug_register_write(const std::string& register_name)
+{
+    std::cout << "[DEBUG PPU] WRITE TO " << register_name << "\n";
+}
+
+void PPU::log_debug_register_read(const std::string& register_name)
+{
+    std::cout << "[DEBUG PPU] READ FROM " << register_name << "\n";
+}
 
 void PPU::prepare_pattern_table(int pattern_table_number)
 {
@@ -249,23 +293,70 @@ uint8_t PPU::process_palettes_memory_read(uint16_t address) const
     return palettes_ram[normalized_address];
 }
 
+void PPU::process_ppu_controller_write(uint8_t data)
+{
+    log_debug_register_write(std::string("PPU CONTROLLER"));
+
+    ppu_ctrl.word = data;
+}
+
+void PPU::process_ppu_mask_write(uint8_t data)
+{
+    log_debug_register_write("PPU MASK");
+
+    ppu_mask.word = data;
+}
+
 void PPU::process_ppu_address_write(uint8_t data)
 {
     if (first_address_write_latch) {
+        log_debug_register_write("PPU ADDRESS FIRST WRITE");
+
         temp_ppu_address_msb = data;
         first_address_write_latch = !first_address_write_latch;
     }
     else {
+        log_debug_register_write("PPU ADDRESS SECOND WRITE");
+
         ppu_addr.word = (temp_ppu_address_msb << 8) | data;
         ppu_addr.word = ppu_addr.word % ppu_memory_size;
         first_address_write_latch = !first_address_write_latch;
     }
 }
 
+void PPU::process_ppu_data_write(uint8_t data)
+{
+    log_debug_register_write("PPU DATA");
+
+    memory_write(ppu_addr.word, data);
+
+    if (ppu_ctrl.flag.vram_increment)
+        ppu_addr.word += vram_increment_enabled_value;
+    else
+        ppu_addr.word += vram_increment_disabled_value;
+}
+
 uint8_t PPU::process_ppu_status_read()
 {
+    log_debug_register_read("PPU STATUS");
+
     ppu_status.flag.vblank_start = 0;
     first_address_write_latch = false;
 
     return ppu_status.word;
+}
+
+uint8_t PPU::process_ppu_data_read()
+{
+    log_debug_register_read("PPU DATA");
+
+    ppu_data = data_read_buffer;
+    data_read_buffer = memory_read(ppu_addr.word);
+
+    if (ppu_ctrl.flag.vram_increment)
+        ppu_addr.word += vram_increment_enabled_value;
+    else
+        ppu_addr.word += vram_increment_disabled_value;
+
+    return ppu_data;
 }

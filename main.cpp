@@ -28,7 +28,7 @@ int main()
 
     do {
         nes.cpu.perform_cycle(true);
-    } while (!(nes.cpu.cycles_executed == 10000));
+    } while (!(nes.cpu.cycles_executed == 100));
 
     // do {
     //     nes.cpu.perform_cycle(true);
@@ -46,42 +46,42 @@ int main()
     // }
 
 
-    sf::RenderWindow window(sf::VideoMode(pattern_table_screen_size * 2, pattern_table_screen_size), "Yume NES");
-    window.setSize({pattern_table_screen_size * 8, pattern_table_screen_size * 4});
+    // sf::RenderWindow window(sf::VideoMode(pattern_table_screen_size * 2, pattern_table_screen_size), "Yume NES");
 
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed ||
-                (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
-                window.close();
-                return 0;
-            }
-        }
+    // while (window.isOpen()) {
+    //     sf::Event event;
+    //     while (window.pollEvent(event)) {
+    //         if (event.type == sf::Event::Closed ||
+    //             (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
+    //             window.close();
+    //             return 0;
+    //         }
+    //     }
 
-        window.clear(PPUColors::available_colors[0x1D]);
+    //     window.setSize({pattern_table_screen_size * 8, pattern_table_screen_size * 4});
+    //     window.clear(PPUColors::available_colors[0x1D]);
 
-        for (auto& tile : nes.ppu.sprites_tiles) {
-            for (auto& pixel : tile.pixels) {
-                const auto pixel_color_index {pixel.color_index};
-                if (pixel_color_index != 0) {
-                    sf::Color new_color;
+    //     for (auto& tile : nes.ppu.sprites_tiles) {
+    //         for (auto& pixel : tile.pixels) {
+    //             const auto pixel_color_index {pixel.color_index};
+    //             if (pixel_color_index != 0) {
+    //                 sf::Color new_color;
 
-                    switch (pixel_color_index) {
-                        case 0b01: new_color = PPUColors::available_colors[0x12]; break;
-                        case 0b10: new_color = PPUColors::available_colors[0x37]; break;
-                        case 0b11: new_color = PPUColors::available_colors[0x07]; break;
-                        default: break;
-                    }
+    //                 switch (pixel_color_index) {
+    //                     case 0b01: new_color = PPUColors::available_colors[0x12]; break;
+    //                     case 0b10: new_color = PPUColors::available_colors[0x37]; break;
+    //                     case 0b11: new_color = PPUColors::available_colors[0x07]; break;
+    //                     default: break;
+    //                 }
 
-                    pixel.sfml_pixel.setFillColor(new_color);
-                    window.draw(pixel.sfml_pixel);
-                }
-            }
-        }
+    //                 pixel.sfml_pixel.setFillColor(new_color);
+    //                 window.draw(pixel.sfml_pixel);
+    //             }
+    //         }
+    //     }
 
-        window.display();
-    }
+    //     window.display();
+    // }
 
 
     return 0;

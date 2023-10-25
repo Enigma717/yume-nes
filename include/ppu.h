@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <vector>
 
 
@@ -131,6 +132,10 @@ private:
     Renderer renderer;
 
 
+    void log_debug_info();
+    void log_debug_register_write(const std::string& register_name);
+    void log_debug_register_read(const std::string& register_name);
+
     void prepare_pattern_table(int pattern_table_number);
 
     uint16_t normalize_nametables_address(uint16_t address) const;
@@ -146,8 +151,13 @@ private:
     void    process_palettes_memory_write(uint16_t address, uint8_t data);
     uint8_t process_palettes_memory_read(uint16_t address) const;
 
+    void    process_ppu_controller_write(uint8_t data);
+    void    process_ppu_mask_write(uint8_t data);
     void    process_ppu_address_write(uint8_t data);
+    void    process_ppu_data_write(uint8_t data);
+
     uint8_t process_ppu_status_read();
+    uint8_t process_ppu_data_read();
 };
 
 

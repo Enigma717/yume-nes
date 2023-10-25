@@ -73,7 +73,6 @@ public:
     void interrupt_irq();
     void interrupt_reset();
     void hard_reset();
-    void log_debug_info();
 
     /////  Addressing modes  /////
     void address_mode_immediate();
@@ -114,6 +113,8 @@ private:
     CartridgePtr cartridge_ptr {};
     PPU& ppu_ref;
 
+
+    void log_debug_info();
 
     void send_write_to_ppu(uint16_t address, uint8_t data) const;
     void send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const;

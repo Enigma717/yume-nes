@@ -240,13 +240,21 @@ void CPU::hard_reset()
     ram_ptr.lock()->memory_clear();
 }
 
+
 void CPU::log_debug_info()
 {
-    std::cout << "[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
+    uint8_t debug_read_data {0x00};
+
+    if (arg_address >= MC::ppu_registers_space_start && arg_address < MC::apu_and_io_space_start)
+        debug_read_data = 0xAA;
+    else
+        debug_read_data = memory_read(arg_address);
+
+    std::cout << "[DEBUG CPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
     std::cout << std::hex << std::uppercase << std::setfill('0')
         << " | OPCODE: 0x" << std::setw(2) << std::right << static_cast<short>(curr_instruction.opcode)
         << " | ARG: 0x" << std::setw(4) << std::right << static_cast<short>(arg_address)
-        << " | MEM[ARG]: 0x" << std::setw(4) << std::right << static_cast<short>(memory_read(arg_address))
+        << " | MEM[ARG]: 0x" << std::setw(2) << std::right << static_cast<short>(debug_read_data)
         << " || A: 0x" << std::setw(2) << std::right << static_cast<short>(acc)
         << " | X: 0x" << std::setw(2) << std::right << static_cast<short>(x_reg)
         << " | Y: 0x" << std::setw(2) << std::right << static_cast<short>(y_reg)
@@ -256,12 +264,8 @@ void CPU::log_debug_info()
         << std::dec << "\n";
 }
 
-
 void CPU::send_write_to_ppu(uint16_t address, uint8_t data) const
 {
-    // std::cout << "\n[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
-    // std::cout << " WRITE TO PPU REQUESTED" << std::dec << "\n";
-
     ppu_ref.handle_write_from_cpu(address, data);
 }
 
@@ -282,9 +286,6 @@ void CPU::send_write_to_cpu_ram(uint16_t address, uint8_t data) const
 
 uint8_t CPU::send_read_to_ppu(uint16_t address) const
 {
-    // std::cout << "\n[DEBUG] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
-    // std::cout << " READ FROM PPU REQUESTED" << std::dec << "\n";
-
     return ppu_ref.handle_read_from_cpu(address);
 }
 
