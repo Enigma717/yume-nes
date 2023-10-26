@@ -88,7 +88,7 @@ public:
 
     int      current_cycle {0};
     int      current_scanline {0};
-    bool     first_address_write_latch {true};
+    bool     second_address_write_latch {false};
     uint8_t  temp_ppu_address_msb {0x00};
     uint8_t  data_read_buffer {0x00};
 
@@ -132,9 +132,10 @@ private:
     Renderer renderer;
 
 
-    void log_debug_info();
-    void log_debug_register_write(const std::string& register_name);
-    void log_debug_register_read(const std::string& register_name);
+    void log_debug_info() const;
+    void log_debug_palettes_ram_data() const;
+    void log_debug_register_write(const std::string& register_name) const;
+    void log_debug_register_read(const std::string& register_name) const;
 
     void prepare_pattern_table(int pattern_table_number);
 

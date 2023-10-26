@@ -114,7 +114,7 @@ private:
     PPU& ppu_ref;
 
 
-    void log_debug_info();
+    void log_debug_info() const;
 
     void send_write_to_ppu(uint16_t address, uint8_t data) const;
     void send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const;

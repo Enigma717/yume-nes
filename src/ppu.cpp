@@ -135,7 +135,7 @@ void PPU::perform_cycle()
 }
 
 
-void PPU::log_debug_info()
+void PPU::log_debug_info() const
 {
     std::cout << "[DEBUG PPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << current_cycle;
     std::cout << std::hex << std::uppercase << std::setfill('0')
@@ -150,12 +150,48 @@ void PPU::log_debug_info()
         << std::dec << "\n";
 }
 
-void PPU::log_debug_register_write(const std::string& register_name)
+void PPU::log_debug_palettes_ram_data() const
+{
+    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << current_cycle;
+    std::cout << std::hex << std::uppercase << std::setfill('0')
+        << " | BACKGROUND: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[0])
+        << " || BG PALETTE 0: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[1])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[2])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[3])
+        << " || BG PALETTE 1: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[5])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[6])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[7])
+        << " || BG PALETTE 2: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[9])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[10])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[11])
+        << " || BG PALETTE 3: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[13])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[14])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[15])
+        << std::dec << "\n";
+
+    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << current_cycle;
+    std::cout << std::hex << std::uppercase << std::setfill('0')
+        << " | FG PALETTE 0: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[17])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[18])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[19])
+        << " || FG PALETTE 1: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[21])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[22])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[23])
+        << " || FG PALETTE 2: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[25])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[26])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[27])
+        << " || FG PALETTE 3: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[29])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[30])
+        << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[31])
+        << std::dec << "\n";
+}
+
+void PPU::log_debug_register_write(const std::string& register_name) const
 {
     std::cout << "[DEBUG PPU] WRITE TO " << register_name << "\n";
 }
 
-void PPU::log_debug_register_read(const std::string& register_name)
+void PPU::log_debug_register_read(const std::string& register_name) const
 {
     std::cout << "[DEBUG PPU] READ FROM " << register_name << "\n";
 }
@@ -244,6 +280,8 @@ uint16_t PPU::normalize_palettes_address(uint16_t address) const
     if (check_for_palette_mirroring(normalized_address))
         normalized_address -= palette_mirror_mask;
 
+    log_debug_palettes_ram_data();
+
     return normalized_address;
 }
 
@@ -309,18 +347,18 @@ void PPU::process_ppu_mask_write(uint8_t data)
 
 void PPU::process_ppu_address_write(uint8_t data)
 {
-    if (first_address_write_latch) {
+    if (!second_address_write_latch) {
         log_debug_register_write("PPU ADDRESS FIRST WRITE");
 
         temp_ppu_address_msb = data;
-        first_address_write_latch = !first_address_write_latch;
+        second_address_write_latch = !second_address_write_latch;
     }
     else {
         log_debug_register_write("PPU ADDRESS SECOND WRITE");
 
         ppu_addr.word = (temp_ppu_address_msb << 8) | data;
         ppu_addr.word = ppu_addr.word % ppu_memory_size;
-        first_address_write_latch = !first_address_write_latch;
+        second_address_write_latch = !second_address_write_latch;
     }
 }
 
@@ -341,7 +379,11 @@ uint8_t PPU::process_ppu_status_read()
     log_debug_register_read("PPU STATUS");
 
     ppu_status.flag.vblank_start = 0;
-    first_address_write_latch = false;
+    second_address_write_latch = false;
+    perform_cycle();
+
+    if (current_cycle > 0)
+        ppu_status.word = 0x80;
 
     return ppu_status.word;
 }

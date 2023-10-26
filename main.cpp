@@ -24,11 +24,11 @@ int main()
 {
     System nes;
 
-    nes.boot_up("./test/cartridge_tests/roms/dk.nes");
+    nes.boot_up("./test/cartridge_tests/roms/nestest.nes");
 
     do {
         nes.cpu.perform_cycle(true);
-    } while (!(nes.cpu.cycles_executed == 100));
+    } while (!(nes.cpu.cycles_executed == 100000));
 
     // do {
     //     nes.cpu.perform_cycle(true);

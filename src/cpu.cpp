@@ -241,7 +241,7 @@ void CPU::hard_reset()
 }
 
 
-void CPU::log_debug_info()
+void CPU::log_debug_info() const
 {
     uint8_t debug_read_data {0x00};
 
