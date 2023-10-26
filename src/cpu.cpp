@@ -250,7 +250,7 @@ void CPU::log_debug_info() const
     else
         debug_read_data = memory_read(arg_address);
 
-    std::cout << "[DEBUG CPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << cycles_executed;
+    std::cout << "[DEBUG CPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << cycles_executed;
     std::cout << std::hex << std::uppercase << std::setfill('0')
         << " | OPCODE: 0x" << std::setw(2) << std::right << static_cast<short>(curr_instruction.opcode)
         << " | ARG: 0x" << std::setw(4) << std::right << static_cast<short>(arg_address)
@@ -341,7 +341,7 @@ bool CPU::check_for_zero_flag(uint8_t reg) const
 
 bool CPU::check_for_negative_flag(uint8_t reg) const
 {
-    return (reg & Masks::negative_flag_mask) > 0;
+    return ((reg & Masks::negative_flag_mask) >> 7);
 }
 
 bool CPU::check_for_flag_with_mask(uint16_t reg, uint16_t mask) const
@@ -660,37 +660,31 @@ void CPU::CLV()
 void CPU::CMP()
 {
     uint8_t value {memory_read(arg_address)};
+    uint8_t result = acc - value;
 
     status.flag.carry = acc >= value;
-
-    value -= acc;
-
-    status.flag.zero = check_for_zero_flag(value);
-    status.flag.negative = check_for_negative_flag(value);
+    status.flag.zero = check_for_zero_flag(result);
+    status.flag.negative = check_for_negative_flag(result);
 }
 
 void CPU::CPX()
 {
     uint8_t value {memory_read(arg_address)};
+    uint8_t result = x_reg - value;
 
     status.flag.carry = x_reg >= value;
-
-    value -= x_reg;
-
-    status.flag.zero = check_for_zero_flag(value);
-    status.flag.negative = check_for_negative_flag(value);
+    status.flag.zero = check_for_zero_flag(result);
+    status.flag.negative = check_for_negative_flag(result);
 }
 
 void CPU::CPY()
 {
     uint8_t value {memory_read(arg_address)};
+    uint8_t result = y_reg - value;
 
     status.flag.carry = y_reg >= value;
-
-    value -= y_reg;
-
-    status.flag.zero = check_for_zero_flag(value);
-    status.flag.negative = check_for_negative_flag(value);
+    status.flag.zero = check_for_zero_flag(result);
+    status.flag.negative = check_for_negative_flag(result);
 }
 
 void CPU::DEC()

@@ -137,7 +137,7 @@ void PPU::perform_cycle()
 
 void PPU::log_debug_info() const
 {
-    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << current_cycle;
+    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << current_cycle;
     std::cout << std::hex << std::uppercase << std::setfill('0')
         << " | PPUCTRL: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_ctrl.word)
         << " | PPUMASK: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_mask.word)
@@ -152,7 +152,7 @@ void PPU::log_debug_info() const
 
 void PPU::log_debug_palettes_ram_data() const
 {
-    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << current_cycle;
+    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << current_cycle;
     std::cout << std::hex << std::uppercase << std::setfill('0')
         << " | BACKGROUND: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[0])
         << " || BG PALETTE 0: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[1])
@@ -169,7 +169,7 @@ void PPU::log_debug_palettes_ram_data() const
         << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[15])
         << std::dec << "\n";
 
-    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(6) << std::left << std::setfill(' ') << current_cycle;
+    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << current_cycle;
     std::cout << std::hex << std::uppercase << std::setfill('0')
         << " | FG PALETTE 0: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[17])
         << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[18])
@@ -380,10 +380,10 @@ uint8_t PPU::process_ppu_status_read()
 
     ppu_status.flag.vblank_start = 0;
     second_address_write_latch = false;
-    perform_cycle();
-
-    if (current_cycle > 0)
-        ppu_status.word = 0x80;
+    perform_cycle();            //
+                                //
+    if (current_cycle > 0)      //
+        ppu_status.word = 0x80; // TO REMOVE, DEBUG PURPOUSES
 
     return ppu_status.word;
 }
