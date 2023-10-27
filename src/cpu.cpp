@@ -526,9 +526,9 @@ void CPU::ADC()
     uint8_t value {memory_read(arg_address)};
     uint16_t result = static_cast<uint16_t>(acc + value + status.flag.carry);
 
-    bool acc_sign {check_for_flag_with_mask(acc, Masks::negative_flag_mask)};
-    bool value_sign {check_for_flag_with_mask(value, Masks::negative_flag_mask)};
-    bool result_sign {check_for_flag_with_mask(result, Masks::negative_flag_mask)};
+    bool acc_sign {check_for_negative_flag(acc)};
+    bool value_sign {check_for_negative_flag(value)};
+    bool result_sign {check_for_negative_flag(result)};
 
     acc = static_cast<uint8_t>(result);
 
@@ -933,12 +933,13 @@ void CPU::RTS()
 void CPU::SBC()
 {
     uint8_t value {memory_read(arg_address)};
-    uint8_t value_neg = static_cast<uint8_t>(~value);
-    uint16_t result = static_cast<uint16_t>(acc + value_neg + status.flag.carry);
+    value = static_cast<uint8_t>(~value);
 
-    bool acc_sign {check_for_flag_with_mask(acc, Masks::negative_flag_mask)};
-    bool value_sign {check_for_flag_with_mask(value, Masks::negative_flag_mask)};
-    bool result_sign {check_for_flag_with_mask(result, Masks::negative_flag_mask)};
+    uint16_t result = static_cast<uint16_t>(acc + value + status.flag.carry);
+
+    bool acc_sign {check_for_negative_flag(acc)};
+    bool value_sign {check_for_negative_flag(value)};
+    bool result_sign {check_for_negative_flag(result)};
 
     acc = static_cast<uint8_t>(result);
 
