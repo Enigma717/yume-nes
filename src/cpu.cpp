@@ -341,7 +341,12 @@ bool CPU::check_for_zero_flag(uint8_t reg) const
 
 bool CPU::check_for_negative_flag(uint8_t reg) const
 {
-    return ((reg & Masks::negative_flag_mask) >> 7);
+    return reg >> 7;
+}
+
+bool CPU::check_for_negative_flag(uint16_t reg) const
+{
+    return reg >> 15;
 }
 
 bool CPU::check_for_flag_with_mask(uint16_t reg, uint16_t mask) const

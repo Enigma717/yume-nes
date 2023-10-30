@@ -132,6 +132,7 @@ private:
 
     bool check_for_zero_flag(uint8_t reg) const;
     bool check_for_negative_flag(uint8_t reg) const;
+    bool check_for_negative_flag(uint16_t reg) const;
     bool check_for_flag_with_mask(uint16_t reg, uint16_t mask) const;
     bool check_for_page_crossing(uint16_t old_address, uint16_t new_address) const;
     bool check_for_sign_change(bool a, bool b, bool c) const;

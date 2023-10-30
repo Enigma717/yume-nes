@@ -71,7 +71,7 @@ public:
             uint8_t nametable : 2;
             uint8_t fine_y    : 3;
             uint8_t           : 1;
-        };
+        } internal;
 
         uint16_t word {0x0000};
     };
@@ -80,7 +80,7 @@ public:
         struct {
             uint8_t position : 3;
             uint8_t          : 5;
-        };
+        } internal;
 
         uint8_t word {0x00};
     };
@@ -165,6 +165,7 @@ private:
 
     void    process_ppu_controller_write(uint8_t data);
     void    process_ppu_mask_write(uint8_t data);
+    void    process_ppu_scroll_write(uint8_t data);
     void    process_ppu_address_write(uint8_t data);
     void    process_ppu_data_write(uint8_t data);
 

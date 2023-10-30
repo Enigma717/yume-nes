@@ -32,8 +32,6 @@ namespace
     constexpr size_t sprite_tiles_col_offset {0x0010};
     constexpr size_t sprite_second_plane_offset {0x0008};
 
-    constexpr uint8_t first_byte_mask {0b0000'0001};
-
     constexpr uint8_t vram_increment_enabled_value {0x20};
     constexpr uint8_t vram_increment_disabled_value {0x01};
 
@@ -45,12 +43,20 @@ namespace
     constexpr uint16_t nametables_space_start {0x2000};
     constexpr uint16_t palettes_space_start {0x3F00};
 
+    constexpr uint8_t first_byte_mask {0b0000'0001};
+    constexpr uint8_t nametable_bytes_mask {0b0000'0011};
+    constexpr uint8_t fine_registers_bytes_mask {0b0000'0111};
+    constexpr uint8_t first_address_write_mask {0b0011'1111};
+
+    constexpr uint16_t lower_bytes_mask {0x00FF};
+    constexpr uint16_t upper_bytes_mask {0xFF00};
     constexpr uint16_t current_nametable_mask {0x0FFF};
     constexpr uint16_t vertical_mirroring_mask {0x0800};
     constexpr uint16_t single_screen_mirroring_mask {0x0400};
 
     constexpr uint16_t current_palette_mask {0x0020};
     constexpr uint16_t palette_mirror_mask {0x0010};
+
 }
 
 
@@ -100,7 +106,7 @@ void PPU::handle_write_from_cpu(uint16_t address, uint8_t data) // TODO: Unfinis
         case RA::PPUMASK:   process_ppu_mask_write(data);       break;
         case RA::OAMADDR:   oam_address = data;                 break;
         case RA::OAMDATA:   oam_data = data;                    break;
-        case RA::PPUSCROLL: ppu_scroll.word = data;             break;
+        case RA::PPUSCROLL: process_ppu_scroll_write(data);    break;
         case RA::PPUADDR:   process_ppu_address_write(data);    break;
         case RA::PPUDATA:   process_ppu_data_write(data);       break;
         default: break;
@@ -308,6 +314,7 @@ bool PPU::check_for_palette_mirroring(uint16_t address) const
         || address == (palette_mirror_mask + 0x000C);
 }
 
+
 void PPU::send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const
 {
     cartridge_ptr.lock()->mapper.map_chr_rom_write(address, data);
@@ -346,10 +353,12 @@ uint8_t PPU::process_palettes_memory_read(uint16_t address) const
     return palettes_ram[normalized_address];
 }
 
+
 void PPU::process_ppu_controller_write(uint8_t data)
 {
     log_debug_register_write(std::string("PPU CONTROLLER"));
 
+    ppu_scroll.internal.nametable = data & nametable_bytes_mask;
     ppu_controller.word = data;
 }
 
@@ -360,20 +369,39 @@ void PPU::process_ppu_mask_write(uint8_t data)
     ppu_mask.word = data;
 }
 
+void PPU::process_ppu_scroll_write(uint8_t data)
+{
+    if (second_address_write_latch == false) {
+        log_debug_register_write("PPU SCROLL FIRST WRITE");
+
+        ppu_scroll.internal.coarse_x = data >> 3;
+        fine_x.internal.position = data & fine_registers_bytes_mask;
+        second_address_write_latch = true;
+    }
+    else {
+        log_debug_register_write("PPU SCROLL SECOND WRITE");
+
+        ppu_scroll.internal.coarse_y = data >> 3;
+        ppu_scroll.internal.fine_y = data & fine_registers_bytes_mask;
+        second_address_write_latch = false;
+    }
+}
+
 void PPU::process_ppu_address_write(uint8_t data)
 {
-    if (!second_address_write_latch) {
+    if (second_address_write_latch == false) {
         log_debug_register_write("PPU ADDRESS FIRST WRITE");
 
-        temp_ppu_address_msb = data;
-        second_address_write_latch = !second_address_write_latch;
+        uint16_t temp_address = (data & first_address_write_mask) << 8;
+        ppu_scroll.word = (ppu_scroll.word & lower_bytes_mask) | temp_address;
+        second_address_write_latch = true;
     }
     else {
         log_debug_register_write("PPU ADDRESS SECOND WRITE");
 
-        ppu_address.word = (temp_ppu_address_msb << 8) | data;
-        ppu_address.word = ppu_address.word % ppu_memory_size;
-        second_address_write_latch = !second_address_write_latch;
+        ppu_scroll.word = (ppu_scroll.word & upper_bytes_mask) | data;
+        ppu_address.word = ppu_scroll.word;
+        second_address_write_latch = false;
     }
 }
 
@@ -407,8 +435,8 @@ uint8_t PPU::process_ppu_data_read()
 {
     log_debug_register_read("PPU DATA");
 
-    ppu_data = data_read_buffer;
-    data_read_buffer = memory_read(ppu_address.word);
+    ppu_data = ppu_data_read_buffer;
+    ppu_data_read_buffer = memory_read(ppu_address.word);
 
     if (ppu_controller.flag.vram_increment)
         ppu_address.word += vram_increment_enabled_value;
