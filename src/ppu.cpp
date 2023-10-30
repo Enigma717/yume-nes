@@ -131,7 +131,22 @@ uint8_t PPU::handle_read_from_cpu(uint16_t address) // TODO: Unfinished placehol
 
 void PPU::perform_cycle()
 {
+    render_next_cycle();
+
     current_cycle++;
+
+    if (current_cycle == 341) {
+        current_cycle = 0;
+        current_scanline++;
+
+        if (current_scanline == 261)
+            current_scanline = -1;
+    }
+}
+
+void PPU::render_next_cycle()
+{
+
 }
 
 
@@ -139,13 +154,13 @@ void PPU::log_debug_info() const
 {
     std::cout << "[DEBUG PPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << current_cycle;
     std::cout << std::hex << std::uppercase << std::setfill('0')
-        << " | PPUCTRL: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_ctrl.word)
+        << " | PPUCTRL: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_controller.word)
         << " | PPUMASK: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_mask.word)
         << " | PPUSTATUS: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_status.word)
         << " | OAMADDR: 0x" << std::setw(2) << std::right << static_cast<short>(oam_address)
         << " | OAMDATA: 0x" << std::setw(2) << std::right << static_cast<short>(oam_data)
         << " | PPUSCROLL: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_scroll.word)
-        << " | PPUADDR: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_addr.word)
+        << " | PPUADDR: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_address.word)
         << " | PPUDATA: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_data)
         << std::dec << "\n";
 }
@@ -335,7 +350,7 @@ void PPU::process_ppu_controller_write(uint8_t data)
 {
     log_debug_register_write(std::string("PPU CONTROLLER"));
 
-    ppu_ctrl.word = data;
+    ppu_controller.word = data;
 }
 
 void PPU::process_ppu_mask_write(uint8_t data)
@@ -356,8 +371,8 @@ void PPU::process_ppu_address_write(uint8_t data)
     else {
         log_debug_register_write("PPU ADDRESS SECOND WRITE");
 
-        ppu_addr.word = (temp_ppu_address_msb << 8) | data;
-        ppu_addr.word = ppu_addr.word % ppu_memory_size;
+        ppu_address.word = (temp_ppu_address_msb << 8) | data;
+        ppu_address.word = ppu_address.word % ppu_memory_size;
         second_address_write_latch = !second_address_write_latch;
     }
 }
@@ -366,12 +381,12 @@ void PPU::process_ppu_data_write(uint8_t data)
 {
     log_debug_register_write("PPU DATA");
 
-    memory_write(ppu_addr.word, data);
+    memory_write(ppu_address.word, data);
 
-    if (ppu_ctrl.flag.vram_increment)
-        ppu_addr.word += vram_increment_enabled_value;
+    if (ppu_controller.flag.vram_increment)
+        ppu_address.word += vram_increment_enabled_value;
     else
-        ppu_addr.word += vram_increment_disabled_value;
+        ppu_address.word += vram_increment_disabled_value;
 }
 
 uint8_t PPU::process_ppu_status_read()
@@ -393,12 +408,12 @@ uint8_t PPU::process_ppu_data_read()
     log_debug_register_read("PPU DATA");
 
     ppu_data = data_read_buffer;
-    data_read_buffer = memory_read(ppu_addr.word);
+    data_read_buffer = memory_read(ppu_address.word);
 
-    if (ppu_ctrl.flag.vram_increment)
-        ppu_addr.word += vram_increment_enabled_value;
+    if (ppu_controller.flag.vram_increment)
+        ppu_address.word += vram_increment_enabled_value;
     else
-        ppu_addr.word += vram_increment_disabled_value;
+        ppu_address.word += vram_increment_disabled_value;
 
     return ppu_data;
 }

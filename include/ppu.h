@@ -71,26 +71,36 @@ public:
             uint8_t nametable : 2;
             uint8_t fine_y    : 3;
             uint8_t           : 1;
-        } flag;
+        };
 
         uint16_t word {0x0000};
     };
 
-    Controller ppu_ctrl {};
+    union FineX {
+        struct {
+            uint8_t position : 3;
+            uint8_t          : 5;
+        };
+
+        uint8_t word {0x00};
+    };
+
+    Controller ppu_controller {};
     Mask       ppu_mask {};
     Status     ppu_status {};
     uint8_t    oam_address {0x00};
     uint8_t    oam_data {0x00};
     Loopy      ppu_scroll {};
-    Loopy      ppu_addr {};
+    Loopy      ppu_address {};
     uint8_t    ppu_data {0x00};
     uint8_t    oam_mdma {0x00};
 
+    FineX    fine_x {};
+    bool     second_address_write_latch {false};
+    uint8_t  ppu_data_read_buffer {0x00};
+
     int      current_cycle {0};
     int      current_scanline {0};
-    bool     second_address_write_latch {false};
-    uint8_t  temp_ppu_address_msb {0x00};
-    uint8_t  data_read_buffer {0x00};
 
     struct OAMEntry {
         uint8_t position_y {0x00};
@@ -101,7 +111,7 @@ public:
 
     struct Pixel {
         sf::RectangleShape sfml_pixel;
-        int color_index;
+        int color_index {0};
     };
 
     struct SpriteTile {
@@ -126,6 +136,7 @@ public:
     uint8_t handle_read_from_cpu(uint16_t address);
 
     void perform_cycle();
+    void render_next_cycle();
 
 private:
     CartridgePtr cartridge_ptr {};
