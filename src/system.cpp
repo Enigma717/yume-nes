@@ -16,6 +16,17 @@ void System::boot_up(const std::string& cartridge_path)
     prepare_system_for_start();
 }
 
+void System::perform_cycle(bool debug_mode)
+{
+    ppu.perform_cycle(false);
+    ppu.perform_cycle(false);
+    ppu.perform_cycle(false);
+
+    cpu.perform_cycle(debug_mode);
+
+    system_cycles_executed++;
+}
+
 
 void System::prepare_system_for_start()
 {

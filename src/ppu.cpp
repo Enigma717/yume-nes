@@ -91,7 +91,7 @@ uint8_t PPU::memory_read(uint16_t address) const
         return process_palettes_memory_read(address);
 }
 
-void PPU::handle_write_from_cpu(uint16_t address, uint8_t data) // TODO: Unfinished placeholders
+void PPU::handle_write_from_cpu(uint16_t address, uint8_t data)
 {
     std::cout << "[DEBUG PPU] WRITE REQUESTED FROM CPU" << std::hex
         << " | ADDRESS: 0x" << static_cast<short>(address)
@@ -106,24 +106,19 @@ void PPU::handle_write_from_cpu(uint16_t address, uint8_t data) // TODO: Unfinis
         case RA::PPUMASK:   process_ppu_mask_write(data);       break;
         case RA::OAMADDR:   oam_address = data;                 break;
         case RA::OAMDATA:   oam_data = data;                    break;
-        case RA::PPUSCROLL: process_ppu_scroll_write(data);    break;
+        case RA::PPUSCROLL: process_ppu_scroll_write(data);     break;
         case RA::PPUADDR:   process_ppu_address_write(data);    break;
         case RA::PPUDATA:   process_ppu_data_write(data);       break;
-        default: break;
     }
-
-    log_debug_info();
 }
 
-uint8_t PPU::handle_read_from_cpu(uint16_t address) // TODO: Unfinished placeholders
+uint8_t PPU::handle_read_from_cpu(uint16_t address)
 {
     std::cout << "[DEBUG PPU] READ REQUESTED FROM CPU" << std::hex
         << " | AT ADDRESS: 0x" << static_cast<short>(address)
         << std::dec << "\n";
 
     address = address % ppu_registers_space_size;
-
-    log_debug_info();
 
     namespace RA = RegistersAddresses;
     switch (address) {
@@ -135,9 +130,21 @@ uint8_t PPU::handle_read_from_cpu(uint16_t address) // TODO: Unfinished placehol
 
 }
 
-void PPU::perform_cycle()
+void PPU::perform_cycle(bool debug_mode)
 {
-    render_next_cycle();
+    if (debug_mode)
+        log_debug_info();
+
+    if (current_scanline == -1)
+        rendering_mode = RenderingMode::pre_render_scanline;
+    else if (current_scanline > -1 && current_scanline < 240)
+        rendering_mode = RenderingMode::visible_scanline;
+    else if (current_scanline == 240)
+        rendering_mode = RenderingMode::post_render_scanline;
+    else if (current_scanline > 240 && current_scanline < 261)
+        rendering_mode = RenderingMode::vblank_scanline;
+
+    dispatch_rendering_mode();
 
     current_cycle++;
 
@@ -150,15 +157,43 @@ void PPU::perform_cycle()
     }
 }
 
-void PPU::render_next_cycle()
+void PPU::dispatch_rendering_mode()
+{
+    using RM = RenderingMode;
+    switch (rendering_mode) {
+        case RM::pre_render_scanline:  render_pre_render_scanline(); break;
+        case RM::visible_scanline:     render_visible_scanline();    break;
+        case RM::post_render_scanline:                               break;
+        case RM::vblank_scanline:      render_vblank_scanline();     break;
+    }
+}
+
+void PPU::render_pre_render_scanline()
+{
+    if (current_cycle == 1)
+        ppu_status.word = 0x00;
+}
+
+void PPU::render_visible_scanline()
 {
 
+}
+
+void PPU::render_vblank_scanline()
+{
+    if (current_scanline == 241 && current_cycle == 1) {
+        ppu_status.flag.vblank_start = 1;
+
+        if (ppu_controller.flag.generate_nmi)
+            force_nmi_in_cpu = true;
+    }
 }
 
 
 void PPU::log_debug_info() const
 {
-    std::cout << "[DEBUG PPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << current_cycle;
+    std::cout << "[DEBUG PPU] LINE: " << std::setw(4) << std::left << std::setfill(' ') << current_scanline
+        << " | CYCLE: " << std::setw(4) << std::left << std::setfill(' ') << current_cycle;
     std::cout << std::hex << std::uppercase << std::setfill('0')
         << " | PPUCTRL: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_controller.word)
         << " | PPUMASK: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_mask.word)
@@ -192,6 +227,7 @@ void PPU::log_debug_palettes_ram_data() const
 
     std::cout << "[DEBUG PPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << current_cycle;
     std::cout << std::hex << std::uppercase << std::setfill('0')
+        << " | BACKGROUND: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[16])
         << " | FG PALETTE 0: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[17])
         << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[18])
         << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[19])
@@ -421,14 +457,12 @@ uint8_t PPU::process_ppu_status_read()
 {
     log_debug_register_read("PPU STATUS");
 
+    uint8_t current_state = ppu_status.word;
+
     ppu_status.flag.vblank_start = 0;
     second_address_write_latch = false;
-    perform_cycle();            //
-                                //
-    if (current_cycle > 0)      //
-        ppu_status.word = 0x80; // TO REMOVE, DEBUG PURPOUSES
 
-    return ppu_status.word;
+    return current_state;
 }
 
 uint8_t PPU::process_ppu_data_read()

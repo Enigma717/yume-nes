@@ -1,11 +1,11 @@
 #pragma once
 
-#include "./renderer.h"
-
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <SFML/Graphics.hpp>
 
 
 namespace PPUConsts
@@ -19,7 +19,6 @@ namespace PPUConsts
 class Cartridge;
 
 using CartridgePtr = std::weak_ptr<Cartridge>;
-using ScreenPtr = std::unique_ptr<sf::RenderWindow>;
 
 
 class PPU {
@@ -99,8 +98,9 @@ public:
     bool     second_address_write_latch {false};
     uint8_t  ppu_data_read_buffer {0x00};
 
-    int      current_cycle {0};
-    int      current_scanline {0};
+    int  current_cycle {0};
+    int  current_scanline {-1};
+    bool force_nmi_in_cpu {false};
 
     struct OAMEntry {
         uint8_t position_y {0x00};
@@ -123,8 +123,6 @@ public:
     std::vector<uint8_t>    nametables    {std::vector<uint8_t>(PPUConsts::nametables_size)};
     std::vector<uint8_t>    palettes_ram  {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
 
-    ScreenPtr screen {};
-
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
     void prepare_sprites_tiles_memory();
@@ -135,13 +133,23 @@ public:
     void    handle_write_from_cpu(uint16_t address, uint8_t data);
     uint8_t handle_read_from_cpu(uint16_t address);
 
-    void perform_cycle();
-    void render_next_cycle();
+    void perform_cycle(bool debug_mode = false);
+    void dispatch_rendering_mode();
+    void render_pre_render_scanline();
+    void render_visible_scanline();
+    void render_vblank_scanline();
 
 private:
     CartridgePtr cartridge_ptr {};
-    Renderer renderer;
 
+    enum class RenderingMode {
+        pre_render_scanline,
+        visible_scanline,
+        post_render_scanline,
+        vblank_scanline
+    };
+
+    RenderingMode rendering_mode {RenderingMode::pre_render_scanline};
 
     void log_debug_info() const;
     void log_debug_palettes_ram_data() const;

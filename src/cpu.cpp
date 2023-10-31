@@ -96,6 +96,11 @@ void CPU::perform_cycle(bool debug_mode)
         cycles_queued--;
         cycles_executed++;
     }
+
+    if (ppu_ref.force_nmi_in_cpu) {
+        ppu_ref.force_nmi_in_cpu = false;
+        interrupt_nmi();
+    }
 }
 
 void CPU::next_instruction()
@@ -261,7 +266,8 @@ void CPU::log_debug_info() const
         << " | S: 0x" << std::setw(2) << std::right << static_cast<short>(stack_ptr)
         << " | PC: 0x" << std::setw(4) << std::right << static_cast<short>(pc)
         << " | P: 0b" << std::setw(8) << std::left << std::bitset<8>(status.word)
-        << std::dec << "\n";
+        << " || PPU: " << std::setw(4) << std::setfill(' ') << std::dec << std::left << ppu_ref.current_scanline
+        << " : " << std::setw(4) << std::left << ppu_ref.current_cycle << "\n";
 }
 
 void CPU::send_write_to_ppu(uint16_t address, uint8_t data) const
