@@ -135,14 +135,14 @@ void PPU::perform_cycle(bool debug_mode)
     if (debug_mode)
         log_debug_info();
 
-    if (current_scanline == -1)
-        rendering_mode = RenderingMode::pre_render_scanline;
-    else if (current_scanline > -1 && current_scanline < 240)
+    if (current_scanline >= 0 && current_scanline < 240)
         rendering_mode = RenderingMode::visible_scanline;
     else if (current_scanline == 240)
         rendering_mode = RenderingMode::post_render_scanline;
     else if (current_scanline > 240 && current_scanline < 261)
         rendering_mode = RenderingMode::vblank_scanline;
+    if (current_scanline == 261)
+        rendering_mode = RenderingMode::pre_render_scanline;
 
     dispatch_rendering_mode();
 
@@ -151,10 +151,10 @@ void PPU::perform_cycle(bool debug_mode)
     if (current_cycle == 341) {
         current_cycle = 0;
         current_scanline++;
-
-        if (current_scanline == 261)
-            current_scanline = -1;
     }
+
+    if (current_scanline == 262)
+        current_scanline = 0;
 }
 
 void PPU::dispatch_rendering_mode()

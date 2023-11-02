@@ -99,7 +99,7 @@ public:
     uint8_t  ppu_data_read_buffer {0x00};
 
     int  current_cycle {0};
-    int  current_scanline {-1};
+    int  current_scanline {0};
     bool force_nmi_in_cpu {false};
 
     struct OAMEntry {
