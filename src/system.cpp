@@ -24,7 +24,7 @@ void System::perform_cycle(bool debug_mode)
 
     cpu.perform_cycle(debug_mode);
 
-    system_cycles_executed++;
+    system_cycles_executed += 4;
 }
 
 

@@ -129,8 +129,8 @@ bool Cartridge::check_for_ignoring_mirroring() const
 
 uint8_t Cartridge::calculate_mapper_id() const
 {
-    uint8_t mapper_lsb = (header[6] & mapper_mask) >> 4;
-    uint8_t mapper_msb = (header[7] & mapper_mask) >> 4;
+    const uint8_t mapper_lsb = (header[6] & mapper_mask) >> 4;
+    const uint8_t mapper_msb = (header[7] & mapper_mask) >> 4;
 
     return (mapper_msb << 4) | mapper_lsb;
 }
