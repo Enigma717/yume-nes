@@ -3,6 +3,7 @@
 #include "../include/cartridge.h"
 
 #include <bitset>
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 
@@ -25,22 +26,22 @@ namespace
     constexpr size_t ppu_memory_size {16384};
 
     constexpr size_t pixel_size {1};
-    constexpr size_t sprite_tile_size {8};
-    constexpr size_t sprite_tiles_count_in_row {16};
-    constexpr size_t sprite_tiles_count_in_col {16};
-    constexpr size_t sprite_tiles_row_offset {0x0100};
-    constexpr size_t sprite_tiles_col_offset {0x0010};
-    constexpr size_t sprite_second_plane_offset {0x0008};
+    constexpr size_t tile_size {8};
+    constexpr size_t tiles_count_in_row {16};
+    constexpr size_t tiles_count_in_col {16};
+    constexpr size_t tile_row_offset {0x0100};
+    constexpr size_t tile_col_offset {0x0010};
+    constexpr size_t second_plane_offset {0x0008};
 
     constexpr uint8_t vram_increment_enabled_value {0x20};
     constexpr uint8_t vram_increment_disabled_value {0x01};
 
     constexpr uint16_t second_nametable_offset {0x0400};
     constexpr uint16_t third_nametable_offset {0x0800};
-    constexpr uint16_t attribute_table_offset {0x03C0};
     constexpr uint16_t second_pattern_table_offset {0x1000};
 
     constexpr uint16_t nametables_space_start {0x2000};
+    constexpr uint16_t first_attribute_table_start {0x23C0};
     constexpr uint16_t palettes_space_start {0x3F00};
 
     constexpr uint8_t first_byte_mask {0b0000'0001};
@@ -51,6 +52,7 @@ namespace
     constexpr uint16_t lower_bytes_mask {0x00FF};
     constexpr uint16_t upper_bytes_mask {0xFF00};
     constexpr uint16_t current_nametable_mask {0x0FFF};
+    constexpr uint16_t loopy_no_fine_y_mask {0x0FFF};
     constexpr uint16_t vertical_mirroring_mask {0x0800};
     constexpr uint16_t single_screen_mirroring_mask {0x0400};
 
@@ -135,6 +137,7 @@ void PPU::perform_cycle(bool debug_mode)
     if (debug_mode)
         log_debug_info();
 
+    // https://www.nesdev.org/wiki/PPU_rendering#Line-by-line_timing
     if (current_scanline >= 0 && current_scanline < 240)
         rendering_mode = RenderingMode::visible_scanline;
     else if (current_scanline == 240)
@@ -176,7 +179,44 @@ void PPU::render_pre_render_scanline()
 
 void PPU::render_visible_scanline()
 {
+    if (current_cycle > 0 && current_cycle < 257) {
+        const auto subcycle_tick {current_cycle % 8};
 
+        // https://www.nesdev.org/wiki/PPU_scrolling#Tile_and_attribute_fetching
+        if (subcycle_tick == 0) {
+
+        }
+        else if (subcycle_tick == 1) {
+            const uint16_t address_to_read = nametables_space_start | (ppu_address.word & loopy_no_fine_y_mask);
+
+            fetched_nametable_byte = memory_read(address_to_read);
+        }
+        else if (subcycle_tick == 3) {
+            const uint16_t coarse_x_high_bytes = ppu_address.internal.coarse_x >> 2;
+            const uint16_t coarse_y_high_bytes = (ppu_address.internal.coarse_y >> 2) << 3;
+            const uint16_t nametable_bytes = ppu_address.internal.nametable << 10;
+            const uint16_t address_to_read =
+                first_attribute_table_start | nametable_bytes | coarse_y_high_bytes | coarse_x_high_bytes;
+
+            fetched_attribute_table_byte = memory_read(address_to_read);
+        }
+        else if (subcycle_tick == 5) {
+            const uint16_t current_row_offset = ppu_address.internal.fine_y;
+            const uint16_t current_tile_offset = fetched_nametable_byte * tile_col_offset;
+            const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
+            const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset);
+
+            fetched_pattern_first_plane_byte = memory_read(address_to_read);
+        }
+        else if (subcycle_tick == 7) {
+            const uint16_t current_row_offset = ppu_address.internal.fine_y;
+            const uint16_t current_tile_offset = fetched_nametable_byte * tile_col_offset;
+            const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
+            const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset);
+
+            fetched_pattern_first_plane_byte = memory_read(address_to_read + second_plane_offset);
+        }
+    }
 }
 
 void PPU::render_vblank_scanline()
@@ -255,23 +295,22 @@ void PPU::log_debug_register_read(const std::string& register_name) const
 
 void PPU::prepare_pattern_table(int pattern_table_number)
 {
-    for (size_t row_tile {0}; row_tile < sprite_tiles_count_in_row; row_tile++) {
-        for (size_t col_tile {0}; col_tile < sprite_tiles_count_in_col; col_tile++) {
+    for (size_t row_tile {0}; row_tile < tiles_count_in_row; row_tile++) {
+        for (size_t col_tile {0}; col_tile < tiles_count_in_col; col_tile++) {
             SpriteTile current_tile;
-            const auto current_tile_index {
-                row_tile * sprite_tiles_row_offset + col_tile * sprite_tiles_col_offset};
+            const auto current_tile_index {row_tile * tile_row_offset + col_tile * tile_col_offset};
 
-            for (size_t row_pixel {0}; row_pixel < sprite_tile_size; row_pixel++) {
+            for (size_t row_pixel {0}; row_pixel < tile_size; row_pixel++) {
                 const auto default_tile_index {
                     (pattern_table_number * second_pattern_table_offset) + current_tile_index + row_pixel};
 
                 const auto tile_row_lsb_index = static_cast<uint16_t>(default_tile_index);
-                const auto tile_row_msb_index = static_cast<uint16_t>(default_tile_index + sprite_second_plane_offset);
+                const auto tile_row_msb_index = static_cast<uint16_t>(default_tile_index + second_plane_offset);
 
                 auto tile_row_lsb {memory_read(tile_row_lsb_index)};
                 auto tile_row_msb {memory_read(tile_row_msb_index)};
 
-                for (size_t col_pixel {0}; col_pixel < sprite_tile_size; col_pixel++) {
+                for (size_t col_pixel {0}; col_pixel < tile_size; col_pixel++) {
                     const auto pixel_color_index {
                         ((tile_row_msb & first_byte_mask) << 1) | (tile_row_lsb & first_byte_mask)};
 
@@ -279,9 +318,9 @@ void PPU::prepare_pattern_table(int pattern_table_number)
                     tile_row_msb >>= 1;
 
                     const auto pixel_x_coord = static_cast<float>(
-                        col_tile * sprite_tile_size + ((sprite_tile_size - 1) - col_pixel) + (128 * pattern_table_number));
+                        col_tile * tile_size + ((tile_size - 1) - col_pixel) + (128 * pattern_table_number));
                     const auto pixel_y_coord = static_cast<float>(
-                        row_tile * sprite_tile_size + row_pixel);
+                        row_tile * tile_size + row_pixel);
 
                     Pixel current_pixel;
                     sf::RectangleShape pixel(sf::Vector2f(pixel_size, pixel_size));
@@ -457,12 +496,12 @@ uint8_t PPU::process_ppu_status_read()
 {
     log_debug_register_read("PPU STATUS");
 
-    uint8_t current_state = ppu_status.word;
+    const uint8_t current_status = ppu_status.word;
 
     ppu_status.flag.vblank_start = 0;
     second_address_write_latch = false;
 
-    return current_state;
+    return current_status;
 }
 
 uint8_t PPU::process_ppu_data_read()

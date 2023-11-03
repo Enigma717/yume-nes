@@ -14,6 +14,8 @@ namespace PPUConsts
     constexpr size_t sprites_tiles_size {512};
     constexpr size_t nametables_size {2048};
     constexpr size_t palettes_ram_size {32};
+    constexpr size_t rendered_pixels_count {89342};
+
 }
 
 class Cartridge;
@@ -118,10 +120,11 @@ public:
         std::vector<Pixel> pixels;
     };
 
-    std::vector<OAMEntry>   oam           {std::vector<OAMEntry>(PPUConsts::oam_size)};
-    std::vector<SpriteTile> sprites_tiles {std::vector<SpriteTile>(PPUConsts::sprites_tiles_size)};
-    std::vector<uint8_t>    nametables    {std::vector<uint8_t>(PPUConsts::nametables_size)};
-    std::vector<uint8_t>    palettes_ram  {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
+    std::vector<OAMEntry>   oam              {std::vector<OAMEntry>(PPUConsts::oam_size)};
+    std::vector<SpriteTile> sprites_tiles    {std::vector<SpriteTile>(PPUConsts::sprites_tiles_size)};
+    std::vector<Pixel>      pixels_to_render {std::vector<Pixel>(PPUConsts::rendered_pixels_count)};
+    std::vector<uint8_t>    nametables       {std::vector<uint8_t>(PPUConsts::nametables_size)};
+    std::vector<uint8_t>    palettes_ram     {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
 
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
@@ -150,6 +153,12 @@ private:
     };
 
     RenderingMode rendering_mode {RenderingMode::pre_render_scanline};
+
+    uint8_t fetched_nametable_byte {0x00};
+    uint8_t fetched_attribute_table_byte {0x00};
+    uint8_t fetched_pattern_first_plane_byte {0x00};
+    uint8_t fetched_pattern_second_plane_byte {0x00};
+
 
     void log_debug_info() const;
     void log_debug_palettes_ram_data() const;
