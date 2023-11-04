@@ -35,6 +35,9 @@ namespace
 
     constexpr uint8_t vram_increment_enabled_value {0x20};
     constexpr uint8_t vram_increment_disabled_value {0x01};
+    constexpr uint8_t fine_y_max_value {0x07};
+    constexpr uint8_t nametable_change_to_attribute_bound {0x1D};
+    constexpr uint8_t nametable_coarse_bound {0x1F};
 
     constexpr uint16_t second_nametable_offset {0x0400};
     constexpr uint16_t third_nametable_offset {0x0800};
@@ -45,8 +48,8 @@ namespace
     constexpr uint16_t palettes_space_start {0x3F00};
 
     constexpr uint8_t first_bit_mask {0b0000'0001};
+    constexpr uint8_t second_bit_mask {0b0000'0010};
     constexpr uint8_t first_two_bits_mask {0b0000'0011};
-    constexpr uint8_t attribute_quadrant_mask {0b0000'0010};
     constexpr uint8_t fine_registers_bits_mask {0b0000'0111};
     constexpr uint8_t first_address_write_mask {0b0011'1111};
 
@@ -176,52 +179,21 @@ void PPU::render_pre_render_scanline()
 {
     if (current_cycle == 1)
         ppu_status.word = 0x00;
+
+    if ((current_cycle > 0 && current_cycle < 257) || (current_cycle > 320 && current_cycle < 337))
+        process_rendering_fetches();
+
+    if (current_cycle == 256)
+        coarse_y_increment_with_wrapping();
 }
 
 void PPU::render_visible_scanline()
 {
-    if (current_cycle > 0 && current_cycle < 257) {
-        const auto subcycle_tick {current_cycle % 8};
+    if ((current_cycle > 0 && current_cycle < 257) || (current_cycle > 320 && current_cycle < 337))
+        process_rendering_fetches();
 
-        // https://www.nesdev.org/wiki/PPU_scrolling#Tile_and_attribute_fetching
-        if (subcycle_tick == 0) {
-
-        }
-        else if (subcycle_tick == 1) {
-            const uint16_t address_to_read = nametables_space_start | (ppu_address.word & loopy_no_fine_y_mask);
-
-            fetched_nametable_byte = memory_read(address_to_read);
-        }
-        else if (subcycle_tick == 3) {
-            const uint16_t coarse_x_high_bits = ppu_address.internal.coarse_x >> 2;
-            const uint16_t coarse_y_high_bits = (ppu_address.internal.coarse_y >> 2) << 3;
-            const uint16_t nametable_bits = ppu_address.internal.nametable << 10;
-            const uint16_t address_to_read = first_attribute_table_start | nametable_bits | coarse_y_high_bits | coarse_x_high_bits;
-
-            const uint16_t horizontal_half_choice = (ppu_address.internal.coarse_y & attribute_quadrant_mask) << 1;
-            const uint16_t vertical_half_choice = ppu_address.internal.coarse_x & attribute_quadrant_mask;
-            const auto attribute_quadrant_shift =  static_cast<uint8_t>(horizontal_half_choice | vertical_half_choice);
-
-            fetched_attribute_table_byte = memory_read(address_to_read);
-            fetched_attribute_table_byte = (fetched_attribute_table_byte >> attribute_quadrant_shift) & first_two_bits_mask;
-        }
-        else if (subcycle_tick == 5) {
-            const uint16_t current_row_offset = ppu_address.internal.fine_y;
-            const uint16_t current_tile_offset = fetched_nametable_byte * tile_col_offset;
-            const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
-            const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset);
-
-            fetched_pattern_first_plane_byte = memory_read(address_to_read);
-        }
-        else if (subcycle_tick == 7) {
-            const uint16_t current_row_offset = ppu_address.internal.fine_y;
-            const uint16_t current_tile_offset = fetched_nametable_byte * tile_col_offset;
-            const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
-            const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset);
-
-            fetched_pattern_second_plane_byte = memory_read(address_to_read + second_plane_offset);
-        }
-    }
+    if (current_cycle == 256)
+        coarse_y_increment_with_wrapping();
 }
 
 void PPU::render_vblank_scanline()
@@ -340,6 +312,84 @@ void PPU::prepare_pattern_table(int pattern_table_number)
             }
 
             sprites_tiles.push_back(current_tile);
+        }
+    }
+}
+
+void PPU::process_rendering_fetches()
+{
+    // https://www.nesdev.org/wiki/PPU_scrolling#Tile_and_attribute_fetching
+    const auto subcycle_tick {current_cycle % 8};
+
+    if (subcycle_tick == 0) {
+        coarse_x_increment_with_wrapping();
+    }
+    else if (subcycle_tick == 1) {
+        const uint16_t address_to_read = nametables_space_start | (ppu_address.word & loopy_no_fine_y_mask);
+
+        fetched_nametable_byte = memory_read(address_to_read);
+    }
+    else if (subcycle_tick == 3) {
+        const uint16_t coarse_x_high_bits = ppu_address.internal.coarse_x >> 2;
+        const uint16_t coarse_y_high_bits = (ppu_address.internal.coarse_y >> 2) << 3;
+        const uint16_t nametable_bits = ppu_address.internal.nametable << 10;
+        const uint16_t address_to_read = first_attribute_table_start | nametable_bits | coarse_y_high_bits | coarse_x_high_bits;
+
+        const uint16_t horizontal_half_choice = (ppu_address.internal.coarse_y & second_bit_mask) << 1;
+        const uint16_t vertical_half_choice = ppu_address.internal.coarse_x & second_bit_mask;
+        const auto attribute_quadrant_shift =  static_cast<uint8_t>(horizontal_half_choice | vertical_half_choice);
+
+        fetched_attribute_table_byte = memory_read(address_to_read);
+        fetched_attribute_table_byte = (fetched_attribute_table_byte >> attribute_quadrant_shift) & first_two_bits_mask;
+    }
+    else if (subcycle_tick == 5) {
+        const uint16_t current_row_offset = ppu_address.internal.fine_y;
+        const uint16_t current_tile_offset = fetched_nametable_byte * tile_col_offset;
+        const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
+        const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset);
+
+        fetched_pattern_first_plane_byte = memory_read(address_to_read);
+    }
+    else if (subcycle_tick == 7) {
+        const uint16_t current_row_offset = ppu_address.internal.fine_y;
+        const uint16_t current_tile_offset = fetched_nametable_byte * tile_col_offset;
+        const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
+        const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset);
+
+        fetched_pattern_second_plane_byte = memory_read(address_to_read + second_plane_offset);
+    }
+}
+
+void PPU::coarse_x_increment_with_wrapping()
+{
+    // https://www.nesdev.org/wiki/PPU_scrolling#Wrapping_around
+    if (ppu_address.internal.coarse_x == nametable_coarse_bound) {
+        ppu_address.internal.coarse_x = 0x00;
+        ppu_address.internal.nametable ^= first_bit_mask;
+    }
+    else {
+        ppu_address.internal.coarse_x++;
+    }
+}
+
+void PPU::coarse_y_increment_with_wrapping()
+{
+    // https://www.nesdev.org/wiki/PPU_scrolling#Wrapping_around
+    if (ppu_address.internal.fine_y < fine_y_max_value) {
+        ppu_address.internal.fine_y++;
+    }
+    else {
+        ppu_address.internal.fine_y = 0x00;
+
+        if (ppu_address.internal.coarse_y == nametable_change_to_attribute_bound) {
+            ppu_address.internal.coarse_y = 0x00;
+            ppu_address.internal.nametable ^= second_bit_mask;
+        }
+        else if (ppu_address.internal.coarse_y == nametable_coarse_bound) {
+            ppu_address.internal.coarse_y = 0x00;
+        }
+        else {
+            ppu_address.internal.coarse_y++;
         }
     }
 }
