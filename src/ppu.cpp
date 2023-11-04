@@ -44,13 +44,14 @@ namespace
     constexpr uint16_t first_attribute_table_start {0x23C0};
     constexpr uint16_t palettes_space_start {0x3F00};
 
-    constexpr uint8_t first_byte_mask {0b0000'0001};
-    constexpr uint8_t nametable_bytes_mask {0b0000'0011};
-    constexpr uint8_t fine_registers_bytes_mask {0b0000'0111};
+    constexpr uint8_t first_bit_mask {0b0000'0001};
+    constexpr uint8_t first_two_bits_mask {0b0000'0011};
+    constexpr uint8_t attribute_quadrant_mask {0b0000'0010};
+    constexpr uint8_t fine_registers_bits_mask {0b0000'0111};
     constexpr uint8_t first_address_write_mask {0b0011'1111};
 
-    constexpr uint16_t lower_bytes_mask {0x00FF};
-    constexpr uint16_t upper_bytes_mask {0xFF00};
+    constexpr uint16_t lower_byte_mask {0x00FF};
+    constexpr uint16_t upper_byte_mask {0xFF00};
     constexpr uint16_t current_nametable_mask {0x0FFF};
     constexpr uint16_t loopy_no_fine_y_mask {0x0FFF};
     constexpr uint16_t vertical_mirroring_mask {0x0800};
@@ -81,7 +82,7 @@ void PPU::memory_write(uint16_t address, uint8_t data)
         process_nametables_write(address, data);
     else
         process_palettes_memory_write(address, data);
-}
+    }
 
 uint8_t PPU::memory_read(uint16_t address) const
 {
@@ -96,9 +97,9 @@ uint8_t PPU::memory_read(uint16_t address) const
 void PPU::handle_write_from_cpu(uint16_t address, uint8_t data)
 {
     std::cout << "[DEBUG PPU] WRITE REQUESTED FROM CPU" << std::hex
-        << " | ADDRESS: 0x" << static_cast<short>(address)
-        << " | DATA: 0x" << static_cast<short>(data)
-        << std::dec << "\n";
+    << " | ADDRESS: 0x" << static_cast<short>(address)
+    << " | DATA: 0x" << static_cast<short>(data)
+    << std::dec << "\n";
 
     address = address % ppu_registers_space_size;
 
@@ -117,8 +118,8 @@ void PPU::handle_write_from_cpu(uint16_t address, uint8_t data)
 uint8_t PPU::handle_read_from_cpu(uint16_t address)
 {
     std::cout << "[DEBUG PPU] READ REQUESTED FROM CPU" << std::hex
-        << " | AT ADDRESS: 0x" << static_cast<short>(address)
-        << std::dec << "\n";
+    << " | AT ADDRESS: 0x" << static_cast<short>(address)
+    << std::dec << "\n";
 
     address = address % ppu_registers_space_size;
 
@@ -192,13 +193,17 @@ void PPU::render_visible_scanline()
             fetched_nametable_byte = memory_read(address_to_read);
         }
         else if (subcycle_tick == 3) {
-            const uint16_t coarse_x_high_bytes = ppu_address.internal.coarse_x >> 2;
-            const uint16_t coarse_y_high_bytes = (ppu_address.internal.coarse_y >> 2) << 3;
-            const uint16_t nametable_bytes = ppu_address.internal.nametable << 10;
-            const uint16_t address_to_read =
-                first_attribute_table_start | nametable_bytes | coarse_y_high_bytes | coarse_x_high_bytes;
+            const uint16_t coarse_x_high_bits = ppu_address.internal.coarse_x >> 2;
+            const uint16_t coarse_y_high_bits = (ppu_address.internal.coarse_y >> 2) << 3;
+            const uint16_t nametable_bits = ppu_address.internal.nametable << 10;
+            const uint16_t address_to_read = first_attribute_table_start | nametable_bits | coarse_y_high_bits | coarse_x_high_bits;
+
+            const uint16_t horizontal_half_choice = (ppu_address.internal.coarse_y & attribute_quadrant_mask) << 1;
+            const uint16_t vertical_half_choice = ppu_address.internal.coarse_x & attribute_quadrant_mask;
+            const auto attribute_quadrant_shift =  static_cast<uint8_t>(horizontal_half_choice | vertical_half_choice);
 
             fetched_attribute_table_byte = memory_read(address_to_read);
+            fetched_attribute_table_byte = (fetched_attribute_table_byte >> attribute_quadrant_shift) & first_two_bits_mask;
         }
         else if (subcycle_tick == 5) {
             const uint16_t current_row_offset = ppu_address.internal.fine_y;
@@ -214,7 +219,7 @@ void PPU::render_visible_scanline()
             const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
             const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset);
 
-            fetched_pattern_first_plane_byte = memory_read(address_to_read + second_plane_offset);
+            fetched_pattern_second_plane_byte = memory_read(address_to_read + second_plane_offset);
         }
     }
 }
@@ -268,7 +273,7 @@ void PPU::log_debug_palettes_ram_data() const
     std::cout << "[DEBUG PPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << current_cycle;
     std::cout << std::hex << std::uppercase << std::setfill('0')
         << " | BACKGROUND: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[16])
-        << " | FG PALETTE 0: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[17])
+        << " || FG PALETTE 0: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[17])
         << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[18])
         << " | 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[19])
         << " || FG PALETTE 1: 0x" << std::setw(2) << std::right << static_cast<short>(palettes_ram[21])
@@ -312,7 +317,7 @@ void PPU::prepare_pattern_table(int pattern_table_number)
 
                 for (size_t col_pixel {0}; col_pixel < tile_size; col_pixel++) {
                     const auto pixel_color_index {
-                        ((tile_row_msb & first_byte_mask) << 1) | (tile_row_lsb & first_byte_mask)};
+                        ((tile_row_msb & first_bit_mask) << 1) | (tile_row_lsb & first_bit_mask)};
 
                     tile_row_lsb >>= 1;
                     tile_row_msb >>= 1;
@@ -433,7 +438,7 @@ void PPU::process_ppu_controller_write(uint8_t data)
 {
     log_debug_register_write(std::string("PPU CONTROLLER"));
 
-    ppu_scroll.internal.nametable = data & nametable_bytes_mask;
+    ppu_scroll.internal.nametable = data & first_two_bits_mask;
     ppu_controller.word = data;
 }
 
@@ -450,14 +455,14 @@ void PPU::process_ppu_scroll_write(uint8_t data)
         log_debug_register_write("PPU SCROLL FIRST WRITE");
 
         ppu_scroll.internal.coarse_x = data >> 3;
-        fine_x.internal.position = data & fine_registers_bytes_mask;
+        fine_x.internal.position = data & fine_registers_bits_mask;
         second_address_write_latch = true;
     }
     else {
         log_debug_register_write("PPU SCROLL SECOND WRITE");
 
         ppu_scroll.internal.coarse_y = data >> 3;
-        ppu_scroll.internal.fine_y = data & fine_registers_bytes_mask;
+        ppu_scroll.internal.fine_y = data & fine_registers_bits_mask;
         second_address_write_latch = false;
     }
 }
@@ -468,13 +473,13 @@ void PPU::process_ppu_address_write(uint8_t data)
         log_debug_register_write("PPU ADDRESS FIRST WRITE");
 
         uint16_t temp_address = (data & first_address_write_mask) << 8;
-        ppu_scroll.word = (ppu_scroll.word & lower_bytes_mask) | temp_address;
+        ppu_scroll.word = (ppu_scroll.word & lower_byte_mask) | temp_address;
         second_address_write_latch = true;
     }
     else {
         log_debug_register_write("PPU ADDRESS SECOND WRITE");
 
-        ppu_scroll.word = (ppu_scroll.word & upper_bytes_mask) | data;
+        ppu_scroll.word = (ppu_scroll.word & upper_byte_mask) | data;
         ppu_address.word = ppu_scroll.word;
         second_address_write_latch = false;
     }
