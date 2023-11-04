@@ -154,10 +154,10 @@ private:
 
     RenderingMode rendering_mode {RenderingMode::pre_render_scanline};
 
-    uint8_t fetched_nametable_byte {0x00};
+    uint8_t fetched_nametable_tile_byte {0x00};
     uint8_t fetched_attribute_table_byte {0x00};
-    uint8_t fetched_pattern_first_plane_byte {0x00};
-    uint8_t fetched_pattern_second_plane_byte {0x00};
+    uint8_t fetched_tile_first_plane_byte {0x00};
+    uint8_t fetched_tile_second_plane_byte {0x00};
 
 
     void log_debug_info() const;
@@ -167,9 +167,16 @@ private:
 
     void prepare_pattern_table(int pattern_table_number);
 
-    void process_rendering_fetches();
+    void    process_rendering_fetches();
+    uint8_t fetch_nametable_tile_byte();
+    uint8_t fetch_attribute_table_byte();
+    uint8_t calculate_attribute_shift();
+    uint8_t fetch_tile_plane_byte(uint8_t offset = 0x00);
+
     void coarse_x_increment_with_wrapping();
     void coarse_y_increment_with_wrapping();
+    void copy_horizontal_scroll_to_address();
+    void copy_vertical_scroll_to_address();
 
     uint16_t normalize_nametables_address(uint16_t address) const;
     uint16_t normalize_palettes_address(uint16_t address) const;
