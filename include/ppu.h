@@ -25,6 +25,8 @@ using CartridgePtr = std::weak_ptr<Cartridge>;
 
 class PPU {
 public:
+    PPU();
+
     union Controller {
         struct {
             uint8_t nametable      : 2;
@@ -122,9 +124,11 @@ public:
 
     std::vector<OAMEntry>   oam              {std::vector<OAMEntry>(PPUConsts::oam_size)};
     std::vector<SpriteTile> sprites_tiles    {std::vector<SpriteTile>(PPUConsts::sprites_tiles_size)};
-    std::vector<Pixel>      pixels_to_render {std::vector<Pixel>(PPUConsts::rendered_pixels_count)};
     std::vector<uint8_t>    nametables       {std::vector<uint8_t>(PPUConsts::nametables_size)};
     std::vector<uint8_t>    palettes_ram     {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
+    std::vector<sf::RectangleShape> pixels_to_render {std::vector<sf::RectangleShape>(PPUConsts::rendered_pixels_count)};
+
+    sf::RenderWindow app_screen {};
 
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
@@ -141,6 +145,8 @@ public:
     void render_pre_render_scanline();
     void render_visible_scanline();
     void render_vblank_scanline();
+    void process_pixel_rendering();
+
 
 private:
     CartridgePtr cartridge_ptr {};
@@ -159,6 +165,10 @@ private:
     uint8_t fetched_tile_first_plane_byte {0x00};
     uint8_t fetched_tile_second_plane_byte {0x00};
 
+    uint16_t tile_data_first_shift_reg {0x0000};
+    uint16_t tile_data_second_shift_reg {0x0000};
+    uint16_t data_multiplexer {0x0000};
+
 
     void log_debug_info() const;
     void log_debug_palettes_ram_data() const;
@@ -171,12 +181,14 @@ private:
     uint8_t fetch_nametable_tile_byte();
     uint8_t fetch_attribute_table_byte();
     uint8_t calculate_attribute_shift();
-    uint8_t fetch_tile_plane_byte(uint8_t offset = 0x00);
+    uint8_t fetch_tile_plane_byte(uint8_t plane_offset = 0x00);
 
     void coarse_x_increment_with_wrapping();
     void coarse_y_increment_with_wrapping();
     void copy_horizontal_scroll_to_address();
     void copy_vertical_scroll_to_address();
+    void load_next_tile_data_to_shift_registers();
+    void move_shift_registers();
 
     uint16_t normalize_nametables_address(uint16_t address) const;
     uint16_t normalize_palettes_address(uint16_t address) const;
@@ -199,6 +211,8 @@ private:
 
     uint8_t process_ppu_status_read();
     uint8_t process_ppu_data_read();
+
+    void increment_vram_address();
 };
 
 

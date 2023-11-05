@@ -265,7 +265,7 @@ void CPU::log_debug_info() const
         << " | Y: 0x" << std::setw(2) << std::right << static_cast<short>(y_reg)
         << " | S: 0x" << std::setw(2) << std::right << static_cast<short>(stack_ptr)
         << " | PC: 0x" << std::setw(4) << std::right << static_cast<short>(pc)
-        << " | P: 0b" << std::setw(8) << std::left << std::bitset<8>(status.word)
+        << " | P: 0x" << std::setw(2) << std::right << static_cast<short>(status.word)
         << " || PPU: " << std::setw(4) << std::setfill(' ') << std::dec << std::left << ppu_ref.current_scanline
         << " : " << std::setw(4) << std::left << ppu_ref.current_cycle << "\n";
 }
@@ -851,7 +851,6 @@ void CPU::PHP()
     stack_push(status.word);
 
     status.flag.brk = 0;
-    status.flag.unused = 0;
 }
 
 void CPU::PLA()
@@ -865,6 +864,7 @@ void CPU::PLA()
 void CPU::PLP()
 {
     status.word = stack_pop();
+    status.flag.brk = 0;
 }
 
 void CPU::ROL()

@@ -3,6 +3,9 @@
 #include "../include/cartridge.h"
 #include "../include/memory.h"
 
+#include <chrono>
+#include <iostream>
+
 
 System::System() : cpu{ppu}
 {
@@ -19,12 +22,50 @@ void System::boot_up(const std::string& cartridge_path)
 void System::perform_cycle(bool debug_mode)
 {
     ppu.perform_cycle(false);
-    ppu.perform_cycle(false);
-    ppu.perform_cycle(false);
 
-    cpu.perform_cycle(debug_mode);
+    if (system_cycles_executed % 3 == 0)
+        cpu.perform_cycle(debug_mode);
 
-    system_cycles_executed += 4;
+    system_cycles_executed++;
+}
+
+void System::run()
+{
+    ppu.app_screen.setSize({1024, 960});
+    ppu.app_screen.setPosition({448, 60});
+
+    auto begin = std::chrono::steady_clock::now();
+
+    while (ppu.app_screen.isOpen()) {
+        // sf::Event event;
+        // while (ppu.app_screen.pollEvent(event)) {
+        //     if (event.type == sf::Event::Closed
+        //         || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
+        //         ppu.app_screen.close();
+        //         return;
+        //     }
+        // }
+
+
+        begin = std::chrono::steady_clock::now();
+
+        perform_cycle(false);
+
+        if (system_cycles_executed % (341 * 262) == 0) {
+            // ppu.log_debug_palettes_ram_data();
+
+            for (auto& pixel : ppu.pixels_to_render) {
+                ppu.app_screen.draw(pixel);
+            }
+
+            ppu.app_screen.display();
+            ppu.pixels_to_render.clear();
+
+            auto end = std::chrono::steady_clock::now();
+            std::cout << "ELAPSED: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1000000000.0 << "s\n";
+            begin = std::chrono::steady_clock::now();
+        }
+    }
 }
 
 

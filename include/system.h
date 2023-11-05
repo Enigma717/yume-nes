@@ -19,6 +19,7 @@ public:
 
     void boot_up(const std::string& cartridge_path);
     void perform_cycle(bool debug_mode = false);
+    void run();
 
 private:
     int system_cycles_executed {0};

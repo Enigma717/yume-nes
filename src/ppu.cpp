@@ -22,6 +22,8 @@ namespace RegistersAddresses
 
 namespace
 {
+    constexpr size_t screen_width {256};
+    constexpr size_t screen_height {240};
     constexpr size_t ppu_registers_space_size {8};
     constexpr size_t ppu_memory_size {16384};
 
@@ -52,6 +54,7 @@ namespace
     constexpr uint8_t first_two_bits_mask {0b0000'0011};
     constexpr uint8_t fine_registers_bits_mask {0b0000'0111};
     constexpr uint8_t first_address_write_mask {0b0011'1111};
+    constexpr uint8_t multiplexer_default_pointer {0b1000'0000};
 
     constexpr uint16_t lower_byte_mask {0x00FF};
     constexpr uint16_t upper_byte_mask {0xFF00};
@@ -65,6 +68,8 @@ namespace
 
 }
 
+
+PPU::PPU() : app_screen{sf::VideoMode(screen_width, screen_height), "Yume NES"} {};
 
 void PPU::connect_with_cartridge(std::shared_ptr<Cartridge> cartridge)
 {
@@ -99,10 +104,10 @@ uint8_t PPU::memory_read(uint16_t address) const
 
 void PPU::handle_write_from_cpu(uint16_t address, uint8_t data)
 {
-    std::cout << "[DEBUG PPU] WRITE REQUESTED FROM CPU" << std::hex
-    << " | ADDRESS: 0x" << static_cast<short>(address)
-    << " | DATA: 0x" << static_cast<short>(data)
-    << std::dec << "\n";
+    // std::cout << "[DEBUG PPU] WRITE REQUESTED FROM CPU" << std::hex
+    //     << " | ADDRESS: 0x" << static_cast<short>(address)
+    //     << " | DATA: 0x" << static_cast<short>(data)
+    //     << std::dec << "\n";
 
     address = address % ppu_registers_space_size;
 
@@ -120,9 +125,9 @@ void PPU::handle_write_from_cpu(uint16_t address, uint8_t data)
 
 uint8_t PPU::handle_read_from_cpu(uint16_t address)
 {
-    std::cout << "[DEBUG PPU] READ REQUESTED FROM CPU" << std::hex
-    << " | AT ADDRESS: 0x" << static_cast<short>(address)
-    << std::dec << "\n";
+    // std::cout << "[DEBUG PPU] READ REQUESTED FROM CPU" << std::hex
+        // << " | AT ADDRESS: 0x" << static_cast<short>(address)
+        // << std::dec << "\n";
 
     address = address % ppu_registers_space_size;
 
@@ -152,16 +157,18 @@ void PPU::perform_cycle(bool debug_mode)
         rendering_mode = RenderingMode::pre_render_scanline;
 
     dispatch_rendering_mode();
+    process_pixel_rendering();
 
     current_cycle++;
 
     if (current_cycle == 341) {
         current_cycle = 0;
         current_scanline++;
-    }
 
-    if (current_scanline == 262)
-        current_scanline = 0;
+        if (current_scanline == 262) {
+            current_scanline = 0;
+        }
+    }
 }
 
 void PPU::dispatch_rendering_mode()
@@ -209,6 +216,28 @@ void PPU::render_vblank_scanline()
         if (ppu_controller.flag.generate_nmi)
             force_nmi_in_cpu = true;
     }
+}
+
+void PPU::process_pixel_rendering()
+{
+    if (ppu_mask.flag.show_background == 0) {
+        return;
+    }
+
+    data_multiplexer = multiplexer_default_pointer >> fine_x.internal.position;
+
+    const uint8_t pixel_color_lsb = (tile_data_first_shift_reg & data_multiplexer) >> (15 - fine_x.internal.position);
+    const uint8_t pixel_color_msb = (tile_data_second_shift_reg & data_multiplexer) >> (14 - fine_x.internal.position);
+
+    const uint8_t pixel_color = pixel_color_msb | pixel_color_lsb;
+    const uint16_t address_to_read = 0x3F00 + (fetched_attribute_table_byte << 2) + pixel_color;
+
+    const auto final_color = PPUColors::available_colors[memory_read(address_to_read)];
+
+    sf::RectangleShape square(sf::Vector2f(1, 1));
+    square.setFillColor(final_color);
+    square.setPosition(current_cycle - 1, current_scanline);
+    pixels_to_render.push_back(square);
 }
 
 
@@ -267,12 +296,12 @@ void PPU::log_debug_palettes_ram_data() const
 
 void PPU::log_debug_register_write(const std::string& register_name) const
 {
-    std::cout << "[DEBUG PPU] WRITE TO " << register_name << "\n";
+    // std::cout << "[DEBUG PPU] WRITE TO " << register_name << "\n";
 }
 
 void PPU::log_debug_register_read(const std::string& register_name) const
 {
-    std::cout << "[DEBUG PPU] READ FROM " << register_name << "\n";
+    // std::cout << "[DEBUG PPU] READ FROM " << register_name << "\n";
 }
 
 void PPU::prepare_pattern_table(int pattern_table_number)
@@ -326,6 +355,8 @@ void PPU::process_rendering_fetches()
     // https://www.nesdev.org/wiki/PPU_scrolling#Tile_and_attribute_fetching
     const auto subcycle_dot {current_cycle % 8};
 
+    move_shift_registers();
+
     if (subcycle_dot == 0)
         coarse_x_increment_with_wrapping();
     else if (subcycle_dot == 1)
@@ -341,6 +372,7 @@ void PPU::process_rendering_fetches()
 uint8_t PPU::fetch_nametable_tile_byte()
 {
     const uint16_t address_to_read = nametables_space_start | (ppu_address.word & loopy_no_fine_y_mask);
+    load_next_tile_data_to_shift_registers();
 
     return memory_read(address_to_read);
 }
@@ -366,19 +398,23 @@ uint8_t PPU::calculate_attribute_shift()
     return static_cast<uint8_t>(horizontal_half_choice | vertical_half_choice);
 }
 
-uint8_t PPU::fetch_tile_plane_byte(uint8_t offset)
+uint8_t PPU::fetch_tile_plane_byte(uint8_t plane_offset)
 {
     const uint16_t current_row_offset = ppu_address.internal.fine_y;
     const uint16_t current_tile_offset = fetched_nametable_tile_byte * tile_col_offset;
     const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
-    const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset);
+    const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset + plane_offset);
 
-    return memory_read(address_to_read + offset);
+    return memory_read(address_to_read);
 }
 
 void PPU::coarse_x_increment_with_wrapping()
 {
     // https://www.nesdev.org/wiki/PPU_scrolling#Coarse_X_increment
+    if (ppu_mask.flag.show_background == 0) {
+        return;
+    }
+
     if (ppu_address.internal.coarse_x == nametable_coarse_bound) {
         ppu_address.internal.coarse_x = 0x00;
         ppu_address.internal.nametable ^= first_bit_mask;
@@ -391,6 +427,10 @@ void PPU::coarse_x_increment_with_wrapping()
 void PPU::coarse_y_increment_with_wrapping()
 {
     // https://www.nesdev.org/wiki/PPU_scrolling#Y_increment
+    if (ppu_mask.flag.show_background == 0) {
+        return;
+    }
+
     if (ppu_address.internal.fine_y < fine_y_max_value) {
         ppu_address.internal.fine_y++;
     }
@@ -413,6 +453,10 @@ void PPU::coarse_y_increment_with_wrapping()
 void PPU::copy_horizontal_scroll_to_address()
 {
     // https://www.nesdev.org/wiki/PPU_scrolling#At_dot_257_of_each_scanline
+    if (ppu_mask.flag.show_background == 0) {
+        return;
+    }
+
     const uint8_t horizontal_nametable_bit = ppu_scroll.internal.nametable & first_bit_mask;
 
     ppu_address.internal.coarse_x = ppu_scroll.internal.coarse_x;
@@ -422,11 +466,31 @@ void PPU::copy_horizontal_scroll_to_address()
 void PPU::copy_vertical_scroll_to_address()
 {
     // https://www.nesdev.org/wiki/PPU_scrolling#During_dots_280_to_304_of_the_pre-render_scanline_(end_of_vblank)
+    if (ppu_mask.flag.show_background == 0) {
+        return;
+    }
+
     const uint8_t vertical_nametable_bit = ppu_scroll.internal.nametable & second_bit_mask;
 
     ppu_address.internal.coarse_y = ppu_scroll.internal.coarse_y;
     ppu_address.internal.nametable = (ppu_scroll.internal.nametable & first_bit_mask) | vertical_nametable_bit;
     ppu_address.internal.fine_y = ppu_scroll.internal.fine_y;
+}
+
+void PPU::load_next_tile_data_to_shift_registers()
+{
+    tile_data_first_shift_reg = (tile_data_first_shift_reg & upper_byte_mask) | fetched_tile_first_plane_byte;
+    tile_data_second_shift_reg = (tile_data_second_shift_reg & upper_byte_mask) | fetched_tile_second_plane_byte;
+}
+
+void PPU::move_shift_registers()
+{
+    if (ppu_mask.flag.show_background == 0) {
+        return;
+    }
+
+    tile_data_first_shift_reg <<= 1;
+    tile_data_second_shift_reg <<= 1;
 }
 
 
@@ -466,7 +530,7 @@ uint16_t PPU::normalize_palettes_address(uint16_t address) const
     if (check_for_palette_mirroring(normalized_address))
         normalized_address -= palette_mirror_mask;
 
-    log_debug_palettes_ram_data();
+    // log_debug_palettes_ram_data();
 
     return normalized_address;
 }
