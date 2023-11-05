@@ -576,10 +576,7 @@ void PPU::process_ppu_data_write(uint8_t data)
 
     memory_write(ppu_address.word, data);
 
-    if (ppu_controller.flag.vram_increment)
-        ppu_address.word += vram_increment_enabled_value;
-    else
-        ppu_address.word += vram_increment_disabled_value;
+    increment_vram_address();
 }
 
 uint8_t PPU::process_ppu_status_read()
@@ -596,15 +593,26 @@ uint8_t PPU::process_ppu_status_read()
 
 uint8_t PPU::process_ppu_data_read()
 {
+    // https://www.nesdev.org/wiki/PPU_registers#The_PPUDATA_read_buffer_(post-fetch)
     log_debug_register_read("PPU DATA");
+
+    const auto pre_increment_address {ppu_address.word};
 
     ppu_data = ppu_data_read_buffer;
     ppu_data_read_buffer = memory_read(ppu_address.word);
 
+    increment_vram_address();
+
+    if (pre_increment_address >= palettes_space_start)
+        return ppu_data_read_buffer;
+    else
+        return ppu_data;
+}
+
+void PPU::increment_vram_address()
+{
     if (ppu_controller.flag.vram_increment)
         ppu_address.word += vram_increment_enabled_value;
     else
         ppu_address.word += vram_increment_disabled_value;
-
-    return ppu_data;
 }
