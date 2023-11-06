@@ -122,11 +122,11 @@ public:
         std::vector<Pixel> pixels;
     };
 
-    std::vector<OAMEntry>   oam              {std::vector<OAMEntry>(PPUConsts::oam_size)};
-    std::vector<SpriteTile> sprites_tiles    {std::vector<SpriteTile>(PPUConsts::sprites_tiles_size)};
-    std::vector<uint8_t>    nametables       {std::vector<uint8_t>(PPUConsts::nametables_size)};
-    std::vector<uint8_t>    palettes_ram     {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
-    std::vector<sf::RectangleShape> pixels_to_render {std::vector<sf::RectangleShape>(PPUConsts::rendered_pixels_count)};
+    std::vector<OAMEntry>           oam              {std::vector<OAMEntry>(PPUConsts::oam_size)};
+    std::vector<SpriteTile>         sprites_tiles    {std::vector<SpriteTile>(PPUConsts::sprites_tiles_size)};
+    std::vector<sf::RectangleShape> pixels_to_render {};
+    std::vector<uint8_t>            nametables       {std::vector<uint8_t>(PPUConsts::nametables_size)};
+    std::vector<uint8_t>            palettes_ram     {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
 
     sf::RenderWindow app_screen {};
 

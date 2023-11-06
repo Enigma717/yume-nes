@@ -46,9 +46,6 @@ void System::run()
         //     }
         // }
 
-
-        begin = std::chrono::steady_clock::now();
-
         perform_cycle(false);
 
         if (system_cycles_executed % (341 * 262) == 0) {
@@ -59,7 +56,6 @@ void System::run()
             }
 
             ppu.app_screen.display();
-            ppu.pixels_to_render.clear();
 
             auto end = std::chrono::steady_clock::now();
             std::cout << "ELAPSED: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1000000000.0 << "s\n";

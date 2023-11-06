@@ -69,7 +69,19 @@ namespace
 }
 
 
-PPU::PPU() : app_screen{sf::VideoMode(screen_width, screen_height), "Yume NES"} {};
+PPU::PPU() : app_screen{sf::VideoMode(screen_width, screen_height), "Yume NES"}
+{
+    pixels_to_render.reserve(PPUConsts::rendered_pixels_count);
+
+    for (auto i {0}; i < screen_height; i++) {
+        for (auto j {0}; j < screen_width; j++) {
+            sf::RectangleShape square(sf::Vector2f(pixel_size, pixel_size));
+            square.setPosition(j, i);
+
+            pixels_to_render.push_back(square);
+        }
+    }
+};
 
 void PPU::connect_with_cartridge(std::shared_ptr<Cartridge> cartridge)
 {
@@ -232,12 +244,15 @@ void PPU::process_pixel_rendering()
     const uint8_t pixel_color = pixel_color_msb | pixel_color_lsb;
     const uint16_t address_to_read = 0x3F00 + (fetched_attribute_table_byte << 2) + pixel_color;
 
-    const auto final_color = PPUColors::available_colors[memory_read(address_to_read)];
+    const auto final_color = PPUColors::available_colors[rand() % 63];
+    // const auto final_color = PPUColors::available_colors[memory_read(address_to_read)];
 
-    sf::RectangleShape square(sf::Vector2f(1, 1));
-    square.setFillColor(final_color);
-    square.setPosition(current_cycle - 1, current_scanline);
-    pixels_to_render.push_back(square);
+    const auto x_coord = current_cycle - 1;
+    const auto y_coord = current_scanline;
+
+    if (x_coord >= 0 && x_coord < 256 && y_coord >= 0 && y_coord < 240) {
+        pixels_to_render.at(y_coord * screen_width + x_coord).setFillColor(final_color);
+    }
 }
 
 
