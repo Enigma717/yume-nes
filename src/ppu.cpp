@@ -25,15 +25,11 @@ namespace
     constexpr size_t screen_width {256};
     constexpr size_t screen_height {240};
     constexpr size_t ppu_registers_space_size {8};
-    constexpr size_t ppu_memory_size {16384};
 
     constexpr size_t pixel_size {1};
     constexpr size_t tile_size {8};
     constexpr size_t tiles_count_in_row {16};
     constexpr size_t tiles_count_in_col {16};
-    constexpr size_t tile_row_offset {0x0100};
-    constexpr size_t tile_col_offset {0x0010};
-    constexpr size_t second_plane_offset {0x0008};
 
     constexpr uint8_t vram_increment_enabled_value {0x20};
     constexpr uint8_t vram_increment_disabled_value {0x01};
@@ -41,31 +37,32 @@ namespace
     constexpr uint8_t nametable_change_to_attribute_bound {0x1D};
     constexpr uint8_t nametable_coarse_bound {0x1F};
 
-    constexpr uint16_t second_nametable_offset {0x0400};
-    constexpr uint16_t third_nametable_offset {0x0800};
-    constexpr uint16_t second_pattern_table_offset {0x1000};
-
-    constexpr uint16_t nametables_space_start {0x2000};
-    constexpr uint16_t first_attribute_table_start {0x23C0};
-    constexpr uint16_t palettes_space_start {0x3F00};
-
     constexpr uint8_t first_bit_mask {0b0000'0001};
     constexpr uint8_t second_bit_mask {0b0000'0010};
     constexpr uint8_t first_two_bits_mask {0b0000'0011};
     constexpr uint8_t fine_registers_bits_mask {0b0000'0111};
     constexpr uint8_t first_address_write_mask {0b0011'1111};
-    constexpr uint8_t multiplexer_default_pointer {0b1000'0000};
 
+    constexpr uint16_t second_nametable_offset {0x0400};
+    constexpr uint16_t third_nametable_offset {0x0800};
+    constexpr uint16_t second_pattern_table_offset {0x1000};
+    constexpr uint16_t tile_row_offset {0x0100};
+    constexpr uint16_t tile_col_offset {0x0010};
+    constexpr uint16_t second_plane_offset {0x0008};
+
+    constexpr uint16_t nametables_space_start {0x2000};
+    constexpr uint16_t first_attribute_table_start {0x23C0};
+    constexpr uint16_t palettes_space_start {0x3F00};
+
+    constexpr uint16_t current_palette_mask {0x0020};
+    constexpr uint16_t palette_mirror_mask {0x0010};
     constexpr uint16_t lower_byte_mask {0x00FF};
     constexpr uint16_t upper_byte_mask {0xFF00};
     constexpr uint16_t current_nametable_mask {0x0FFF};
     constexpr uint16_t loopy_no_fine_y_mask {0x0FFF};
     constexpr uint16_t vertical_mirroring_mask {0x0800};
     constexpr uint16_t single_screen_mirroring_mask {0x0400};
-
-    constexpr uint16_t current_palette_mask {0x0020};
-    constexpr uint16_t palette_mirror_mask {0x0010};
-
+    constexpr uint16_t multiplexer_default_pointer {0b1000'0000'0000'0000};
 }
 
 
@@ -138,8 +135,8 @@ void PPU::handle_write_from_cpu(uint16_t address, uint8_t data)
 uint8_t PPU::handle_read_from_cpu(uint16_t address)
 {
     // std::cout << "[DEBUG PPU] READ REQUESTED FROM CPU" << std::hex
-        // << " | AT ADDRESS: 0x" << static_cast<short>(address)
-        // << std::dec << "\n";
+    //     << " | AT ADDRESS: 0x" << static_cast<short>(address)
+    //     << std::dec << "\n";
 
     address = address % ppu_registers_space_size;
 
@@ -242,15 +239,14 @@ void PPU::process_pixel_rendering()
     const uint8_t pixel_color_msb = (tile_data_second_shift_reg & data_multiplexer) >> (14 - fine_x.internal.position);
 
     const uint8_t pixel_color = pixel_color_msb | pixel_color_lsb;
-    const uint16_t address_to_read = 0x3F00 + (fetched_attribute_table_byte << 2) + pixel_color;
+    const uint16_t address_to_read = palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color;
 
-    const auto final_color = PPUColors::available_colors[rand() % 63];
-    // const auto final_color = PPUColors::available_colors[memory_read(address_to_read)];
+    const auto final_color = PPUColors::available_colors[memory_read(address_to_read)];
 
     const auto x_coord = current_cycle - 1;
     const auto y_coord = current_scanline;
 
-    if (x_coord >= 0 && x_coord < 256 && y_coord >= 0 && y_coord < 240) {
+    if (x_coord >= 0 && x_coord < screen_width && y_coord >= 0 && y_coord < screen_height) {
         pixels_to_render.at(y_coord * screen_width + x_coord).setFillColor(final_color);
     }
 }
@@ -545,7 +541,7 @@ uint16_t PPU::normalize_palettes_address(uint16_t address) const
     if (check_for_palette_mirroring(normalized_address))
         normalized_address -= palette_mirror_mask;
 
-    // log_debug_palettes_ram_data();
+    log_debug_palettes_ram_data();
 
     return normalized_address;
 }

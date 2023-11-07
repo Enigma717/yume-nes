@@ -48,11 +48,14 @@ void System::run()
 
         perform_cycle(false);
 
-        if (system_cycles_executed % (341 * 262) == 0) {
-            // ppu.log_debug_palettes_ram_data();
+        if (system_cycles_executed % PPUConsts::rendered_pixels_count == 0) {
+            const auto& bg_color = PPUColors::available_colors[ppu.memory_read(0x3F00)];
 
-            for (auto& pixel : ppu.pixels_to_render) {
-                ppu.app_screen.draw(pixel);
+            ppu.app_screen.clear(bg_color);
+
+            for (const auto& pixel : ppu.pixels_to_render) {
+                if (pixel.getFillColor() != bg_color)
+                    ppu.app_screen.draw(pixel);
             }
 
             ppu.app_screen.display();

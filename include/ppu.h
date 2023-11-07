@@ -69,11 +69,11 @@ public:
 
     union Loopy {
         struct {
-            uint8_t coarse_x  : 5;
-            uint8_t coarse_y  : 5;
-            uint8_t nametable : 2;
-            uint8_t fine_y    : 3;
-            uint8_t           : 1;
+            uint16_t coarse_x  : 5;
+            uint16_t coarse_y  : 5;
+            uint16_t nametable : 2;
+            uint16_t fine_y    : 3;
+            uint16_t           : 1;
         } internal;
 
         uint16_t word {0x0000};
