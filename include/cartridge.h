@@ -8,7 +8,6 @@
 namespace CartridgeConsts
 {
     constexpr size_t header_size {16};
-    const CartridgeContents nes_logo {0x4E, 0x45, 0x53, 0x1A};
 }
 
 

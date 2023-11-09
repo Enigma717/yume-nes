@@ -6,9 +6,9 @@
 
 namespace MapperConsts
 {
+    constexpr size_t chr_rom_bank_size {8192};
     constexpr size_t prg_ram_bank_size {8192};
     constexpr size_t prg_rom_bank_size {16384};
-    constexpr size_t chr_rom_bank_size {8192};
 }
 
 using CartridgeContents = std::vector<uint8_t>;

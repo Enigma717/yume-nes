@@ -23,17 +23,17 @@ void Memory::memory_load_program(SystemMemory program, uint16_t offset)
 void Memory::memory_write(uint16_t address, uint8_t data)
 {
     if (address <= cpu_ram_upper_bound)
-        memory[address % cpu_ram_bank_size] = data;
+        memory.at(address % cpu_ram_bank_size) = data;
     else
-        memory[address] = data;
+        memory.at(address) = data;
 }
 
 uint8_t Memory::memory_read(uint16_t address) const
 {
     if (address <= cpu_ram_upper_bound)
-        return memory[address % cpu_ram_bank_size];
+        return memory.at(address % cpu_ram_bank_size);
 
-    return memory[address];
+    return memory.at(address);
 }
 
 SystemMemory Memory::get_memory_copy() const

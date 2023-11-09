@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <string>
 #include <vector>
 
 #include <SFML/Graphics.hpp>
@@ -11,11 +10,8 @@
 namespace PPUConsts
 {
     constexpr size_t oam_size {64};
-    constexpr size_t sprites_tiles_size {512};
     constexpr size_t nametables_size {2048};
     constexpr size_t palettes_ram_size {32};
-    constexpr size_t rendered_pixels_count {89342};
-
 }
 
 class Cartridge;
@@ -113,18 +109,8 @@ public:
         uint8_t position_x {0x00};
     };
 
-    struct Pixel {
-        sf::RectangleShape sfml_pixel;
-        int color_index {0};
-    };
-
-    struct SpriteTile {
-        std::vector<Pixel> pixels;
-    };
-
-    std::vector<OAMEntry>           oam              {std::vector<OAMEntry>(PPUConsts::oam_size)};
-    std::vector<SpriteTile>         sprites_tiles    {std::vector<SpriteTile>(PPUConsts::sprites_tiles_size)};
     std::vector<sf::RectangleShape> pixels_to_render {};
+    std::vector<OAMEntry>           oam              {std::vector<OAMEntry>(PPUConsts::oam_size)};
     std::vector<uint8_t>            nametables       {std::vector<uint8_t>(PPUConsts::nametables_size)};
     std::vector<uint8_t>            palettes_ram     {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
 
@@ -132,7 +118,6 @@ public:
 
 
     void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
-    void prepare_sprites_tiles_memory();
 
     void    memory_write(uint16_t address, uint8_t data);
     uint8_t memory_read(uint16_t address) const;
@@ -146,7 +131,6 @@ public:
     void render_visible_scanline();
     void render_vblank_scanline();
     void process_pixel_rendering();
-
 
 private:
     CartridgePtr cartridge_ptr {};
@@ -171,14 +155,9 @@ private:
 
 
     void log_debug_info() const;
-    void log_debug_palettes_ram_data() const;
-    void log_debug_register_write(const std::string& register_name) const;
-    void log_debug_register_read(const std::string& register_name) const;
-
-    void prepare_pattern_table(int pattern_table_number);
 
     void    process_rendering_fetches();
-    uint8_t fetch_nametable_tile_byte();
+    uint8_t fetch_nametable_tile_byte_with_shifters_load();
     uint8_t fetch_attribute_table_byte();
     uint8_t calculate_attribute_shift();
     uint8_t fetch_tile_plane_byte(uint8_t plane_offset = 0x00);
@@ -189,6 +168,8 @@ private:
     void copy_vertical_scroll_to_address();
     void load_next_tile_data_to_shift_registers();
     void move_shift_registers();
+
+    bool check_for_pixel_within_visible_screen(int x_coord, int y_coord) const;
 
     uint16_t normalize_nametables_address(uint16_t address) const;
     uint16_t normalize_palettes_address(uint16_t address) const;

@@ -6,20 +6,32 @@
 #include "../include/ppu.h"
 
 #include <algorithm>
-#include <bitset>
 #include <iostream>
 #include <iomanip>
 #include <memory>
 
 
-namespace MC = MemoryConsts;
-namespace Masks
+namespace
 {
-    constexpr uint8_t  carry_flag_mask {0b0000'0001};
-    constexpr uint8_t  overflow_flag_mask {0b0100'0000};
-    constexpr uint8_t  negative_flag_mask {0b1000'0000};
+    constexpr uint8_t carry_flag_mask {0b0000'0001};
+    constexpr uint8_t overflow_flag_mask {0b0100'0000};
+    constexpr uint8_t negative_flag_mask {0b1000'0000};
+
+    constexpr uint16_t one_byte_overflow_mask {0xFF00};
     constexpr uint16_t zero_page_mask {0x00FF};
-    constexpr uint16_t uint8_overflow_mask {0xFF00};
+
+    constexpr uint16_t apu_and_io_space_start {0x4000};
+    constexpr uint16_t ppu_registers_space_start {0x2000};
+    constexpr uint16_t prg_ram_space_start {0x6000};
+    constexpr uint16_t prg_rom_space_start {0x8000};
+    constexpr uint16_t stack_offset {0x0100};
+
+    constexpr uint16_t irq_vector_lsb {0xFFFE};
+    constexpr uint16_t irq_vector_msb {0xFFFF};
+    constexpr uint16_t nmi_vector_lsb {0xFFFA};
+    constexpr uint16_t nmi_vector_msb {0xFFFB};
+    constexpr uint16_t reset_vector_lsb {0xFFFC};
+    constexpr uint16_t reset_vector_msb {0xFFFD};
 }
 
 
@@ -47,11 +59,11 @@ CartridgePtr CPU::get_cartridge_pointer() const
 
 void CPU::memory_write(uint16_t address, uint8_t data) const
 {
-    if (address >= MC::ppu_registers_space_start && address < MC::apu_and_io_space_start)
+    if (address >= ppu_registers_space_start && address < apu_and_io_space_start)
         send_write_to_ppu(address, data);
-    else if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
+    else if (address >= prg_ram_space_start && address < prg_rom_space_start)
         send_write_to_mapper_prg_ram(address, data);
-    else if (address >= MC::prg_rom_space_start)
+    else if (address >= prg_rom_space_start)
         send_write_to_mapper_prg_rom(address, data);
     else
         send_write_to_cpu_ram(address, data);
@@ -59,11 +71,11 @@ void CPU::memory_write(uint16_t address, uint8_t data) const
 
 uint8_t CPU::memory_read(uint16_t address) const
 {
-    if (address >= MC::ppu_registers_space_start && address < MC::apu_and_io_space_start)
+    if (address >= ppu_registers_space_start && address < apu_and_io_space_start)
         return send_read_to_ppu(address);
-    else if (address >= MC::prg_ram_space_start && address < MC::prg_rom_space_start)
+    else if (address >= prg_ram_space_start && address < prg_rom_space_start)
         return send_read_to_mapper_prg_ram(address);
-    else if (address >= MC::prg_rom_space_start)
+    else if (address >= prg_rom_space_start)
         return send_read_to_mapper_prg_rom(address);
     else
         return send_read_to_cpu_ram(address);
@@ -71,14 +83,14 @@ uint8_t CPU::memory_read(uint16_t address) const
 
 void CPU::stack_push(uint8_t data)
 {
-    memory_write(MC::stack_offset + stack_ptr, data);
+    memory_write(stack_offset + stack_ptr, data);
     stack_ptr--;
 }
 
 uint8_t CPU::stack_pop()
 {
     stack_ptr++;
-    return memory_read(MC::stack_offset + stack_ptr);
+    return memory_read(stack_offset + stack_ptr);
 }
 
 
@@ -250,7 +262,7 @@ void CPU::log_debug_info() const
 {
     uint8_t debug_read_data {0x00};
 
-    if (arg_address >= MC::ppu_registers_space_start && arg_address < MC::apu_and_io_space_start)
+    if (arg_address >= ppu_registers_space_start && arg_address < apu_and_io_space_start)
         debug_read_data = 0xAA;
     else
         debug_read_data = memory_read(arg_address);
@@ -312,8 +324,8 @@ uint8_t CPU::send_read_to_cpu_ram(uint16_t address) const
 
 uint16_t CPU::read_nmi_vector() const
 {
-    auto lsb {memory_read(MC::nmi_vector_lsb)};
-    auto msb {memory_read(MC::nmi_vector_msb)};
+    auto lsb {memory_read(nmi_vector_lsb)};
+    auto msb {memory_read(nmi_vector_msb)};
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -322,8 +334,8 @@ uint16_t CPU::read_nmi_vector() const
 
 uint16_t CPU::read_reset_vector() const
 {
-    auto lsb {memory_read(MC::reset_vector_lsb)};
-    auto msb {memory_read(MC::reset_vector_msb)};
+    auto lsb {memory_read(reset_vector_lsb)};
+    auto msb {memory_read(reset_vector_msb)};
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -332,8 +344,8 @@ uint16_t CPU::read_reset_vector() const
 
 uint16_t CPU::read_irq_vector() const
 {
-    auto lsb {memory_read(MC::irq_vector_lsb)};
-    auto msb {memory_read(MC::irq_vector_msb)};
+    auto lsb {memory_read(irq_vector_lsb)};
+    auto msb {memory_read(irq_vector_msb)};
 
     uint16_t address = (msb << 8) | lsb;
 
@@ -362,7 +374,7 @@ bool CPU::check_for_flag_with_mask(uint16_t reg, uint16_t mask) const
 
 bool CPU::check_for_page_crossing(uint16_t first_address, uint16_t second_address) const
 {
-    return (first_address & Masks::uint8_overflow_mask) != (second_address & Masks::uint8_overflow_mask);
+    return (first_address & one_byte_overflow_mask) != (second_address & one_byte_overflow_mask);
 }
 
 bool CPU::check_for_sign_change(bool a, bool b, bool c) const
@@ -372,7 +384,7 @@ bool CPU::check_for_sign_change(bool a, bool b, bool c) const
 
 void CPU::process_interrupt(bool brk_flag_state)
 {
-    const auto pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
+    const auto pc_lsb = static_cast<uint8_t>(pc & zero_page_mask);
     const auto pc_msb = static_cast<uint8_t>(pc >> 8);
 
     status.flag.brk = brk_flag_state;
@@ -386,8 +398,8 @@ void CPU::process_interrupt(bool brk_flag_state)
 
 void CPU::perform_branching()
 {
-    if (branch_offset & Masks::negative_flag_mask)
-        branch_offset = branch_offset | Masks::uint8_overflow_mask;
+    if (branch_offset & negative_flag_mask)
+        branch_offset = branch_offset | one_byte_overflow_mask;
 
     const uint16_t new_pc = pc + branch_offset;
 
@@ -415,7 +427,7 @@ void CPU::address_mode_zero_page()
     arg_address = memory_read(pc);
     pc++;
 
-    arg_address = arg_address & Masks::zero_page_mask;
+    arg_address = arg_address & zero_page_mask;
 }
 
 void CPU::address_mode_zero_page_x()
@@ -423,7 +435,7 @@ void CPU::address_mode_zero_page_x()
     arg_address = memory_read(pc) + x_reg;
     pc++;
 
-    arg_address = arg_address & Masks::zero_page_mask;
+    arg_address = arg_address & zero_page_mask;
 }
 
 void CPU::address_mode_zero_page_y()
@@ -431,7 +443,7 @@ void CPU::address_mode_zero_page_y()
     arg_address = memory_read(pc) + y_reg;
     pc++;
 
-    arg_address = arg_address & Masks::zero_page_mask;
+    arg_address = arg_address & zero_page_mask;
 }
 
 void CPU::address_mode_relative()
@@ -492,7 +504,7 @@ void CPU::address_mode_indirect()
     // Original 6502 CPU's indirect jump page crossing bug reproduction:
     // https://www.nesdev.org/obelisk-6502-guide/reference.html#JMP
     if (lsb == 0xFF)
-        msb = memory_read(temp_address & Masks::uint8_overflow_mask);
+        msb = memory_read(temp_address & one_byte_overflow_mask);
     else
         msb = memory_read(temp_address + 1);
 
@@ -506,8 +518,8 @@ void CPU::address_mode_indirect_x()
     const uint16_t temp_address = memory_read(pc) + x_reg;
     pc++;
 
-    auto lsb {memory_read(temp_address & Masks::zero_page_mask)};
-    auto msb {memory_read((temp_address + 1) & Masks::zero_page_mask)};
+    auto lsb {memory_read(temp_address & zero_page_mask)};
+    auto msb {memory_read((temp_address + 1) & zero_page_mask)};
 
     arg_address = (msb << 8) | lsb;
 }
@@ -517,8 +529,8 @@ void CPU::address_mode_indirect_y()
     const uint16_t temp_address = memory_read(pc);
     pc++;
 
-    auto lsb {memory_read(temp_address & Masks::zero_page_mask)};
-    auto msb {memory_read((temp_address + 1) & Masks::zero_page_mask)};
+    auto lsb {memory_read(temp_address & zero_page_mask)};
+    auto msb {memory_read((temp_address + 1) & zero_page_mask)};
 
     const uint16_t read_address = (msb << 8) | lsb;
     arg_address = read_address + y_reg;
@@ -543,7 +555,7 @@ void CPU::ADC()
 
     acc = static_cast<uint8_t>(result);
 
-    status.flag.carry = check_for_flag_with_mask(result, Masks::uint8_overflow_mask);
+    status.flag.carry = check_for_flag_with_mask(result, one_byte_overflow_mask);
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.overflow = check_for_sign_change(acc_sign, value_sign, result_sign);
     status.flag.negative = check_for_negative_flag(acc);
@@ -562,7 +574,7 @@ void CPU::AND()
 void CPU::ASL()
 {
     if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
-        status.flag.carry = check_for_flag_with_mask(acc, Masks::negative_flag_mask);
+        status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
 
         acc = acc << 1;
 
@@ -571,7 +583,7 @@ void CPU::ASL()
     }
     else {
         auto result {memory_read(arg_address)};
-        status.flag.carry = check_for_flag_with_mask(result, Masks::negative_flag_mask);
+        status.flag.carry = check_for_flag_with_mask(result, negative_flag_mask);
 
         result = result << 1;
         memory_write(arg_address, result);
@@ -605,7 +617,7 @@ void CPU::BIT()
     const uint8_t result = acc & value;
 
     status.flag.zero = check_for_zero_flag(result);
-    status.flag.overflow = check_for_flag_with_mask(value, Masks::overflow_flag_mask);
+    status.flag.overflow = check_for_flag_with_mask(value, overflow_flag_mask);
     status.flag.negative = check_for_negative_flag(value);
 }
 
@@ -771,7 +783,7 @@ void CPU::JSR()
 {
     pc--;
 
-    const auto pc_lsb = static_cast<uint8_t>(pc & Masks::zero_page_mask);
+    const auto pc_lsb = static_cast<uint8_t>(pc & zero_page_mask);
     const auto pc_msb = static_cast<uint8_t>(pc >> 8);
 
     stack_push(pc_msb);
@@ -807,7 +819,7 @@ void CPU::LDY()
 void CPU::LSR()
 {
     if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
-        status.flag.carry = check_for_flag_with_mask(acc, Masks::carry_flag_mask);
+        status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
 
         acc = acc >> 1;
 
@@ -816,7 +828,7 @@ void CPU::LSR()
     }
     else {
         auto result {memory_read(arg_address)};
-        status.flag.carry = check_for_flag_with_mask(result, Masks::carry_flag_mask);
+        status.flag.carry = check_for_flag_with_mask(result, carry_flag_mask);
 
         result = result >> 1;
         memory_write(arg_address, result);
@@ -872,7 +884,7 @@ void CPU::ROL()
     const bool old_carry = status.flag.carry;
 
     if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
-        status.flag.carry = check_for_flag_with_mask(acc, Masks::negative_flag_mask);
+        status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
 
         acc = acc << 1;
         acc = acc | old_carry;
@@ -882,7 +894,7 @@ void CPU::ROL()
     }
     else {
         auto result {memory_read(arg_address)};
-        status.flag.carry = check_for_flag_with_mask(result, Masks::negative_flag_mask);
+        status.flag.carry = check_for_flag_with_mask(result, negative_flag_mask);
 
         result = result << 1;
         result = result | old_carry;
@@ -898,7 +910,7 @@ void CPU::ROR()
     const bool old_carry = status.flag.carry;
 
     if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
-        status.flag.carry = check_for_flag_with_mask(acc, Masks::carry_flag_mask);
+        status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
 
         acc = acc >> 1;
         acc = acc | (old_carry << 7);
@@ -908,7 +920,7 @@ void CPU::ROR()
     }
     else {
         auto result {memory_read(arg_address)};
-        status.flag.carry = check_for_flag_with_mask(result, Masks::carry_flag_mask);
+        status.flag.carry = check_for_flag_with_mask(result, carry_flag_mask);
 
         result = result >> 1;
         result = result | (old_carry << 7);
@@ -954,7 +966,7 @@ void CPU::SBC()
 
     acc = static_cast<uint8_t>(result);
 
-    status.flag.carry = check_for_flag_with_mask(result, Masks::uint8_overflow_mask);
+    status.flag.carry = check_for_flag_with_mask(result, one_byte_overflow_mask);
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.overflow = check_for_sign_change(acc_sign, value_sign, result_sign);
     status.flag.negative = check_for_negative_flag(acc);
