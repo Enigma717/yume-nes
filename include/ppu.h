@@ -172,8 +172,9 @@ private:
     bool check_for_pixel_within_visible_screen(int x_coord, int y_coord) const;
 
     uint16_t normalize_nametables_address(uint16_t address) const;
-    uint16_t normalize_palettes_address(uint16_t address) const;
+    uint16_t normalize_palettes_address(uint16_t address, bool is_reading = false) const;
     bool     check_for_palette_mirroring(uint16_t address) const;
+    bool     check_for_background_read(uint16_t address) const;
 
     void    send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const;
     uint8_t send_read_to_mapper_chr_rom(uint16_t address) const;

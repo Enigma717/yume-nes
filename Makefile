@@ -6,7 +6,7 @@ SRC  := ./src
 SRCS := $(wildcard $(SRC)/*.cpp)
 
 all:
-	$(CXX) $(CPPFLAGS) -o emu main.cpp $(SRCS)
+	$(CXX) $(CPPFLAGS) -o yume main.cpp $(SRCS)
 
 clean:
-	rm -f emu
+	rm -f yume

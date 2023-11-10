@@ -2,7 +2,7 @@
 main.cpp
 
 # executables
-emu
+yume
 run_tests
 
 # ROM test files

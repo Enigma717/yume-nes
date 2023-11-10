@@ -40,17 +40,16 @@ void System::run()
     ppu.app_screen.setFramerateLimit(framerate_cap);
     ppu.app_screen.setVerticalSyncEnabled(false);
 
-    sf::Event event;
     sf::Clock clock;
     while (ppu.app_screen.isOpen()) {
         // while (ppu.app_screen.pollEvent(event)) {
-        //     if (event.type == sf::Event::Closed
-        //         || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
-        //         ppu.app_screen.close();
-        //         return;
-        //     }
+            //     if (event.type == sf::Event::Closed
+                //         || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
+                //         ppu.app_screen.close();
+                //         return;
+            //     }
         //     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-        //         std::cout << "\n\n\nSPACE PRESSED\n\n\n";
+                //         std::cout << "\n\n\nSPACE PRESSED\n\n\n";
         //     }
         // }
 

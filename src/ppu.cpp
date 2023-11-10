@@ -20,26 +20,27 @@ namespace RegistersAddresses
 
 namespace
 {
-    constexpr size_t actual_screen_height {262};
-    constexpr size_t actual_screen_width {341};
     constexpr size_t fetching_subcycle_size {8};
     constexpr size_t pixel_size {1};
     constexpr size_t ppu_registers_space_size {8};
-    constexpr size_t visible_pixels_count {61440};
-    constexpr size_t visible_screen_height {240};
-    constexpr size_t visible_screen_width {256};
 
-    constexpr size_t clear_ppu_status_cycle {1};
-    constexpr size_t garbage_nametable_fetch_cycle {339};
-    constexpr size_t horizontal_scroll_copy_cycle {257};
-    constexpr size_t next_tile_fetches_cycle_end {337};
-    constexpr size_t next_tile_fetches_cycle_start {320};
-    constexpr size_t post_render_scanline_number {240};
-    constexpr size_t pre_render_scanline_number {261};
-    constexpr size_t set_vblank_flag_cycle {1};
-    constexpr size_t vblank_scanline_number {241};
-    constexpr size_t vertical_scroll_copy_cycle_end {305};
-    constexpr size_t vertical_scroll_copy_cycle_start {279};
+    constexpr int actual_screen_height {262};
+    constexpr int actual_screen_width {341};
+    constexpr int visible_pixels_count {61440};
+    constexpr int visible_screen_height {240};
+    constexpr int visible_screen_width {256};
+
+    constexpr int clear_ppu_status_cycle {1};
+    constexpr int garbage_nametable_fetch_cycle {339};
+    constexpr int horizontal_scroll_copy_cycle {257};
+    constexpr int next_tile_fetches_cycle_end {337};
+    constexpr int next_tile_fetches_cycle_start {320};
+    constexpr int post_render_scanline_number {240};
+    constexpr int pre_render_scanline_number {261};
+    constexpr int set_vblank_flag_cycle {1};
+    constexpr int vblank_scanline_number {241};
+    constexpr int vertical_scroll_copy_cycle_end {305};
+    constexpr int vertical_scroll_copy_cycle_start {279};
 
     constexpr uint8_t fine_y_max_value {0x07};
     constexpr uint8_t nametable_change_to_attribute_bound {0x1D};
@@ -84,7 +85,9 @@ PPU::PPU() : app_screen{sf::VideoMode(visible_screen_width, visible_screen_heigh
     for (auto i {0}; i < visible_screen_height; i++) {
         for (auto j {0}; j < visible_screen_width; j++) {
             sf::RectangleShape square(sf::Vector2f(pixel_size, pixel_size));
-            square.setPosition(j, i);
+            const auto x_coord = static_cast<float>(j);
+            const auto y_coord = static_cast<float>(i);
+            square.setPosition(x_coord, y_coord);
 
             pixels_to_render.push_back(square);
         }
@@ -232,13 +235,14 @@ void PPU::process_pixel_rendering()
 
     data_multiplexer = multiplexer_default_pointer >> fine_x.internal.position;
 
-    const uint8_t pixel_color_lsb =
-        (tile_data_first_shift_reg & data_multiplexer) >> (pixel_color_lsb_default_shift - fine_x.internal.position);
-    const uint8_t pixel_color_msb =
-        (tile_data_second_shift_reg & data_multiplexer) >> (pixel_color_msb_default_shift - fine_x.internal.position);
+    const auto pixel_color_lsb = static_cast<uint8_t>(
+        (tile_data_first_shift_reg & data_multiplexer) >> (pixel_color_lsb_default_shift - fine_x.internal.position));
+    const auto pixel_color_msb = static_cast<uint8_t>(
+        (tile_data_second_shift_reg & data_multiplexer) >> (pixel_color_msb_default_shift - fine_x.internal.position));
 
     const uint8_t pixel_color = pixel_color_msb | pixel_color_lsb;
-    const uint16_t address_to_read = palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color;
+    const auto address_to_read = static_cast<uint16_t>(
+        palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color);
 
     const auto final_color = PPUColors::available_colors.at(memory_read(address_to_read));
 
@@ -445,12 +449,15 @@ uint16_t PPU::normalize_nametables_address(uint16_t address) const
     return normalized_address;
 }
 
-uint16_t PPU::normalize_palettes_address(uint16_t address) const
+uint16_t PPU::normalize_palettes_address(uint16_t address, bool is_reading) const
 {
     uint16_t normalized_address = address % current_palette_mask;
 
     if (check_for_palette_mirroring(normalized_address))
         normalized_address -= palette_mirror_mask;
+
+    if (is_reading && check_for_background_read(normalized_address))
+        normalized_address = 0x0000;
 
     return normalized_address;
 }
@@ -463,6 +470,12 @@ bool PPU::check_for_palette_mirroring(uint16_t address) const
         || address == (palette_mirror_mask + 0x000C);
 }
 
+bool PPU::check_for_background_read(uint16_t address) const
+{
+    return address == 0x0004
+        || address == 0x0008
+        || address == 0x000C;
+}
 
 void PPU::send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const
 {
@@ -497,7 +510,7 @@ void PPU::process_palettes_memory_write(uint16_t address, uint8_t data)
 
 uint8_t PPU::process_palettes_memory_read(uint16_t address) const
 {
-    const auto normalized_address {normalize_palettes_address(address)};
+    const auto normalized_address {normalize_palettes_address(address, true)};
 
     return palettes_ram.at(normalized_address);
 }

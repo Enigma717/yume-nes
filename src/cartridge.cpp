@@ -36,9 +36,9 @@ void Cartridge::load_cartridge(const std::string& cartridge_path)
     auto final_prg_rom_size {MapperConsts::prg_rom_bank_size * mapper.prg_rom_banks_count};
     auto final_chr_rom_size {MapperConsts::chr_rom_bank_size * mapper.chr_rom_banks_count};
 
-    mapper.prg_rom_memory.reserve(final_prg_ram_size);
-    mapper.prg_rom_memory.reserve(final_prg_rom_size);
-    mapper.chr_rom_memory.reserve(final_chr_rom_size);
+    mapper.prg_rom_memory.resize(final_prg_ram_size);
+    mapper.prg_rom_memory.resize(final_prg_rom_size);
+    mapper.chr_rom_memory.resize(final_chr_rom_size);
 
 
     auto actual_trainer_size {mapper.trainer_presence ? trainer_size : 0};
