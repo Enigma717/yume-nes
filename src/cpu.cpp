@@ -1,14 +1,10 @@
 #include "../include/cpu.h"
 
-#include "../include/cartridge.h"
 #include "../include/instruction.h"
-#include "../include/memory.h"
-#include "../include/ppu.h"
 
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
-#include <memory>
 
 
 namespace
@@ -22,8 +18,6 @@ namespace
 
     constexpr uint16_t apu_and_io_space_start {0x4000};
     constexpr uint16_t ppu_registers_space_start {0x2000};
-    constexpr uint16_t prg_ram_space_start {0x6000};
-    constexpr uint16_t prg_rom_space_start {0x8000};
     constexpr uint16_t stack_offset {0x0100};
 
     constexpr uint16_t irq_vector_lsb {0xFFFE};
@@ -32,67 +26,48 @@ namespace
     constexpr uint16_t nmi_vector_msb {0xFFFB};
     constexpr uint16_t reset_vector_lsb {0xFFFC};
     constexpr uint16_t reset_vector_msb {0xFFFD};
+
+
+    bool check_for_zero_flag(uint8_t reg)
+    {
+        return reg == 0x00;
+    }
+
+    bool check_for_negative_flag(uint8_t reg)
+    {
+        return reg >> 7;
+    }
+
+    bool check_for_negative_flag(uint16_t reg)
+    {
+        return reg >> 15;
+    }
+
+    bool check_for_flag_with_mask(uint16_t reg, uint16_t mask)
+    {
+        return (reg & mask) > 0;
+    }
+
+    bool check_for_page_crossing(uint16_t first_address, uint16_t second_address)
+    {
+        return (first_address & one_byte_overflow_mask) != (second_address & one_byte_overflow_mask);
+    }
+
+    bool check_for_sign_change(bool a, bool b, bool c)
+    {
+        return ((a && b) && !c) || (!(a || b) && c);
+    }
 }
 
 
-CPU::CPU(PPU& ppu) : ppu_ref{ppu} {};
+// API
 
-void CPU::connect_with_memory(std::shared_ptr<Memory> ram)
+CPU::CPU(PPU& ppu) : memory_bus{ppu} {};
+
+void CPU::connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge)
 {
-    ram_ptr = ram;
+    memory_bus.insert_cartridge(cartridge);
 }
-
-void CPU::connect_with_cartridge(std::shared_ptr<Cartridge> cartridge)
-{
-    cartridge_ptr = cartridge;
-}
-
-MemoryPtr CPU::get_memory_pointer() const
-{
-    return ram_ptr;
-}
-
-CartridgePtr CPU::get_cartridge_pointer() const
-{
-    return cartridge_ptr;
-}
-
-void CPU::memory_write(uint16_t address, uint8_t data) const
-{
-    if (address >= ppu_registers_space_start && address < apu_and_io_space_start)
-        send_write_to_ppu(address, data);
-    else if (address >= prg_ram_space_start && address < prg_rom_space_start)
-        send_write_to_mapper_prg_ram(address, data);
-    else if (address >= prg_rom_space_start)
-        send_write_to_mapper_prg_rom(address, data);
-    else
-        send_write_to_cpu_ram(address, data);
-}
-
-uint8_t CPU::memory_read(uint16_t address) const
-{
-    if (address >= ppu_registers_space_start && address < apu_and_io_space_start)
-        return send_read_to_ppu(address);
-    else if (address >= prg_ram_space_start && address < prg_rom_space_start)
-        return send_read_to_mapper_prg_ram(address);
-    else if (address >= prg_rom_space_start)
-        return send_read_to_mapper_prg_rom(address);
-    else
-        return send_read_to_cpu_ram(address);
-}
-
-void CPU::stack_push(uint8_t data)
-{
-    memory_write(stack_offset + stack_ptr, data);
-    stack_ptr--;
-}
-
-uint8_t CPU::stack_pop()
-{
-    stack_ptr++;
-    return memory_read(stack_offset + stack_ptr);
-}
-
 
 void CPU::perform_cycle(bool debug_mode)
 {
@@ -109,28 +84,101 @@ void CPU::perform_cycle(bool debug_mode)
         cycles_executed++;
     }
 
-    if (ppu_ref.force_nmi_in_cpu) {
-        ppu_ref.force_nmi_in_cpu = false;
+    if (memory_bus.read_ppu_nmi_flag()) {
+        memory_bus.clear_ppu_nmi_flag();
         interrupt_nmi();
     }
 }
 
+void CPU::hard_reset()
+{
+    acc = 0x00;
+    x_reg = 0x00;
+    y_reg = 0x00;
+    stack_ptr = 0xFD;
+    pc = read_reset_vector();
+    status.word = 0x34;
+    memory_bus.clear_memory();
+}
+
+void CPU::log_debug_info() const
+{
+    uint8_t debug_read_data {0x00};
+
+    if (arg_address >= ppu_registers_space_start && arg_address < apu_and_io_space_start)
+        debug_read_data = 0xAA;
+    else
+        debug_read_data = read_from_bus(arg_address);
+
+    std::cout << "[DEBUG CPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << cycles_executed;
+    std::cout << std::hex << std::uppercase << std::setfill('0')
+        << " | OPCODE: 0x" << std::setw(2) << std::right << static_cast<short>(current_instruction.opcode)
+        << " | ARG: 0x" << std::setw(4) << std::right << static_cast<short>(arg_address)
+        << " | MEM[ARG]: 0x" << std::setw(2) << std::right << static_cast<short>(debug_read_data)
+        << " || A: 0x" << std::setw(2) << std::right << static_cast<short>(acc)
+        << " | X: 0x" << std::setw(2) << std::right << static_cast<short>(x_reg)
+        << " | Y: 0x" << std::setw(2) << std::right << static_cast<short>(y_reg)
+        << " | S: 0x" << std::setw(2) << std::right << static_cast<short>(stack_ptr)
+        << " | PC: 0x" << std::setw(4) << std::right << static_cast<short>(pc)
+        << " | P: 0x" << std::setw(2) << std::right << static_cast<short>(status.word);
+}
+
+
+// Bus management
+
+void CPU::write_to_bus(uint16_t address, uint8_t data)
+{
+    memory_bus.dispatch_write_to_device(address, data);
+}
+
+void CPU::stack_push(uint8_t data)
+{
+    write_to_bus(stack_offset + stack_ptr, data);
+    stack_ptr--;
+}
+
+uint8_t CPU::read_from_bus(uint16_t address) const
+{
+    return memory_bus.dispatch_read_to_device(address);
+}
+
+uint8_t CPU::stack_pop()
+{
+    stack_ptr++;
+    return read_from_bus(stack_offset + stack_ptr);
+}
+
 void CPU::next_instruction()
 {
-    const auto instruction_opcode {memory_read(pc)};
+    const auto instruction_opcode {read_from_bus(pc)};
     pc++;
 
-    curr_instruction = deduce_instruction_from_opcode(instruction_opcode);
-    cycles_queued = curr_instruction.cycles;
+    current_instruction = decode_instruction_from_opcode(instruction_opcode);
+    cycles_queued = current_instruction.cycles;
 
     exec_address_mode();
     exec_instruction();
 }
 
+//////////////////////////
+// Instruction decoding //
+//////////////////////////
+
+Instruction CPU::decode_instruction_from_opcode(uint8_t opcode) const
+{
+    auto instruction_it = std::find_if(
+        Lookup::instructions_table.begin(),
+        Lookup::instructions_table.end(),
+        [&] (const Instruction& instr) { return instr.opcode == opcode; }
+        );
+
+    return *instruction_it;
+}
+
 void CPU::exec_address_mode()
 {
     using AM = Instruction::AddressingMode;
-    switch (curr_instruction.address_mode) {
+    switch (current_instruction.address_mode) {
         case AM::immediate:   address_mode_immediate();   break;
         case AM::zero_page:   address_mode_zero_page();   break;
         case AM::zero_page_x: address_mode_zero_page_x(); break;
@@ -149,7 +197,7 @@ void CPU::exec_address_mode()
 void CPU::exec_instruction()
 {
     using MN = Instruction::MnemonicName;
-    switch (curr_instruction.mnemonic) {
+    switch (current_instruction.mnemonic) {
         case MN::ADC: ADC(); break;
         case MN::AND: AND(); break;
         case MN::ASL: ASL(); break;
@@ -210,17 +258,40 @@ void CPU::exec_instruction()
     }
 }
 
-Instruction CPU::deduce_instruction_from_opcode(uint8_t opcode) const
-{
-    auto instruction_it = std::find_if(
-        Lookup::instructions_table.begin(),
-        Lookup::instructions_table.end(),
-        [&] (const Instruction& instr) { return instr.opcode == opcode; }
-        );
 
-    return *instruction_it;
+////////////////////////////
+// Interrupts + branching //
+////////////////////////////
+
+uint16_t CPU::read_nmi_vector() const
+{
+    auto lsb {read_from_bus(nmi_vector_lsb)};
+    auto msb {read_from_bus(nmi_vector_msb)};
+
+    uint16_t address = (msb << 8) | lsb;
+
+    return address;
 }
 
+uint16_t CPU::read_reset_vector() const
+{
+    auto lsb {read_from_bus(reset_vector_lsb)};
+    auto msb {read_from_bus(reset_vector_msb)};
+
+    uint16_t address = (msb << 8) | lsb;
+
+    return address;
+}
+
+uint16_t CPU::read_irq_vector() const
+{
+    auto lsb {read_from_bus(irq_vector_lsb)};
+    auto msb {read_from_bus(irq_vector_msb)};
+
+    uint16_t address = (msb << 8) | lsb;
+
+    return address;
+}
 
 void CPU::interrupt_nmi()
 {
@@ -244,142 +315,6 @@ void CPU::interrupt_reset()
     stack_ptr -= 0x03;
     pc = read_reset_vector();
     status.flag.interrupt = 1;
-}
-
-void CPU::hard_reset()
-{
-    acc = 0x00;
-    x_reg = 0x00;
-    y_reg = 0x00;
-    stack_ptr = 0xFD;
-    pc = read_reset_vector();
-    status.word = 0x34;
-    ram_ptr.lock()->memory_clear();
-}
-
-
-void CPU::log_debug_info() const
-{
-    uint8_t debug_read_data {0x00};
-
-    if (arg_address >= ppu_registers_space_start && arg_address < apu_and_io_space_start)
-        debug_read_data = 0xAA;
-    else
-        debug_read_data = memory_read(arg_address);
-
-    std::cout << "[DEBUG CPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << cycles_executed;
-    std::cout << std::hex << std::uppercase << std::setfill('0')
-        << " | OPCODE: 0x" << std::setw(2) << std::right << static_cast<short>(curr_instruction.opcode)
-        << " | ARG: 0x" << std::setw(4) << std::right << static_cast<short>(arg_address)
-        << " | MEM[ARG]: 0x" << std::setw(2) << std::right << static_cast<short>(debug_read_data)
-        << " || A: 0x" << std::setw(2) << std::right << static_cast<short>(acc)
-        << " | X: 0x" << std::setw(2) << std::right << static_cast<short>(x_reg)
-        << " | Y: 0x" << std::setw(2) << std::right << static_cast<short>(y_reg)
-        << " | S: 0x" << std::setw(2) << std::right << static_cast<short>(stack_ptr)
-        << " | PC: 0x" << std::setw(4) << std::right << static_cast<short>(pc)
-        << " | P: 0x" << std::setw(2) << std::right << static_cast<short>(status.word)
-        << " || PPU: " << std::setw(4) << std::setfill(' ') << std::dec << std::left << ppu_ref.current_scanline
-        << " : " << std::setw(4) << std::left << ppu_ref.current_cycle << "\n";
-}
-
-void CPU::send_write_to_ppu(uint16_t address, uint8_t data) const
-{
-    ppu_ref.handle_write_from_cpu(address, data);
-}
-
-void CPU::send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const
-{
-    cartridge_ptr.lock()->mapper.map_prg_ram_write(address, data);
-}
-
-void CPU::send_write_to_mapper_prg_rom(uint16_t address, uint8_t data) const
-{
-    cartridge_ptr.lock()->mapper.map_prg_rom_write(address, data);
-}
-
-void CPU::send_write_to_cpu_ram(uint16_t address, uint8_t data) const
-{
-    ram_ptr.lock()->memory_write(address, data);
-}
-
-uint8_t CPU::send_read_to_ppu(uint16_t address) const
-{
-    return ppu_ref.handle_read_from_cpu(address);
-}
-
-uint8_t CPU::send_read_to_mapper_prg_ram(uint16_t address) const
-{
-    return cartridge_ptr.lock()->mapper.map_prg_ram_read(address);
-}
-
-uint8_t CPU::send_read_to_mapper_prg_rom(uint16_t address) const
-{
-    return cartridge_ptr.lock()->mapper.map_prg_rom_read(address);
-}
-
-uint8_t CPU::send_read_to_cpu_ram(uint16_t address) const
-{
-    return ram_ptr.lock()->memory_read(address);
-}
-
-uint16_t CPU::read_nmi_vector() const
-{
-    auto lsb {memory_read(nmi_vector_lsb)};
-    auto msb {memory_read(nmi_vector_msb)};
-
-    uint16_t address = (msb << 8) | lsb;
-
-    return address;
-}
-
-uint16_t CPU::read_reset_vector() const
-{
-    auto lsb {memory_read(reset_vector_lsb)};
-    auto msb {memory_read(reset_vector_msb)};
-
-    uint16_t address = (msb << 8) | lsb;
-
-    return address;
-}
-
-uint16_t CPU::read_irq_vector() const
-{
-    auto lsb {memory_read(irq_vector_lsb)};
-    auto msb {memory_read(irq_vector_msb)};
-
-    uint16_t address = (msb << 8) | lsb;
-
-    return address;
-}
-
-bool CPU::check_for_zero_flag(uint8_t reg) const
-{
-    return reg == 0x00;
-}
-
-bool CPU::check_for_negative_flag(uint8_t reg) const
-{
-    return reg >> 7;
-}
-
-bool CPU::check_for_negative_flag(uint16_t reg) const
-{
-    return reg >> 15;
-}
-
-bool CPU::check_for_flag_with_mask(uint16_t reg, uint16_t mask) const
-{
-    return (reg & mask) > 0;
-}
-
-bool CPU::check_for_page_crossing(uint16_t first_address, uint16_t second_address) const
-{
-    return (first_address & one_byte_overflow_mask) != (second_address & one_byte_overflow_mask);
-}
-
-bool CPU::check_for_sign_change(bool a, bool b, bool c) const
-{
-    return ((a && b) && !c) || (!(a || b) && c);
 }
 
 void CPU::process_interrupt(bool brk_flag_state)
@@ -424,7 +359,7 @@ void CPU::address_mode_immediate()
 
 void CPU::address_mode_zero_page()
 {
-    arg_address = memory_read(pc);
+    arg_address = read_from_bus(pc);
     pc++;
 
     arg_address = arg_address & zero_page_mask;
@@ -432,7 +367,7 @@ void CPU::address_mode_zero_page()
 
 void CPU::address_mode_zero_page_x()
 {
-    arg_address = memory_read(pc) + x_reg;
+    arg_address = read_from_bus(pc) + x_reg;
     pc++;
 
     arg_address = arg_address & zero_page_mask;
@@ -440,7 +375,7 @@ void CPU::address_mode_zero_page_x()
 
 void CPU::address_mode_zero_page_y()
 {
-    arg_address = memory_read(pc) + y_reg;
+    arg_address = read_from_bus(pc) + y_reg;
     pc++;
 
     arg_address = arg_address & zero_page_mask;
@@ -448,16 +383,16 @@ void CPU::address_mode_zero_page_y()
 
 void CPU::address_mode_relative()
 {
-    branch_offset = memory_read(pc);
+    branch_offset = read_from_bus(pc);
     arg_address = branch_offset;
     pc++;
 }
 
 void CPU::address_mode_absolute()
 {
-    auto lsb {memory_read(pc)};
+    auto lsb {read_from_bus(pc)};
     pc++;
-    auto msb {memory_read(pc)};
+    auto msb {read_from_bus(pc)};
     pc++;
 
     arg_address = (msb << 8) | lsb;
@@ -465,9 +400,9 @@ void CPU::address_mode_absolute()
 
 void CPU::address_mode_absolute_x()
 {
-    auto lsb {memory_read(pc)};
+    auto lsb {read_from_bus(pc)};
     pc++;
-    auto msb {memory_read(pc)};
+    auto msb {read_from_bus(pc)};
     pc++;
 
     uint16_t read_address = (msb << 8) | lsb;
@@ -480,9 +415,9 @@ void CPU::address_mode_absolute_x()
 
 void CPU::address_mode_absolute_y()
 {
-    auto lsb {memory_read(pc)};
+    auto lsb {read_from_bus(pc)};
     pc++;
-    auto msb {memory_read(pc)};
+    auto msb {read_from_bus(pc)};
     pc++;
 
     uint16_t read_address = (msb << 8) | lsb;
@@ -494,9 +429,9 @@ void CPU::address_mode_absolute_y()
 
 void CPU::address_mode_indirect()
 {
-    auto lsb {memory_read(pc)};
+    auto lsb {read_from_bus(pc)};
     pc++;
-    auto msb {memory_read(pc)};
+    auto msb {read_from_bus(pc)};
     pc++;
 
     uint16_t temp_address = (msb << 8) | lsb;
@@ -504,33 +439,33 @@ void CPU::address_mode_indirect()
     // Original 6502 CPU's indirect jump page crossing bug reproduction:
     // https://www.nesdev.org/obelisk-6502-guide/reference.html#JMP
     if (lsb == 0xFF)
-        msb = memory_read(temp_address & one_byte_overflow_mask);
+        msb = read_from_bus(temp_address & one_byte_overflow_mask);
     else
-        msb = memory_read(temp_address + 1);
+        msb = read_from_bus(temp_address + 1);
 
-    lsb = memory_read(temp_address);
+    lsb = read_from_bus(temp_address);
 
     arg_address = (msb << 8) | lsb;
 }
 
 void CPU::address_mode_indirect_x()
 {
-    const uint16_t temp_address = memory_read(pc) + x_reg;
+    const uint16_t temp_address = read_from_bus(pc) + x_reg;
     pc++;
 
-    auto lsb {memory_read(temp_address & zero_page_mask)};
-    auto msb {memory_read((temp_address + 1) & zero_page_mask)};
+    auto lsb {read_from_bus(temp_address & zero_page_mask)};
+    auto msb {read_from_bus((temp_address + 1) & zero_page_mask)};
 
     arg_address = (msb << 8) | lsb;
 }
 
 void CPU::address_mode_indirect_y()
 {
-    const uint16_t temp_address = memory_read(pc);
+    const uint16_t temp_address = read_from_bus(pc);
     pc++;
 
-    auto lsb {memory_read(temp_address & zero_page_mask)};
-    auto msb {memory_read((temp_address + 1) & zero_page_mask)};
+    auto lsb {read_from_bus(temp_address & zero_page_mask)};
+    auto msb {read_from_bus((temp_address + 1) & zero_page_mask)};
 
     const uint16_t read_address = (msb << 8) | lsb;
     arg_address = read_address + y_reg;
@@ -546,7 +481,7 @@ void CPU::address_mode_indirect_y()
 
 void CPU::ADC()
 {
-    const auto value {memory_read(arg_address)};
+    const auto value {read_from_bus(arg_address)};
     const auto result = static_cast<uint16_t>(acc + value + status.flag.carry);
 
     const auto acc_sign {check_for_negative_flag(acc)};
@@ -563,7 +498,7 @@ void CPU::ADC()
 
 void CPU::AND()
 {
-    const auto value {memory_read(arg_address)};
+    const auto value {read_from_bus(arg_address)};
 
     acc = acc & value;
 
@@ -573,7 +508,7 @@ void CPU::AND()
 
 void CPU::ASL()
 {
-    if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction.address_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
 
         acc = acc << 1;
@@ -582,11 +517,11 @@ void CPU::ASL()
         status.flag.negative = check_for_negative_flag(acc);
     }
     else {
-        auto result {memory_read(arg_address)};
+        auto result {read_from_bus(arg_address)};
         status.flag.carry = check_for_flag_with_mask(result, negative_flag_mask);
 
         result = result << 1;
-        memory_write(arg_address, result);
+        write_to_bus(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
         status.flag.negative = check_for_negative_flag(result);
@@ -613,7 +548,7 @@ void CPU::BEQ()
 
 void CPU::BIT()
 {
-    const auto value {memory_read(arg_address)};
+    const auto value {read_from_bus(arg_address)};
     const uint8_t result = acc & value;
 
     status.flag.zero = check_for_zero_flag(result);
@@ -682,7 +617,7 @@ void CPU::CLV()
 
 void CPU::CMP()
 {
-    const auto value {memory_read(arg_address)};
+    const auto value {read_from_bus(arg_address)};
     const uint8_t result = acc - value;
 
     status.flag.carry = acc >= value;
@@ -692,7 +627,7 @@ void CPU::CMP()
 
 void CPU::CPX()
 {
-    const auto value {memory_read(arg_address)};
+    const auto value {read_from_bus(arg_address)};
     const uint8_t result = x_reg - value;
 
     status.flag.carry = x_reg >= value;
@@ -702,7 +637,7 @@ void CPU::CPX()
 
 void CPU::CPY()
 {
-    const auto value {memory_read(arg_address)};
+    const auto value {read_from_bus(arg_address)};
     const uint8_t result = y_reg - value;
 
     status.flag.carry = y_reg >= value;
@@ -712,10 +647,10 @@ void CPU::CPY()
 
 void CPU::DEC()
 {
-    auto value {memory_read(arg_address)};
+    auto value {read_from_bus(arg_address)};
 
     value--;
-    memory_write(arg_address, value);
+    write_to_bus(arg_address, value);
 
     status.flag.zero = check_for_zero_flag(value);
     status.flag.negative = check_for_negative_flag(value);
@@ -739,7 +674,7 @@ void CPU::DEY()
 
 void CPU::EOR()
 {
-    const auto value {memory_read(arg_address)};
+    const auto value {read_from_bus(arg_address)};
 
     acc = acc ^ value;
 
@@ -749,10 +684,10 @@ void CPU::EOR()
 
 void CPU::INC()
 {
-    auto value {memory_read(arg_address)};
+    auto value {read_from_bus(arg_address)};
 
     value++;
-    memory_write(arg_address, value);
+    write_to_bus(arg_address, value);
 
     status.flag.zero = check_for_zero_flag(value);
     status.flag.negative = check_for_negative_flag(value);
@@ -794,7 +729,7 @@ void CPU::JSR()
 
 void CPU::LDA()
 {
-    acc = memory_read(arg_address);
+    acc = read_from_bus(arg_address);
 
     status.flag.zero = check_for_zero_flag(acc);
     status.flag.negative = check_for_negative_flag(acc);
@@ -802,7 +737,7 @@ void CPU::LDA()
 
 void CPU::LDX()
 {
-    x_reg = memory_read(arg_address);
+    x_reg = read_from_bus(arg_address);
 
     status.flag.zero = check_for_zero_flag(x_reg);
     status.flag.negative = check_for_negative_flag(x_reg);
@@ -810,7 +745,7 @@ void CPU::LDX()
 
 void CPU::LDY()
 {
-    y_reg = memory_read(arg_address);
+    y_reg = read_from_bus(arg_address);
 
     status.flag.zero = check_for_zero_flag(y_reg);
     status.flag.negative = check_for_negative_flag(y_reg);
@@ -818,7 +753,7 @@ void CPU::LDY()
 
 void CPU::LSR()
 {
-    if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction.address_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
 
         acc = acc >> 1;
@@ -827,11 +762,11 @@ void CPU::LSR()
         status.flag.negative = check_for_negative_flag(acc);
     }
     else {
-        auto result {memory_read(arg_address)};
+        auto result {read_from_bus(arg_address)};
         status.flag.carry = check_for_flag_with_mask(result, carry_flag_mask);
 
         result = result >> 1;
-        memory_write(arg_address, result);
+        write_to_bus(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
         status.flag.negative = check_for_negative_flag(result);
@@ -842,7 +777,7 @@ void CPU::NOP() {}
 
 void CPU::ORA()
 {
-    const auto value {memory_read(arg_address)};
+    const auto value {read_from_bus(arg_address)};
 
     acc = acc | value;
 
@@ -883,7 +818,7 @@ void CPU::ROL()
 {
     const bool old_carry = status.flag.carry;
 
-    if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction.address_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
 
         acc = acc << 1;
@@ -893,12 +828,12 @@ void CPU::ROL()
         status.flag.negative = check_for_negative_flag(acc);
     }
     else {
-        auto result {memory_read(arg_address)};
+        auto result {read_from_bus(arg_address)};
         status.flag.carry = check_for_flag_with_mask(result, negative_flag_mask);
 
         result = result << 1;
         result = result | old_carry;
-        memory_write(arg_address, result);
+        write_to_bus(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
         status.flag.negative = check_for_negative_flag(result);
@@ -909,7 +844,7 @@ void CPU::ROR()
 {
     const bool old_carry = status.flag.carry;
 
-    if (curr_instruction.address_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction.address_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
 
         acc = acc >> 1;
@@ -919,12 +854,12 @@ void CPU::ROR()
         status.flag.negative = check_for_negative_flag(acc);
     }
     else {
-        auto result {memory_read(arg_address)};
+        auto result {read_from_bus(arg_address)};
         status.flag.carry = check_for_flag_with_mask(result, carry_flag_mask);
 
         result = result >> 1;
         result = result | (old_carry << 7);
-        memory_write(arg_address, result);
+        write_to_bus(arg_address, result);
 
         status.flag.zero = check_for_zero_flag(result);
         status.flag.negative = check_for_negative_flag(result);
@@ -955,7 +890,7 @@ void CPU::RTS()
 
 void CPU::SBC()
 {
-    auto value {memory_read(arg_address)};
+    auto value {read_from_bus(arg_address)};
     value = static_cast<uint8_t>(~value);
 
     const auto result = static_cast<uint16_t>(acc + value + status.flag.carry);
@@ -989,17 +924,17 @@ void CPU::SEI()
 
 void CPU::STA()
 {
-    memory_write(arg_address, acc);
+    write_to_bus(arg_address, acc);
 }
 
 void CPU::STX()
 {
-    memory_write(arg_address, x_reg);
+    write_to_bus(arg_address, x_reg);
 }
 
 void CPU::STY()
 {
-    memory_write(arg_address, y_reg);
+    write_to_bus(arg_address, y_reg);
 }
 
 void CPU::TAX()

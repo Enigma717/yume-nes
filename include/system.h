@@ -10,7 +10,6 @@ class System {
 public:
     System();
 
-    std::shared_ptr<Memory> ram;
     std::shared_ptr<Cartridge> cartridge;
     PPU ppu;
     CPU cpu;
@@ -23,5 +22,5 @@ private:
     int system_cycles_executed {0};
 
     void prepare_system_for_start();
-    void perform_cycle(bool debug_mode = false);
+    void perform_master_clock_cycle(bool debug_mode = false);
 };

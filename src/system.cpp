@@ -1,7 +1,6 @@
 #include "../include/system.h"
 
 #include "../include/cartridge.h"
-#include "../include/memory.h"
 
 #include <chrono>
 #include <iostream>
@@ -9,12 +8,12 @@
 
 namespace
 {
-    constexpr size_t final_screen_width {1024};
-    constexpr size_t final_screen_height {960};
     constexpr size_t center_screen_in_x_axis {448};
     constexpr size_t center_screen_in_y_axis {60};
-    constexpr size_t framerate_cap {60};
     constexpr size_t cycles_needed_to_render_frame {89342};
+    constexpr size_t final_screen_width {1024};
+    constexpr size_t final_screen_height {960};
+    constexpr size_t framerate_cap {60};
     constexpr size_t ppu_cycles_needed_for_cpu_tick {3};
 
     constexpr uint16_t palette_bg_color_address {0x3F00};
@@ -23,7 +22,6 @@ namespace
 
 System::System() : cpu{ppu}
 {
-    ram = std::make_shared<Memory>();
     cartridge = std::make_shared<Cartridge>();
 }
 
@@ -42,18 +40,19 @@ void System::run()
 
     sf::Clock clock;
     while (ppu.app_screen.isOpen()) {
+        // sf::Event event;
         // while (ppu.app_screen.pollEvent(event)) {
-            //     if (event.type == sf::Event::Closed
-                //         || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
-                //         ppu.app_screen.close();
-                //         return;
-            //     }
+        //         if (event.type == sf::Event::Closed
+        //                 || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
+        //                 ppu.app_screen.close();
+        //                 return;
+        //         }
         //     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-                //         std::cout << "\n\n\nSPACE PRESSED\n\n\n";
+        //                 std::cout << "\n\n\nSPACE PRESSED\n\n\n";
         //     }
         // }
 
-        perform_cycle(false);
+        perform_master_clock_cycle(false);
 
         if (system_cycles_executed % cycles_needed_to_render_frame == 0) {
             const auto& bg_color = PPUColors::available_colors.at(ppu.memory_read(palette_bg_color_address));
@@ -72,7 +71,15 @@ void System::run()
     }
 }
 
-void System::perform_cycle(bool debug_mode)
+void System::prepare_system_for_start()
+{
+    ppu.connect_with_cartridge(cartridge);
+
+    cpu.connect_bus_with_cartridge(cartridge);
+    cpu.hard_reset();
+}
+
+void System::perform_master_clock_cycle(bool debug_mode)
 {
     ppu.perform_cycle(false);
 
@@ -80,13 +87,4 @@ void System::perform_cycle(bool debug_mode)
         cpu.perform_cycle(debug_mode);
 
     system_cycles_executed++;
-}
-
-void System::prepare_system_for_start()
-{
-    ppu.connect_with_cartridge(cartridge);
-
-    cpu.connect_with_memory(ram);
-    cpu.connect_with_cartridge(cartridge);
-    cpu.hard_reset();
 }
