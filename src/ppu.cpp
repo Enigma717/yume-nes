@@ -1,7 +1,5 @@
 #include "../include/ppu.h"
 
-#include "../include/cartridge.h"
-
 #include <iostream>
 #include <iomanip>
 
@@ -23,6 +21,12 @@ namespace
     constexpr size_t fetching_subcycle_size {8};
     constexpr size_t pixel_size {1};
     constexpr size_t ppu_registers_space_size {8};
+
+    constexpr size_t center_screen_in_x_axis {448};
+    constexpr size_t center_screen_in_y_axis {60};
+    constexpr size_t final_screen_width {1024};
+    constexpr size_t final_screen_height {960};
+    constexpr size_t framerate_cap {60};
 
     constexpr int actual_screen_height {262};
     constexpr int actual_screen_width {341};
@@ -56,27 +60,31 @@ namespace
     constexpr uint8_t first_two_bits_mask {0b0000'0011};
     constexpr uint8_t second_bit_mask {0b0000'0010};
 
-    constexpr uint16_t second_nametable_offset {0x0400};
     constexpr uint16_t second_pattern_table_offset {0x1000};
     constexpr uint16_t second_plane_offset {0x0008};
     constexpr uint16_t tile_column_offset {0x0010};
-    constexpr uint16_t third_nametable_offset {0x0800};
 
     constexpr uint16_t first_attribute_table_start {0x23C0};
     constexpr uint16_t nametables_space_start {0x2000};
     constexpr uint16_t palettes_space_start {0x3F00};
 
-    constexpr uint16_t current_nametable_mask {0x0FFF};
-    constexpr uint16_t current_palette_mask {0x0020};
     constexpr uint16_t loopy_no_fine_y_mask {0x0FFF};
     constexpr uint16_t lower_byte_mask {0x00FF};
     constexpr uint16_t multiplexer_default_pointer {0b1000'0000'0000'0000};
-    constexpr uint16_t palette_mirror_mask {0x0010};
-    constexpr uint16_t single_screen_mirroring_mask {0x0400};
+    constexpr uint16_t palette_bg_color_mask {0x3F00};
     constexpr uint16_t upper_byte_mask {0xFF00};
-    constexpr uint16_t vertical_mirroring_mask {0x0800};
+
+    bool check_for_pixel_within_visible_screen(int x_coord, int y_coord)
+    {
+        return x_coord >= 0 && x_coord < visible_screen_width
+            && y_coord >= 0 && y_coord < visible_screen_height;
+    }
 }
 
+
+/////////
+// API //
+/////////
 
 PPU::PPU() : app_screen{sf::VideoMode(visible_screen_width, visible_screen_height), "Yume NES"}
 {
@@ -92,61 +100,16 @@ PPU::PPU() : app_screen{sf::VideoMode(visible_screen_width, visible_screen_heigh
             pixels_to_render.push_back(square);
         }
     }
+
+    app_screen.setSize({final_screen_width, final_screen_height});
+    app_screen.setPosition({center_screen_in_x_axis, center_screen_in_y_axis});
+    app_screen.setFramerateLimit(framerate_cap);
+    app_screen.setVerticalSyncEnabled(false);
 };
 
-void PPU::connect_with_cartridge(std::shared_ptr<Cartridge> cartridge)
+void PPU::connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge)
 {
-    cartridge_ptr = cartridge;
-}
-
-void PPU::memory_write(uint16_t address, uint8_t data)
-{
-    if (address < nametables_space_start)
-        send_write_to_mapper_chr_rom(address, data);
-    else if (address >= nametables_space_start && address < palettes_space_start)
-        process_nametables_write(address, data);
-    else
-        process_palettes_memory_write(address, data);
-    }
-
-uint8_t PPU::memory_read(uint16_t address) const
-{
-    if (address < nametables_space_start)
-        return send_read_to_mapper_chr_rom(address);
-    else if (address >= nametables_space_start && address < palettes_space_start)
-        return process_nametables_read(address);
-    else
-        return process_palettes_memory_read(address);
-}
-
-void PPU::handle_write_from_cpu(uint16_t address, uint8_t data)
-{
-    address = address % ppu_registers_space_size;
-
-    namespace RA = RegistersAddresses;
-    switch (address) {
-        case RA::PPUCTRL:   process_ppu_controller_write(data); break;
-        case RA::PPUMASK:   process_ppu_mask_write(data);       break;
-        case RA::OAMADDR:   oam_address = data;                 break;
-        case RA::OAMDATA:   oam_data = data;                    break;
-        case RA::PPUSCROLL: process_ppu_scroll_write(data);     break;
-        case RA::PPUADDR:   process_ppu_address_write(data);    break;
-        case RA::PPUDATA:   process_ppu_data_write(data);       break;
-    }
-}
-
-uint8_t PPU::handle_read_from_cpu(uint16_t address)
-{
-    address = address % ppu_registers_space_size;
-
-    namespace RA = RegistersAddresses;
-    switch (address) {
-        case RA::PPUSTATUS: return process_ppu_status_read(); break;
-        case RA::OAMDATA:   return oam_data;                  break;
-        case RA::PPUDATA:   return process_ppu_data_read();   break;
-        default: return 0x00; break;
-    }
-
+    memory_bus.insert_cartridge(cartridge);
 }
 
 // https://www.nesdev.org/wiki/PPU_rendering#Line-by-line_timing
@@ -178,6 +141,175 @@ void PPU::perform_cycle(bool debug_mode)
         }
     }
 }
+
+void PPU::render_whole_frame()
+{
+    const auto& bg_color {PPUColors::available_colors.at(read_from_bus(palette_bg_color_mask))};
+
+    app_screen.clear(bg_color);
+
+    for (const auto& pixel : pixels_to_render) {
+        if (pixel.getFillColor() != bg_color)
+            app_screen.draw(pixel);
+    }
+
+    app_screen.display();
+}
+
+void PPU::log_debug_info() const
+{
+    std::cout << "[DEBUG PPU] LINE: " << std::setw(4) << std::left << std::setfill(' ') << current_scanline
+        << " | CYCLE: " << std::setw(4) << std::left << std::setfill(' ') << current_cycle;
+    std::cout << std::hex << std::uppercase << std::setfill('0')
+        << " | PPUCTRL: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_controller.word)
+        << " | PPUMASK: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_mask.word)
+        << " | PPUSTATUS: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_status.word)
+        << " | OAMADDR: 0x" << std::setw(2) << std::right << static_cast<short>(oam_address)
+        << " | OAMDATA: 0x" << std::setw(2) << std::right << static_cast<short>(oam_data)
+        << " | PPUSCROLL: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_scroll.word)
+        << " | PPUADDR: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_address.word)
+        << " | PPUDATA: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_data)
+        << std::dec << "\n";
+}
+
+
+////////////////////
+// Bus management //
+////////////////////
+
+void PPU::write_to_bus(uint16_t address, uint8_t data)
+{
+    memory_bus.dispatch_write_to_device(address, data);
+}
+
+uint8_t PPU::read_from_bus(uint16_t address) const
+{
+    return memory_bus.dispatch_read_to_device(address);
+}
+
+
+//////////////////////////
+// Registers management //
+//////////////////////////
+
+// https://www.nesdev.org/wiki/PPU_scrolling#$2007_reads_and_writes
+void PPU::increment_vram_address()
+{
+    if (ppu_controller.flag.vram_increment)
+        ppu_address.word += vram_increment_enabled_value;
+    else
+        ppu_address.word += vram_increment_disabled_value;
+}
+
+void PPU::handle_register_write_from_cpu(uint16_t address, uint8_t data)
+{
+    address = address % ppu_registers_space_size;
+
+    namespace RA = RegistersAddresses;
+    switch (address) {
+        case RA::PPUCTRL:   process_ppu_controller_write(data); break;
+        case RA::PPUMASK:   process_ppu_mask_write(data);       break;
+        case RA::OAMADDR:   oam_address = data;                 break;
+        case RA::OAMDATA:   oam_data = data;                    break;
+        case RA::PPUSCROLL: process_ppu_scroll_write(data);     break;
+        case RA::PPUADDR:   process_ppu_address_write(data);    break;
+        case RA::PPUDATA:   process_ppu_data_write(data);       break;
+    }
+}
+
+void PPU::process_ppu_controller_write(uint8_t data)
+{
+    ppu_scroll.internal.nametable = data & first_two_bits_mask;
+    ppu_controller.word = data;
+}
+
+void PPU::process_ppu_mask_write(uint8_t data)
+{
+    ppu_mask.word = data;
+}
+
+// https://www.nesdev.org/wiki/PPU_scrolling#$2005_first_write_(w_is_0)
+// https://www.nesdev.org/wiki/PPU_scrolling#$2005_second_write_(w_is_1)
+void PPU::process_ppu_scroll_write(uint8_t data)
+{
+    if (second_address_write_latch == false) {
+        ppu_scroll.internal.coarse_x = data >> 3;
+        fine_x.internal.position = data & fine_registers_bits_mask;
+        second_address_write_latch = true;
+    }
+    else {
+        ppu_scroll.internal.coarse_y = data >> 3;
+        ppu_scroll.internal.fine_y = data & fine_registers_bits_mask;
+        second_address_write_latch = false;
+    }
+}
+
+// https://www.nesdev.org/wiki/PPU_scrolling#$2006_first_write_(w_is_0)
+// https://www.nesdev.org/wiki/PPU_scrolling#$2006_second_write_(w_is_1)
+void PPU::process_ppu_address_write(uint8_t data)
+{
+    if (second_address_write_latch == false) {
+        uint16_t temp_address = (data & first_address_write_mask) << 8;
+        ppu_scroll.word = (ppu_scroll.word & lower_byte_mask) | temp_address;
+        second_address_write_latch = true;
+    }
+    else {
+        ppu_scroll.word = (ppu_scroll.word & upper_byte_mask) | data;
+        ppu_address.word = ppu_scroll.word;
+        second_address_write_latch = false;
+    }
+}
+
+void PPU::process_ppu_data_write(uint8_t data)
+{
+    write_to_bus(ppu_address.word, data);
+
+    increment_vram_address();
+}
+
+uint8_t PPU::handle_register_read_from_cpu(uint16_t address)
+{
+    address = address % ppu_registers_space_size;
+
+    namespace RA = RegistersAddresses;
+    switch (address) {
+        case RA::PPUSTATUS: return process_ppu_status_read(); break;
+        case RA::OAMDATA:   return oam_data;                  break;
+        case RA::PPUDATA:   return process_ppu_data_read();   break;
+        default: return 0x00; break;
+    }
+}
+
+uint8_t PPU::process_ppu_status_read()
+{
+    const uint8_t current_status = ppu_status.word;
+
+    ppu_status.flag.vblank_start = 0;
+    second_address_write_latch = false;
+
+    return current_status;
+}
+
+// https://www.nesdev.org/wiki/PPU_registers#The_PPUDATA_read_buffer_(post-fetch)
+uint8_t PPU::process_ppu_data_read()
+{
+    const auto pre_increment_address {ppu_address.word};
+
+    ppu_data = ppu_data_read_buffer;
+    ppu_data_read_buffer = read_from_bus(ppu_address.word);
+
+    increment_vram_address();
+
+    if (pre_increment_address >= palettes_space_start)
+        return ppu_data_read_buffer;
+    else
+        return ppu_data;
+}
+
+
+///////////////////////
+// Process rendering //
+///////////////////////
 
 void PPU::dispatch_rendering_mode()
 {
@@ -244,7 +376,7 @@ void PPU::process_pixel_rendering()
     const auto address_to_read = static_cast<uint16_t>(
         palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color);
 
-    const auto final_color = PPUColors::available_colors.at(memory_read(address_to_read));
+    const auto final_color = PPUColors::available_colors.at(read_from_bus(address_to_read));
 
     const auto x_coord = current_cycle - 1;
     const auto y_coord = current_scanline;
@@ -255,21 +387,9 @@ void PPU::process_pixel_rendering()
 }
 
 
-void PPU::log_debug_info() const
-{
-    std::cout << "[DEBUG PPU] LINE: " << std::setw(4) << std::left << std::setfill(' ') << current_scanline
-        << " | CYCLE: " << std::setw(4) << std::left << std::setfill(' ') << current_cycle;
-    std::cout << std::hex << std::uppercase << std::setfill('0')
-        << " | PPUCTRL: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_controller.word)
-        << " | PPUMASK: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_mask.word)
-        << " | PPUSTATUS: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_status.word)
-        << " | OAMADDR: 0x" << std::setw(2) << std::right << static_cast<short>(oam_address)
-        << " | OAMDATA: 0x" << std::setw(2) << std::right << static_cast<short>(oam_data)
-        << " | PPUSCROLL: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_scroll.word)
-        << " | PPUADDR: 0x" << std::setw(4) << std::right << static_cast<short>(ppu_address.word)
-        << " | PPUDATA: 0x" << std::setw(2) << std::right << static_cast<short>(ppu_data)
-        << std::dec << "\n";
-}
+////////////////////////////////
+// Rendering subcycle fetches //
+////////////////////////////////
 
 // https://www.nesdev.org/wiki/PPU_scrolling#Tile_and_attribute_fetching
 void PPU::process_rendering_fetches()
@@ -295,10 +415,10 @@ uint8_t PPU::fetch_nametable_tile_byte_with_shifters_load()
     const uint16_t address_to_read = nametables_space_start | (ppu_address.word & loopy_no_fine_y_mask);
     load_next_tile_data_to_shift_registers();
 
-    return memory_read(address_to_read);
+    return read_from_bus(address_to_read);
 }
 
-uint8_t PPU::fetch_attribute_table_byte()
+uint8_t PPU::fetch_attribute_table_byte() const
 {
     const uint16_t coarse_x_high_bits = ppu_address.internal.coarse_x >> 2;
     const uint16_t coarse_y_high_bits = (ppu_address.internal.coarse_y >> 2) << 3;
@@ -306,12 +426,12 @@ uint8_t PPU::fetch_attribute_table_byte()
     const uint16_t address_to_read = first_attribute_table_start | nametable_bits | coarse_y_high_bits | coarse_x_high_bits;
 
     const auto attribute_quadrant_shift {calculate_attribute_shift()};
-    const auto attribute_table_byte {memory_read(address_to_read)};
+    const auto attribute_table_byte {read_from_bus(address_to_read)};
 
     return (attribute_table_byte >> attribute_quadrant_shift) & first_two_bits_mask;
 }
 
-uint8_t PPU::calculate_attribute_shift()
+uint8_t PPU::calculate_attribute_shift() const
 {
     const uint16_t horizontal_half_choice = (ppu_address.internal.coarse_y & second_bit_mask) << 1;
     const uint16_t vertical_half_choice = ppu_address.internal.coarse_x & second_bit_mask;
@@ -319,15 +439,20 @@ uint8_t PPU::calculate_attribute_shift()
     return static_cast<uint8_t>(horizontal_half_choice | vertical_half_choice);
 }
 
-uint8_t PPU::fetch_tile_plane_byte(uint8_t plane_offset)
+uint8_t PPU::fetch_tile_plane_byte(uint8_t plane_offset) const
 {
     const uint16_t current_row_offset = ppu_address.internal.fine_y;
     const uint16_t current_tile_offset = fetched_nametable_tile_byte * tile_column_offset;
     const uint16_t pattern_table_offset = ppu_controller.flag.bg_table * second_pattern_table_offset;
     const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset + plane_offset);
 
-    return memory_read(address_to_read);
+    return read_from_bus(address_to_read);
 }
+
+
+//////////////////////////////
+// Fetches helper functions //
+//////////////////////////////
 
 // https://www.nesdev.org/wiki/PPU_scrolling#Coarse_X_increment
 void PPU::coarse_x_increment_with_wrapping()
@@ -412,191 +537,4 @@ void PPU::move_shift_registers()
 
     tile_data_first_shift_reg <<= 1;
     tile_data_second_shift_reg <<= 1;
-}
-
-bool PPU::check_for_pixel_within_visible_screen(int x_coord, int y_coord) const
-{
-    return x_coord >= 0 && x_coord < visible_screen_width && y_coord >= 0 && y_coord < visible_screen_height;
-}
-
-
-uint16_t PPU::normalize_nametables_address(uint16_t address) const
-{
-    using Mirroring = Cartridge::MirroringType;
-    const auto mirroring_mode {cartridge_ptr.lock()->mirroring_mode};
-    const uint16_t current_nametable = address & current_nametable_mask;
-    uint16_t normalized_address {0x0000};
-
-    switch (mirroring_mode) {
-        case Mirroring::horizontal:
-            normalized_address = address % single_screen_mirroring_mask;
-
-            if (current_nametable >= third_nametable_offset)
-                normalized_address += second_nametable_offset;
-
-            break;
-        case Mirroring::vertical:
-            normalized_address = address % vertical_mirroring_mask;
-            break;
-        case Mirroring::single_screen:
-            normalized_address = address % single_screen_mirroring_mask;
-            break;
-        case Mirroring::four_screen:
-            normalized_address = address; // TODO
-            break;
-    }
-
-    return normalized_address;
-}
-
-uint16_t PPU::normalize_palettes_address(uint16_t address, bool is_reading) const
-{
-    uint16_t normalized_address = address % current_palette_mask;
-
-    if (check_for_palette_mirroring(normalized_address))
-        normalized_address -= palette_mirror_mask;
-
-    if (is_reading && check_for_background_read(normalized_address))
-        normalized_address = 0x0000;
-
-    return normalized_address;
-}
-
-bool PPU::check_for_palette_mirroring(uint16_t address) const
-{
-    return address == palette_mirror_mask
-        || address == (palette_mirror_mask + 0x0004)
-        || address == (palette_mirror_mask + 0x0008)
-        || address == (palette_mirror_mask + 0x000C);
-}
-
-bool PPU::check_for_background_read(uint16_t address) const
-{
-    return address == 0x0004
-        || address == 0x0008
-        || address == 0x000C;
-}
-
-void PPU::send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const
-{
-    cartridge_ptr.lock()->mapper.map_chr_rom_write(address, data);
-}
-
-uint8_t PPU::send_read_to_mapper_chr_rom(uint16_t address) const
-{
-    return cartridge_ptr.lock()->mapper.map_chr_rom_read(address);
-}
-
-void PPU::process_nametables_write(uint16_t address, uint8_t data)
-{
-    const auto normalized_address {normalize_nametables_address(address)};
-
-    nametables.at(normalized_address) = data;
-}
-
-uint8_t PPU::process_nametables_read(uint16_t address) const
-{
-    const auto normalized_address {normalize_nametables_address(address)};
-
-    return nametables.at(normalized_address);
-}
-
-void PPU::process_palettes_memory_write(uint16_t address, uint8_t data)
-{
-    const auto normalized_address {normalize_palettes_address(address)};
-
-    palettes_ram.at(normalized_address) = data;
-}
-
-uint8_t PPU::process_palettes_memory_read(uint16_t address) const
-{
-    const auto normalized_address {normalize_palettes_address(address, true)};
-
-    return palettes_ram.at(normalized_address);
-}
-
-
-void PPU::process_ppu_controller_write(uint8_t data)
-{
-    ppu_scroll.internal.nametable = data & first_two_bits_mask;
-    ppu_controller.word = data;
-}
-
-void PPU::process_ppu_mask_write(uint8_t data)
-{
-    ppu_mask.word = data;
-}
-
-// https://www.nesdev.org/wiki/PPU_scrolling#$2005_first_write_(w_is_0)
-// https://www.nesdev.org/wiki/PPU_scrolling#$2005_second_write_(w_is_1)
-void PPU::process_ppu_scroll_write(uint8_t data)
-{
-    if (second_address_write_latch == false) {
-        ppu_scroll.internal.coarse_x = data >> 3;
-        fine_x.internal.position = data & fine_registers_bits_mask;
-        second_address_write_latch = true;
-    }
-    else {
-        ppu_scroll.internal.coarse_y = data >> 3;
-        ppu_scroll.internal.fine_y = data & fine_registers_bits_mask;
-        second_address_write_latch = false;
-    }
-}
-
-// https://www.nesdev.org/wiki/PPU_scrolling#$2006_first_write_(w_is_0)
-// https://www.nesdev.org/wiki/PPU_scrolling#$2006_second_write_(w_is_1)
-void PPU::process_ppu_address_write(uint8_t data)
-{
-    if (second_address_write_latch == false) {
-        uint16_t temp_address = (data & first_address_write_mask) << 8;
-        ppu_scroll.word = (ppu_scroll.word & lower_byte_mask) | temp_address;
-        second_address_write_latch = true;
-    }
-    else {
-        ppu_scroll.word = (ppu_scroll.word & upper_byte_mask) | data;
-        ppu_address.word = ppu_scroll.word;
-        second_address_write_latch = false;
-    }
-}
-
-void PPU::process_ppu_data_write(uint8_t data)
-{
-    memory_write(ppu_address.word, data);
-
-    increment_vram_address();
-}
-
-uint8_t PPU::process_ppu_status_read()
-{
-    const uint8_t current_status = ppu_status.word;
-
-    ppu_status.flag.vblank_start = 0;
-    second_address_write_latch = false;
-
-    return current_status;
-}
-
-// https://www.nesdev.org/wiki/PPU_registers#The_PPUDATA_read_buffer_(post-fetch)
-uint8_t PPU::process_ppu_data_read()
-{
-    const auto pre_increment_address {ppu_address.word};
-
-    ppu_data = ppu_data_read_buffer;
-    ppu_data_read_buffer = memory_read(ppu_address.word);
-
-    increment_vram_address();
-
-    if (pre_increment_address >= palettes_space_start)
-        return ppu_data_read_buffer;
-    else
-        return ppu_data;
-}
-
-// https://www.nesdev.org/wiki/PPU_scrolling#$2007_reads_and_writes
-void PPU::increment_vram_address()
-{
-    if (ppu_controller.flag.vram_increment)
-        ppu_address.word += vram_increment_enabled_value;
-    else
-        ppu_address.word += vram_increment_disabled_value;
 }

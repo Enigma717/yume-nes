@@ -1,27 +1,32 @@
 #pragma once
 
-#include <cstdint>
-#include <memory>
+#include "./ppu_bus.h"
+
 #include <vector>
 
 #include <SFML/Graphics.hpp>
 
 
-namespace PPUConsts
-{
-    constexpr size_t oam_size {64};
-    constexpr size_t nametables_size {2048};
-    constexpr size_t palettes_ram_size {32};
-}
-
-class Cartridge;
-
-using CartridgePtr = std::weak_ptr<Cartridge>;
-
-
 class PPU {
 public:
     PPU();
+
+    sf::RenderWindow app_screen {};
+    bool force_nmi_in_cpu {false};
+
+
+    void connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge);
+    void perform_cycle(bool debug_mode = false);
+    void render_whole_frame();
+
+    void    handle_register_write_from_cpu(uint16_t address, uint8_t data);
+    uint8_t handle_register_read_from_cpu(uint16_t address);
+
+    void log_debug_info() const;
+
+
+private:
+    PPUBus memory_bus;
 
     union Controller {
         struct {
@@ -100,40 +105,6 @@ public:
 
     int  current_cycle {0};
     int  current_scanline {0};
-    bool force_nmi_in_cpu {false};
-
-    struct OAMEntry {
-        uint8_t position_y {0x00};
-        uint8_t tile_index {0x00};
-        uint8_t attributes {0x00};
-        uint8_t position_x {0x00};
-    };
-
-    std::vector<sf::RectangleShape> pixels_to_render {};
-    std::vector<OAMEntry>           oam              {std::vector<OAMEntry>(PPUConsts::oam_size)};
-    std::vector<uint8_t>            nametables       {std::vector<uint8_t>(PPUConsts::nametables_size)};
-    std::vector<uint8_t>            palettes_ram     {std::vector<uint8_t>(PPUConsts::palettes_ram_size)};
-
-    sf::RenderWindow app_screen {};
-
-
-    void connect_with_cartridge(std::shared_ptr<Cartridge> cartridge);
-
-    void    memory_write(uint16_t address, uint8_t data);
-    uint8_t memory_read(uint16_t address) const;
-
-    void    handle_write_from_cpu(uint16_t address, uint8_t data);
-    uint8_t handle_read_from_cpu(uint16_t address);
-
-    void perform_cycle(bool debug_mode = false);
-    void dispatch_rendering_mode();
-    void render_pre_render_scanline();
-    void render_visible_scanline();
-    void render_vblank_scanline();
-    void process_pixel_rendering();
-
-private:
-    CartridgePtr cartridge_ptr {};
 
     enum class RenderingMode {
         pre_render_scanline,
@@ -153,14 +124,32 @@ private:
     uint16_t tile_data_second_shift_reg {0x0000};
     uint16_t data_multiplexer {0x0000};
 
+    std::vector<sf::RectangleShape> pixels_to_render {};
 
-    void log_debug_info() const;
+
+    void    write_to_bus(uint16_t address, uint8_t data);
+    uint8_t read_from_bus(uint16_t address) const;
+
+    void increment_vram_address();
+    void process_ppu_controller_write(uint8_t data);
+    void process_ppu_mask_write(uint8_t data);
+    void process_ppu_scroll_write(uint8_t data);
+    void process_ppu_address_write(uint8_t data);
+    void process_ppu_data_write(uint8_t data);
+    uint8_t process_ppu_status_read();
+    uint8_t process_ppu_data_read();
+
+    void dispatch_rendering_mode();
+    void render_pre_render_scanline();
+    void render_visible_scanline();
+    void render_vblank_scanline();
+    void process_pixel_rendering();
 
     void    process_rendering_fetches();
     uint8_t fetch_nametable_tile_byte_with_shifters_load();
-    uint8_t fetch_attribute_table_byte();
-    uint8_t calculate_attribute_shift();
-    uint8_t fetch_tile_plane_byte(uint8_t plane_offset = 0x00);
+    uint8_t fetch_attribute_table_byte() const;
+    uint8_t calculate_attribute_shift() const;
+    uint8_t fetch_tile_plane_byte(uint8_t plane_offset = 0x00) const;
 
     void coarse_x_increment_with_wrapping();
     void coarse_y_increment_with_wrapping();
@@ -168,33 +157,6 @@ private:
     void copy_vertical_scroll_to_address();
     void load_next_tile_data_to_shift_registers();
     void move_shift_registers();
-
-    bool check_for_pixel_within_visible_screen(int x_coord, int y_coord) const;
-
-    uint16_t normalize_nametables_address(uint16_t address) const;
-    uint16_t normalize_palettes_address(uint16_t address, bool is_reading = false) const;
-    bool     check_for_palette_mirroring(uint16_t address) const;
-    bool     check_for_background_read(uint16_t address) const;
-
-    void    send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const;
-    uint8_t send_read_to_mapper_chr_rom(uint16_t address) const;
-
-    void    process_nametables_write(uint16_t address, uint8_t data);
-    uint8_t process_nametables_read(uint16_t address) const;
-
-    void    process_palettes_memory_write(uint16_t address, uint8_t data);
-    uint8_t process_palettes_memory_read(uint16_t address) const;
-
-    void    process_ppu_controller_write(uint8_t data);
-    void    process_ppu_mask_write(uint8_t data);
-    void    process_ppu_scroll_write(uint8_t data);
-    void    process_ppu_address_write(uint8_t data);
-    void    process_ppu_data_write(uint8_t data);
-
-    uint8_t process_ppu_status_read();
-    uint8_t process_ppu_data_read();
-
-    void increment_vram_address();
 };
 
 

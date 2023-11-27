@@ -60,7 +60,9 @@ namespace
 }
 
 
-// API
+/////////
+// API //
+/////////
 
 CPU::CPU(PPU& ppu) : memory_bus{ppu} {};
 
@@ -124,7 +126,9 @@ void CPU::log_debug_info() const
 }
 
 
-// Bus management
+////////////////////
+// Bus management //
+////////////////////
 
 void CPU::write_to_bus(uint16_t address, uint8_t data)
 {

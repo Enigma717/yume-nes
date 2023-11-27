@@ -64,7 +64,7 @@ void CPUBus::clear_ppu_nmi_flag() const
 
 void CPUBus::send_write_to_ppu(uint16_t address, uint8_t data) const
 {
-    ppu_ref.handle_write_from_cpu(address, data);
+    ppu_ref.handle_register_write_from_cpu(address, data);
 }
 
 void CPUBus::send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const
@@ -87,7 +87,7 @@ void CPUBus::cpu_ram_write(uint16_t address, uint8_t data)
 
 uint8_t CPUBus::send_read_to_ppu(uint16_t address) const
 {
-    return ppu_ref.handle_read_from_cpu(address);
+    return ppu_ref.handle_register_read_from_cpu(address);
 }
 
 uint8_t CPUBus::send_read_to_mapper_prg_ram(uint16_t address) const

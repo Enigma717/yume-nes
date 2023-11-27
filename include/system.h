@@ -16,7 +16,7 @@ public:
 
 
     void boot_up(const std::string& cartridge_path);
-    void run();
+    void run_console();
 
 private:
     int system_cycles_executed {0};

@@ -8,15 +8,8 @@
 
 namespace
 {
-    constexpr size_t center_screen_in_x_axis {448};
-    constexpr size_t center_screen_in_y_axis {60};
-    constexpr size_t cycles_needed_to_render_frame {89342};
-    constexpr size_t final_screen_width {1024};
-    constexpr size_t final_screen_height {960};
-    constexpr size_t framerate_cap {60};
+    constexpr size_t ppu_cycles_needed_to_render_frame {89342};
     constexpr size_t ppu_cycles_needed_for_cpu_tick {3};
-
-    constexpr uint16_t palette_bg_color_address {0x3F00};
 }
 
 
@@ -31,13 +24,8 @@ void System::boot_up(const std::string& cartridge_path)
     prepare_system_for_start();
 }
 
-void System::run()
+void System::run_console()
 {
-    ppu.app_screen.setSize({final_screen_width, final_screen_height});
-    ppu.app_screen.setPosition({center_screen_in_x_axis, center_screen_in_y_axis});
-    ppu.app_screen.setFramerateLimit(framerate_cap);
-    ppu.app_screen.setVerticalSyncEnabled(false);
-
     sf::Clock clock;
     while (ppu.app_screen.isOpen()) {
         // sf::Event event;
@@ -54,17 +42,9 @@ void System::run()
 
         perform_master_clock_cycle(false);
 
-        if (system_cycles_executed % cycles_needed_to_render_frame == 0) {
-            const auto& bg_color = PPUColors::available_colors.at(ppu.memory_read(palette_bg_color_address));
+        if (system_cycles_executed % ppu_cycles_needed_to_render_frame == 0) {
+            ppu.render_whole_frame();
 
-            ppu.app_screen.clear(bg_color);
-
-            for (const auto& pixel : ppu.pixels_to_render) {
-                if (pixel.getFillColor() != bg_color)
-                    ppu.app_screen.draw(pixel);
-            }
-
-            ppu.app_screen.display();
             std::cout << "FPS:" << 1.0 / clock.getElapsedTime().asSeconds() << "\n";
             clock.restart();
         }
@@ -73,7 +53,7 @@ void System::run()
 
 void System::prepare_system_for_start()
 {
-    ppu.connect_with_cartridge(cartridge);
+    ppu.connect_bus_with_cartridge(cartridge);
 
     cpu.connect_bus_with_cartridge(cartridge);
     cpu.hard_reset();
