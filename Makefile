@@ -1,4 +1,4 @@
-CPPFLAGS = -Wall -Wextra -Wconversion -pedantic -O3 -std=c++20 -lsfml-graphics -lsfml-window -lsfml-system
+CPPFLAGS = -Wall -Wextra -pedantic -O3 -std=c++20 -lsfml-graphics -lsfml-window -lsfml-system
 
 .PHONY = all clean
 

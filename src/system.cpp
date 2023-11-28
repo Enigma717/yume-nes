@@ -18,10 +18,17 @@ System::System() : cpu{ppu}
     cartridge = std::make_shared<Cartridge>();
 }
 
-void System::boot_up(const std::string& cartridge_path)
+bool System::boot_up(const std::string& cartridge_path)
 {
-    cartridge->load_cartridge(cartridge_path);
+    if (!cartridge->load_cartridge(cartridge_path)) {
+        std::cerr << "\nError occurred while trying to load cartridge!\n\n";
+
+        return false;
+    }
+
     prepare_system_for_start();
+
+    return true;
 }
 
 void System::run_console()

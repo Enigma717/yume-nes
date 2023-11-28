@@ -30,9 +30,9 @@ public:
     int current_mapper_id {0};
 
 
-    void load_cartridge(const std::string& cartridge_path);
-    void dump_cartridge_into_vector(const std::string& cartridge_path);
-    void decode_header();
+    bool load_cartridge(const std::string& cartridge_path);
+    bool dump_cartridge_into_vector(const std::string& cartridge_path);
+    bool decode_header();
 
 private:
     bool    check_for_nes_logo_in_header() const;

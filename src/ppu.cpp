@@ -26,7 +26,7 @@ namespace
     constexpr size_t center_screen_in_y_axis {60};
     constexpr size_t final_screen_width {1024};
     constexpr size_t final_screen_height {960};
-    constexpr size_t framerate_cap {60};
+        constexpr size_t framerate_cap {60};
 
     constexpr int actual_screen_height {262};
     constexpr int actual_screen_width {341};
@@ -146,6 +146,7 @@ void PPU::render_whole_frame()
 {
     const auto& bg_color {PPUColors::available_colors.at(read_from_bus(palette_bg_color_mask))};
 
+    app_screen.setSize({final_screen_width, final_screen_height});
     app_screen.clear(bg_color);
 
     for (const auto& pixel : pixels_to_render) {

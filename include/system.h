@@ -15,7 +15,7 @@ public:
     CPU cpu;
 
 
-    void boot_up(const std::string& cartridge_path);
+    bool boot_up(const std::string& cartridge_path);
     void run_console();
 
 private:

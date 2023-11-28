@@ -26,10 +26,13 @@ namespace
 }
 
 
-void Cartridge::load_cartridge(const std::string& cartridge_path)
+bool Cartridge::load_cartridge(const std::string& cartridge_path)
 {
-    dump_cartridge_into_vector(cartridge_path);
-    decode_header();
+    if (!dump_cartridge_into_vector(cartridge_path))
+        return false;
+
+    if (!decode_header())
+        return false;
 
 
     auto final_prg_ram_size {MapperConsts::prg_ram_bank_size * mapper.prg_ram_banks_count};
@@ -51,14 +54,16 @@ void Cartridge::load_cartridge(const std::string& cartridge_path)
     std::copy(cartridge_dump.begin() + roms_crossing_point,
         cartridge_dump.begin() + roms_crossing_point + final_chr_rom_size,
         mapper.chr_rom_memory.begin());
+
+    return true;
 }
 
-void Cartridge::dump_cartridge_into_vector(const std::string& cartridge_path)
+bool Cartridge::dump_cartridge_into_vector(const std::string& cartridge_path)
 {
-    if(!(std::filesystem::exists(cartridge_path))) {
-        std::cout << "Cartridge hasn't been loaded\nSearched path: " << cartridge_path << "\n";
+    if (!std::filesystem::exists(cartridge_path)) {
+        std::cerr << "\nCartridge file not found in given path!\nSearched path: " << cartridge_path << "\n";
 
-        return;
+        return false;
     }
 
     std::ifstream game(cartridge_path, std::ios::in | std::ios::binary);
@@ -72,18 +77,20 @@ void Cartridge::dump_cartridge_into_vector(const std::string& cartridge_path)
     cartridge_dump.insert(cartridge_dump.begin(),
         std::istream_iterator<uint8_t>(game),
         std::istream_iterator<uint8_t>());
+
+    return true;
 }
 
-void Cartridge::decode_header()
+bool Cartridge::decode_header()
 {
     std::copy(cartridge_dump.begin(),
         cartridge_dump.begin() + CartridgeConsts::header_size,
         header.begin());
 
     if (!check_for_nes_logo_in_header()) {
-        std::cout << "Nes logo in header is not correct\n";
+        std::cerr << "\nNes logo in header is not correct!\n\n";
 
-        return;
+        return false;
     }
 
     mapper.prg_rom_banks_count = header.at(header_prg_rom_size_byte_flag);
@@ -101,6 +108,8 @@ void Cartridge::decode_header()
         mirroring_mode = check_for_mirroring_mode() ? MirroringType::vertical : MirroringType::horizontal;
 
     current_mapper_id = calculate_mapper_id();
+
+    return true;
 }
 
 bool Cartridge::check_for_nes_logo_in_header() const
