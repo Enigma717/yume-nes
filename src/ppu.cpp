@@ -88,7 +88,7 @@ namespace
 
 PPU::PPU() : app_screen{sf::VideoMode(visible_screen_width, visible_screen_height), "Yume NES"}
 {
-    pixels_to_render.reserve(visible_pixels_count);
+    frame_buffer.reserve(visible_pixels_count);
 
     for (auto i {0}; i < visible_screen_height; i++) {
         for (auto j {0}; j < visible_screen_width; j++) {
@@ -97,7 +97,7 @@ PPU::PPU() : app_screen{sf::VideoMode(visible_screen_width, visible_screen_heigh
             const auto y_coord = static_cast<float>(i);
             square.setPosition(x_coord, y_coord);
 
-            pixels_to_render.push_back(square);
+            frame_buffer.push_back(square);
         }
     }
 
@@ -149,7 +149,7 @@ void PPU::render_whole_frame()
     app_screen.setSize({final_screen_width, final_screen_height});
     app_screen.clear(bg_color);
 
-    for (const auto& pixel : pixels_to_render) {
+    for (const auto& pixel : frame_buffer) {
         if (pixel.getFillColor() != bg_color)
             app_screen.draw(pixel);
     }
@@ -383,7 +383,7 @@ void PPU::process_pixel_rendering()
     const auto y_coord = current_scanline;
 
     if (check_for_pixel_within_visible_screen(x_coord, y_coord)) {
-        pixels_to_render.at(y_coord * visible_screen_width + x_coord).setFillColor(final_color);
+        frame_buffer.at(y_coord * visible_screen_width + x_coord).setFillColor(final_color);
     }
 }
 

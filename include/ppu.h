@@ -26,7 +26,7 @@ public:
 
 
 private:
-    PPUBus memory_bus;
+    PPUBus memory_bus {};
 
     union Controller {
         struct {
@@ -124,7 +124,7 @@ private:
     uint16_t tile_data_second_shift_reg {0x0000};
     uint16_t data_multiplexer {0x0000};
 
-    std::vector<sf::RectangleShape> pixels_to_render {};
+    std::vector<sf::RectangleShape> frame_buffer {};
 
 
     void    write_to_bus(uint16_t address, uint8_t data);

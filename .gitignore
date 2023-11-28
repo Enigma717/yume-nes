@@ -15,6 +15,9 @@ run_tests
 # test files
 test/*
 
+# Plant UML diagrams
+*.puml
+
 # logs
 vgcore.*
 core.*

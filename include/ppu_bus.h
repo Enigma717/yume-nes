@@ -39,7 +39,6 @@ private:
     CartridgePtr cartridge_ptr {};
     Cartridge::MirroringType current_mirroring_mode {};
 
-
     OamMemory   oam          {};
     VRamMemory  vram         {};
     PalettesRam palettes_ram {};
