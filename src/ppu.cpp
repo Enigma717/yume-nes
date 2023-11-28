@@ -105,7 +105,7 @@ PPU::PPU() : app_screen{sf::VideoMode(visible_screen_width, visible_screen_heigh
     app_screen.setPosition({center_screen_in_x_axis, center_screen_in_y_axis});
     app_screen.setFramerateLimit(framerate_cap);
     app_screen.setVerticalSyncEnabled(false);
-};
+}
 
 void PPU::connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge)
 {

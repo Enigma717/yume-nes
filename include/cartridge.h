@@ -10,6 +10,7 @@ namespace CartridgeConsts
     constexpr size_t header_size {16};
 }
 
+using CartridgeContents = std::vector<uint8_t>;
 
 class Cartridge {
 public:

@@ -39,7 +39,6 @@ private:
 
     void send_write_to_ppu(uint16_t address, uint8_t data) const;
     void send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const;
-    void send_write_to_mapper_prg_rom(uint16_t address, uint8_t data) const;
     void cpu_ram_write(uint16_t address, uint8_t data);
 
     uint8_t send_read_to_ppu(uint16_t address) const;

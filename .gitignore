@@ -12,6 +12,9 @@ run_tests
 *.txt
 *.sh
 
+# test files
+test/*
+
 # logs
 vgcore.*
 core.*

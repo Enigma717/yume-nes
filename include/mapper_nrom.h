@@ -33,10 +33,6 @@ public:
 
     void    map_prg_ram_write(uint16_t address, uint8_t data);
     uint8_t map_prg_ram_read(uint16_t address) const;
-
-    void    map_prg_rom_write(uint16_t address, uint8_t data);
     uint8_t map_prg_rom_read(uint16_t address) const;
-
-    void    map_chr_rom_write(uint16_t address, uint8_t data);
     uint8_t map_chr_rom_read(uint16_t address) const;
 };

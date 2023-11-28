@@ -34,7 +34,7 @@ void CPUBus::dispatch_write_to_device(uint16_t address, uint8_t data)
     else if (address >= prg_ram_space_start && address < prg_rom_space_start)
         send_write_to_mapper_prg_ram(address, data);
     else if (address >= prg_rom_space_start)
-        send_write_to_mapper_prg_rom(address, data);
+        return;
     else
         cpu_ram_write(address, data);
 }
@@ -70,11 +70,6 @@ void CPUBus::send_write_to_ppu(uint16_t address, uint8_t data) const
 void CPUBus::send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const
 {
     cartridge_ptr.lock()->mapper.map_prg_ram_write(address, data);
-}
-
-void CPUBus::send_write_to_mapper_prg_rom(uint16_t address, uint8_t data) const
-{
-    cartridge_ptr.lock()->mapper.map_prg_rom_write(address, data);
 }
 
 void CPUBus::cpu_ram_write(uint16_t address, uint8_t data)

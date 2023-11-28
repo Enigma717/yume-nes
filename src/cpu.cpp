@@ -64,7 +64,7 @@ namespace
 // API //
 /////////
 
-CPU::CPU(PPU& ppu) : memory_bus{ppu} {};
+CPU::CPU(PPU& ppu) : memory_bus{ppu} {}
 
 void CPU::connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge)
 {

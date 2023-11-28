@@ -26,7 +26,7 @@ void PPUBus::insert_cartridge(std::shared_ptr<Cartridge> cartridge)
 void PPUBus::dispatch_write_to_device(uint16_t address, uint8_t data)
 {
     if (address < nametables_space_start)
-        send_write_to_mapper_chr_rom(address, data);
+        return;
     else if (address >= nametables_space_start && address < palettes_space_start)
         process_vram_write(address, data);
     else
@@ -41,12 +41,6 @@ uint8_t PPUBus::dispatch_read_to_device(uint16_t address) const
         return process_vram_read(address);
     else
         return process_palettes_ram_read(address);
-}
-
-
-void PPUBus::send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const
-{
-    cartridge_ptr.lock()->mapper.map_chr_rom_write(address, data);
 }
 
 void PPUBus::process_vram_write(uint16_t address, uint8_t data)

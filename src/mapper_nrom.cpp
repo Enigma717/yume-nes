@@ -24,16 +24,6 @@ uint8_t MapperNROM::map_prg_ram_read(uint16_t address) const
     return prg_ram_memory.at(address - prg_ram_space_offset);
 }
 
-void MapperNROM::map_prg_rom_write(uint16_t address, uint8_t data)
-{
-    uint16_t mapped_address = address - prg_rom_space_offset;
-
-    if (prg_rom_banks_count == 1)
-        mapped_address = mapped_address % MapperConsts::prg_rom_bank_size;
-
-    prg_rom_memory.at(mapped_address) = data;
-}
-
 uint8_t MapperNROM::map_prg_rom_read(uint16_t address) const
 {
     uint16_t mapped_address = address - prg_rom_space_offset;
@@ -44,12 +34,7 @@ uint8_t MapperNROM::map_prg_rom_read(uint16_t address) const
     return prg_rom_memory.at(mapped_address);
 }
 
-void MapperNROM::map_chr_rom_write(uint16_t address, uint8_t data)
-{
-    chr_rom_memory.at(address) = data;
-}
-
 uint8_t MapperNROM::map_chr_rom_read(uint16_t address) const
 {
-    return chr_rom_memory.at(address);
+    return chr_rom_memory[address];
 }

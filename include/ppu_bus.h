@@ -45,7 +45,6 @@ private:
     PalettesRam palettes_ram {};
 
 
-    void send_write_to_mapper_chr_rom(uint16_t address, uint8_t data) const;
     void process_vram_write(uint16_t address, uint8_t data);
     void process_palettes_ram_write(uint16_t address, uint8_t data);
 
