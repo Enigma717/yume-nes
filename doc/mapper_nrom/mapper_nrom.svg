@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="496px" preserveAspectRatio="none" style="width:328px;height:496px;" version="1.1" viewBox="0 0 328 496" width="328px" zoomAndPan="magnify"><defs><filter height="300%" id="fqgd9yalvpwfh" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="4.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="8.0" dy="8.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[17e1c1a0a8219605fa597c0a44bc2e80]
+class MapperNROM--><rect codeLine="4" fill="#FEFECE" filter="url(#fqgd9yalvpwfh)" height="455.5653" id="MapperNROM" style="stroke:#A80036;stroke-width:3.0;" width="286" x="14" y="14"/><ellipse cx="71.9" cy="46" fill="#ADD1B2" rx="22" ry="22" style="stroke:#A80036;stroke-width:2.0;"/><path d="M70.8375,59.8438 Q67.3375,59.8438 65.0563,58.375 Q62.8063,56.875 61.6813,54.1875 Q60.5875,51.4688 60.5875,47.875 Q60.5875,43.8125 61.9,40.9063 Q63.2125,38 65.775,36.4375 Q68.3375,34.875 72.0875,34.875 Q73.8688,34.875 75.2125,35.25 Q76.5563,35.5938 77.9313,36.2813 L76.3063,40.3125 Q75.0563,39.6875 73.9625,39.4375 Q72.9,39.1875 71.9313,39.1875 Q69.5875,39.1875 68.1813,40.25 Q66.775,41.3125 66.1813,43.2188 Q65.5875,45.125 65.5875,47.6563 Q65.5875,51.6875 67.025,53.625 Q68.4625,55.5313 71.65,55.5313 Q72.8375,55.5313 74.0875,55.2188 Q75.3375,54.9063 76.9938,54.1563 L76.9938,58.5938 Q75.525,59.2188 73.9313,59.5313 Q72.3688,59.8438 70.8375,59.8438 Z " fill="#000000"/><text fill="#000000" font-family="sans-serif" font-size="24" lengthAdjust="spacing" textLength="160" x="106.1" y="55.3121">MapperNROM</text><line style="stroke:#A80036;stroke-width:3.0;" x1="16" x2="298" y1="78" y2="78"/><ellipse cx="36" cy="100" fill="none" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="232" x="54" y="109.5178">prg_ram_banks_count</text><ellipse cx="36" cy="129.9638" fill="none" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="234" x="54" y="139.4816">prg_rom_banks_count</text><ellipse cx="36" cy="159.9276" fill="none" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="230" x="54" y="169.4454">chr_rom_banks_count</text><ellipse cx="36" cy="189.8913" fill="none" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="194" x="54" y="199.4092">prg_ram_presence</text><ellipse cx="36" cy="219.8551" fill="none" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="176" x="54" y="229.3729">trainer_presence</text><ellipse cx="36" cy="249.8189" fill="none" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="188" x="54" y="259.3367">prg_ram_memory</text><ellipse cx="36" cy="279.7827" fill="none" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="190" x="54" y="289.3005">prg_rom_memory</text><ellipse cx="36" cy="309.7464" fill="none" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="186" x="54" y="319.2643">chr_rom_memory</text><line style="stroke:#A80036;stroke-width:3.0;" x1="16" x2="298" y1="333.7102" y2="333.7102"/><ellipse cx="36" cy="355.7102" fill="#84BE84" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="222" x="54" y="365.228">map_prg_ram_write()</text><ellipse cx="36" cy="385.674" fill="#84BE84" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="216" x="54" y="395.1918">map_prg_ram_read()</text><ellipse cx="36" cy="415.6378" fill="#84BE84" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="218" x="54" y="425.1556">map_prg_rom_read()</text><ellipse cx="36" cy="445.6015" fill="#84BE84" rx="6" ry="6" style="stroke:#038048;stroke-width:2.0;"/><text fill="#000000" font-family="sans-serif" font-size="22" lengthAdjust="spacing" textLength="214" x="54" y="455.1194">map_chr_rom_read()</text><!--MD5=[41d7e56f128795ad65bfc8f07a39034a]
+@startuml mapper_nrom
+scale 2
+hide empty members
+
+class MapperNROM {
++ prg_ram_banks_count
++ prg_rom_banks_count
++ chr_rom_banks_count
++ prg_ram_presence
++ trainer_presence
++ prg_ram_memory
++ prg_rom_memory
++ chr_rom_memory
+
++ map_prg_ram_write()
++ map_prg_ram_read()
++ map_prg_rom_read()
++ map_chr_rom_read()
+}
+@enduml
+
+PlantUML version 1.2021.00(Sun Jan 10 11:25:05 CET 2021)
+(MIT source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
