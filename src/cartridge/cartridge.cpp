@@ -26,6 +26,10 @@ namespace
 }
 
 
+/////////
+// API //
+/////////
+
 bool Cartridge::load_cartridge(const std::string& cartridge_path)
 {
     if (!dump_cartridge_into_vector(cartridge_path))
@@ -35,18 +39,18 @@ bool Cartridge::load_cartridge(const std::string& cartridge_path)
         return false;
 
 
-    auto final_prg_ram_size {MapperConsts::prg_ram_bank_size * mapper.prg_ram_banks_count};
-    auto final_prg_rom_size {MapperConsts::prg_rom_bank_size * mapper.prg_rom_banks_count};
-    auto final_chr_rom_size {MapperConsts::chr_rom_bank_size * mapper.chr_rom_banks_count};
+    const auto final_prg_ram_size {MapperConsts::prg_ram_bank_size * mapper.prg_ram_banks_count};
+    const auto final_prg_rom_size {MapperConsts::prg_rom_bank_size * mapper.prg_rom_banks_count};
+    const auto final_chr_rom_size {MapperConsts::chr_rom_bank_size * mapper.chr_rom_banks_count};
 
     mapper.prg_rom_memory.resize(final_prg_ram_size);
     mapper.prg_rom_memory.resize(final_prg_rom_size);
     mapper.chr_rom_memory.resize(final_chr_rom_size);
 
 
-    auto actual_trainer_size {mapper.trainer_presence ? trainer_size : 0};
-    auto default_offset {CartridgeConsts::header_size + actual_trainer_size};
-    auto roms_crossing_point {default_offset + final_prg_rom_size};
+    const auto actual_trainer_size {mapper.trainer_presence ? trainer_size : 0};
+    const auto default_offset {CartridgeConsts::header_size + actual_trainer_size};
+    const auto roms_crossing_point {default_offset + final_prg_rom_size};
 
     std::copy(cartridge_dump.begin() + default_offset,
         cartridge_dump.begin() + roms_crossing_point,
@@ -111,6 +115,11 @@ bool Cartridge::decode_header()
 
     return true;
 }
+
+
+//////////////////////
+// Helper functions //
+//////////////////////
 
 bool Cartridge::check_for_nes_logo_in_header() const
 {

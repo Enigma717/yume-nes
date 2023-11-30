@@ -22,12 +22,7 @@ public:
     };
 
     MapperNROM mapper {};
-
-    CartridgeContents cartridge_dump {};
-    CartridgeContents header {CartridgeContents(CartridgeConsts::header_size, 0x00)};
-
     MirroringType mirroring_mode {Cartridge::MirroringType::horizontal};
-    int current_mapper_id {0};
 
 
     bool load_cartridge(const std::string& cartridge_path);
@@ -35,6 +30,11 @@ public:
     bool decode_header();
 
 private:
+    CartridgeContents cartridge_dump {};
+    CartridgeContents header {CartridgeContents(CartridgeConsts::header_size, 0x00)};
+    int current_mapper_id {0};
+
+
     bool    check_for_nes_logo_in_header() const;
     bool    check_for_mirroring_mode() const;
     bool    check_for_prg_ram_presence() const;

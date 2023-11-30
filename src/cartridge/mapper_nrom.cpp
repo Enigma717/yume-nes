@@ -8,6 +8,10 @@ namespace
 }
 
 
+/////////
+// API //
+/////////
+
 void MapperNROM::map_prg_ram_write(uint16_t address, uint8_t data)
 {
     if (!prg_ram_presence)
