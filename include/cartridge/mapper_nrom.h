@@ -16,6 +16,12 @@ using CartridgeContents = std::vector<uint8_t>;
 
 class MapperNROM {
 public:
+    void    map_prg_ram_write(uint16_t address, uint8_t data);
+    uint8_t map_prg_ram_read(uint16_t address) const;
+    uint8_t map_prg_rom_read(uint16_t address) const;
+    uint8_t map_chr_rom_read(uint16_t address) const;
+
+private:
     int prg_ram_banks_count {0};
     int prg_rom_banks_count {0};
     int chr_rom_banks_count {0};
@@ -30,9 +36,5 @@ public:
     CartridgeContents chr_rom_memory {
         CartridgeContents(MapperConsts::chr_rom_bank_size, 0x00)};
 
-
-    void    map_prg_ram_write(uint16_t address, uint8_t data);
-    uint8_t map_prg_ram_read(uint16_t address) const;
-    uint8_t map_prg_rom_read(uint16_t address) const;
-    uint8_t map_chr_rom_read(uint16_t address) const;
+    friend class Cartridge;
 };

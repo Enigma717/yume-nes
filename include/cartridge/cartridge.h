@@ -26,14 +26,15 @@ public:
 
 
     bool load_cartridge(const std::string& cartridge_path);
-    bool dump_cartridge_into_vector(const std::string& cartridge_path);
-    bool decode_header();
 
 private:
     CartridgeContents cartridge_dump {};
     CartridgeContents header {CartridgeContents(CartridgeConsts::header_size, 0x00)};
     int current_mapper_id {0};
 
+
+    bool    dump_cartridge_into_vector(const std::string& cartridge_path);
+    bool    decode_header();
 
     bool    check_for_nes_logo_in_header() const;
     bool    check_for_mirroring_mode() const;

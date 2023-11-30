@@ -62,6 +62,11 @@ bool Cartridge::load_cartridge(const std::string& cartridge_path)
     return true;
 }
 
+
+///////////////////
+// File decoding //
+///////////////////
+
 bool Cartridge::dump_cartridge_into_vector(const std::string& cartridge_path)
 {
     if (!std::filesystem::exists(cartridge_path)) {
