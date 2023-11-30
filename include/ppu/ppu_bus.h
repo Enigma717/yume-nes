@@ -9,7 +9,6 @@
 
 namespace PPUBusConsts
 {
-    constexpr size_t oam_size {64};
     constexpr size_t vram_size {2048};
     constexpr size_t palettes_ram_size {32};
 }
@@ -24,22 +23,13 @@ public:
     uint8_t dispatch_read_to_device(uint16_t address) const;
 
 private:
-    struct OAMEntry {
-        uint8_t position_y {0x00};
-        uint8_t tile_index {0x00};
-        uint8_t attributes {0x00};
-        uint8_t position_x {0x00};
-    };
-
     using CartridgePtr = std::weak_ptr<Cartridge>;
-    using OamMemory    = std::array<OAMEntry, PPUBusConsts::oam_size>;
     using VRamMemory   = std::array<uint8_t, PPUBusConsts::vram_size>;
     using PalettesRam  = std::array<uint8_t, PPUBusConsts::palettes_ram_size>;
 
     CartridgePtr cartridge_ptr {};
     Cartridge::MirroringType current_mirroring_mode {};
 
-    OamMemory   oam          {};
     VRamMemory  vram         {};
     PalettesRam palettes_ram {};
 

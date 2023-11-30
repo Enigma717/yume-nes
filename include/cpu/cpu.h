@@ -54,8 +54,8 @@ private:
 
     Instruction decode_instruction_from_opcode(uint8_t opcode) const;
     void        next_instruction();
-    void        exec_address_mode();
-    void        exec_instruction();
+    void        execute_addressing_mode();
+    void        execute_instruction();
 
     uint16_t read_nmi_vector() const;
     uint16_t read_reset_vector() const;
@@ -66,17 +66,17 @@ private:
     void     process_interrupt(bool brk_flag_state = 0);
     void     perform_branching();
 
-    void address_mode_immediate();
-    void address_mode_zero_page();
-    void address_mode_zero_page_x();
-    void address_mode_zero_page_y();
-    void address_mode_relative();
-    void address_mode_absolute();
-    void address_mode_absolute_x();
-    void address_mode_absolute_y();
-    void address_mode_indirect();
-    void address_mode_indirect_x();
-    void address_mode_indirect_y();
+    void addressing_mode_immediate();
+    void addressing_mode_zero_page();
+    void addressing_mode_zero_page_x();
+    void addressing_mode_zero_page_y();
+    void addressing_mode_relative();
+    void addressing_mode_absolute();
+    void addressing_mode_absolute_x();
+    void addressing_mode_absolute_y();
+    void addressing_mode_indirect();
+    void addressing_mode_indirect_x();
+    void addressing_mode_indirect_y();
 
     void ADC(); void AND(); void ASL();
     void BCC(); void BCS(); void BEQ();

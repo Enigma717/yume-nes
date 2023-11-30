@@ -160,8 +160,8 @@ void CPU::next_instruction()
     current_instruction = decode_instruction_from_opcode(instruction_opcode);
     cycles_queued = current_instruction.cycles;
 
-    exec_address_mode();
-    exec_instruction();
+    execute_addressing_mode();
+    execute_instruction();
 }
 
 //////////////////////////
@@ -179,26 +179,26 @@ Instruction CPU::decode_instruction_from_opcode(uint8_t opcode) const
     return *instruction_it;
 }
 
-void CPU::exec_address_mode()
+void CPU::execute_addressing_mode()
 {
     using AM = Instruction::AddressingMode;
-    switch (current_instruction.address_mode) {
-        case AM::immediate:   address_mode_immediate();   break;
-        case AM::zero_page:   address_mode_zero_page();   break;
-        case AM::zero_page_x: address_mode_zero_page_x(); break;
-        case AM::zero_page_y: address_mode_zero_page_y(); break;
-        case AM::relative:    address_mode_relative();    break;
-        case AM::absolute:    address_mode_absolute();    break;
-        case AM::absolute_x:  address_mode_absolute_x();  break;
-        case AM::absolute_y:  address_mode_absolute_y();  break;
-        case AM::indirect:    address_mode_indirect();    break;
-        case AM::indirect_x:  address_mode_indirect_x();  break;
-        case AM::indirect_y:  address_mode_indirect_y();  break;
+    switch (current_instruction.addressing_mode) {
+        case AM::immediate:   addressing_mode_immediate();   break;
+        case AM::zero_page:   addressing_mode_zero_page();   break;
+        case AM::zero_page_x: addressing_mode_zero_page_x(); break;
+        case AM::zero_page_y: addressing_mode_zero_page_y(); break;
+        case AM::relative:    addressing_mode_relative();    break;
+        case AM::absolute:    addressing_mode_absolute();    break;
+        case AM::absolute_x:  addressing_mode_absolute_x();  break;
+        case AM::absolute_y:  addressing_mode_absolute_y();  break;
+        case AM::indirect:    addressing_mode_indirect();    break;
+        case AM::indirect_x:  addressing_mode_indirect_x();  break;
+        case AM::indirect_y:  addressing_mode_indirect_y();  break;
         default: break;
     }
 }
 
-void CPU::exec_instruction()
+void CPU::execute_instruction()
 {
     using MN = Instruction::MnemonicName;
     switch (current_instruction.mnemonic) {
@@ -355,13 +355,13 @@ void CPU::perform_branching()
 //  Addressing modes  //
 ////////////////////////
 
-void CPU::address_mode_immediate()
+void CPU::addressing_mode_immediate()
 {
     arg_address = pc;
     pc++;
 }
 
-void CPU::address_mode_zero_page()
+void CPU::addressing_mode_zero_page()
 {
     arg_address = read_from_bus(pc);
     pc++;
@@ -369,7 +369,7 @@ void CPU::address_mode_zero_page()
     arg_address = arg_address & zero_page_mask;
 }
 
-void CPU::address_mode_zero_page_x()
+void CPU::addressing_mode_zero_page_x()
 {
     arg_address = read_from_bus(pc) + x_reg;
     pc++;
@@ -377,7 +377,7 @@ void CPU::address_mode_zero_page_x()
     arg_address = arg_address & zero_page_mask;
 }
 
-void CPU::address_mode_zero_page_y()
+void CPU::addressing_mode_zero_page_y()
 {
     arg_address = read_from_bus(pc) + y_reg;
     pc++;
@@ -385,14 +385,14 @@ void CPU::address_mode_zero_page_y()
     arg_address = arg_address & zero_page_mask;
 }
 
-void CPU::address_mode_relative()
+void CPU::addressing_mode_relative()
 {
     branch_offset = read_from_bus(pc);
     arg_address = branch_offset;
     pc++;
 }
 
-void CPU::address_mode_absolute()
+void CPU::addressing_mode_absolute()
 {
     auto lsb {read_from_bus(pc)};
     pc++;
@@ -402,7 +402,7 @@ void CPU::address_mode_absolute()
     arg_address = (msb << 8) | lsb;
 }
 
-void CPU::address_mode_absolute_x()
+void CPU::addressing_mode_absolute_x()
 {
     auto lsb {read_from_bus(pc)};
     pc++;
@@ -417,7 +417,7 @@ void CPU::address_mode_absolute_x()
 
 }
 
-void CPU::address_mode_absolute_y()
+void CPU::addressing_mode_absolute_y()
 {
     auto lsb {read_from_bus(pc)};
     pc++;
@@ -431,7 +431,7 @@ void CPU::address_mode_absolute_y()
         cycles_queued += 1;
 }
 
-void CPU::address_mode_indirect()
+void CPU::addressing_mode_indirect()
 {
     auto lsb {read_from_bus(pc)};
     pc++;
@@ -452,7 +452,7 @@ void CPU::address_mode_indirect()
     arg_address = (msb << 8) | lsb;
 }
 
-void CPU::address_mode_indirect_x()
+void CPU::addressing_mode_indirect_x()
 {
     const uint16_t temp_address = read_from_bus(pc) + x_reg;
     pc++;
@@ -463,7 +463,7 @@ void CPU::address_mode_indirect_x()
     arg_address = (msb << 8) | lsb;
 }
 
-void CPU::address_mode_indirect_y()
+void CPU::addressing_mode_indirect_y()
 {
     const uint16_t temp_address = read_from_bus(pc);
     pc++;
@@ -512,7 +512,7 @@ void CPU::AND()
 
 void CPU::ASL()
 {
-    if (current_instruction.address_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
 
         acc = acc << 1;
@@ -757,7 +757,7 @@ void CPU::LDY()
 
 void CPU::LSR()
 {
-    if (current_instruction.address_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
 
         acc = acc >> 1;
@@ -822,7 +822,7 @@ void CPU::ROL()
 {
     const bool old_carry = status.flag.carry;
 
-    if (current_instruction.address_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
 
         acc = acc << 1;
@@ -848,7 +848,7 @@ void CPU::ROR()
 {
     const bool old_carry = status.flag.carry;
 
-    if (current_instruction.address_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
 
         acc = acc >> 1;

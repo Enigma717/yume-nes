@@ -33,6 +33,7 @@ private:
     using CartridgePtr = std::weak_ptr<Cartridge>;
     using CpuRamMemory = std::array<uint8_t, CPUBusConsts::memory_size>;
 
+    CpuRamMemory cpu_ram {};
     CartridgePtr cartridge_ptr {};
     PPU& ppu_ref;
 
@@ -46,5 +47,4 @@ private:
     uint8_t send_read_to_mapper_prg_rom(uint16_t address) const;
     uint8_t cpu_ram_read(uint16_t address) const;
 
-    CpuRamMemory cpu_ram {};
 };

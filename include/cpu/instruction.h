@@ -54,7 +54,7 @@ public:
     };
 
     MnemonicName   mnemonic {MnemonicName::KIL};
-    AddressingMode address_mode {AddressingMode::implied};
+    AddressingMode addressing_mode {AddressingMode::implied};
     uint8_t        opcode {0x02};
     int            bytes {1};
     int            cycles {1};
@@ -62,7 +62,7 @@ public:
     bool operator==(const Instruction& rhs) const
     {
         return mnemonic == rhs.mnemonic &&
-            address_mode == rhs.address_mode &&
+            addressing_mode == rhs.addressing_mode &&
             opcode == rhs.opcode &&
             bytes == rhs.bytes &&
             cycles == rhs.cycles;

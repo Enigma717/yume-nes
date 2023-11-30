@@ -26,7 +26,7 @@ namespace
     constexpr size_t center_screen_in_y_axis {60};
     constexpr size_t final_screen_width {1024};
     constexpr size_t final_screen_height {960};
-        constexpr size_t framerate_cap {60};
+    constexpr size_t framerate_cap {60};
 
     constexpr int actual_screen_height {262};
     constexpr int actual_screen_width {341};
