@@ -1,4 +1,4 @@
-#include "../include/mapper_nrom.h"
+#include "../../include/cartridge/mapper_nrom.h"
 
 
 namespace

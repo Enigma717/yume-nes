@@ -1,6 +1,6 @@
-#include "../include/cpu.h"
+#include "../../include/cpu/cpu.h"
 
-#include "../include/instruction.h"
+#include "../../include/cpu/instruction.h"
 
 #include <algorithm>
 #include <iostream>

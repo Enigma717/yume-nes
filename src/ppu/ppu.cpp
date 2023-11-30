@@ -1,4 +1,4 @@
-#include "../include/ppu.h"
+#include "../../include/ppu/ppu.h"
 
 #include <iostream>
 #include <iomanip>

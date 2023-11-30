@@ -1,4 +1,4 @@
-#include "../include/ppu_bus.h"
+#include "../../include/ppu/ppu_bus.h"
 
 
 namespace

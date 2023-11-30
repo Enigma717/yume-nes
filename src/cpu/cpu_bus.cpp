@@ -1,7 +1,7 @@
-#include "../include/cpu_bus.h"
+#include "../../include/cpu/cpu_bus.h"
 
-#include "../include/cartridge.h"
-#include "../include/ppu.h"
+#include "../../include/cartridge/cartridge.h"
+#include "../../include/ppu/ppu.h"
 
 
 namespace

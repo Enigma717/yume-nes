@@ -1,4 +1,4 @@
-#include "../include/cartridge.h"
+#include "../../include/cartridge/cartridge.h"
 
 #include <iostream>
 #include <iterator>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/cartridge.h"
+#include "../cartridge/cartridge.h"
 
 #include <array>
 #include <cstdint>

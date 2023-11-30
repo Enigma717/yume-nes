@@ -1,6 +1,4 @@
-#include "../include/system.h"
-
-#include "../include/cartridge.h"
+#include "../../include/system/system.h"
 
 #include <chrono>
 #include <iostream>

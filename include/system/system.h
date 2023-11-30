@@ -1,7 +1,7 @@
 #pragma once
 
-#include "./cpu.h"
-#include "./ppu.h"
+#include "../cpu/cpu.h"
+#include "../ppu/ppu.h"
 
 #include <memory>
 
