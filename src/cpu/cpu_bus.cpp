@@ -15,6 +15,10 @@ namespace
 }
 
 
+/////////
+// API //
+/////////
+
 CPUBus::CPUBus(PPU& ppu) : ppu_ref{ppu} {};
 
 void CPUBus::insert_cartridge(std::shared_ptr<Cartridge> cartridge)
@@ -62,6 +66,10 @@ void CPUBus::clear_ppu_nmi_flag() const
 }
 
 
+///////////////////
+// Write methods //
+///////////////////
+
 void CPUBus::send_write_to_ppu(uint16_t address, uint8_t data) const
 {
     ppu_ref.handle_register_write_from_cpu(address, data);
@@ -79,6 +87,11 @@ void CPUBus::cpu_ram_write(uint16_t address, uint8_t data)
     else
         cpu_ram.at(address) = data;
 }
+
+
+//////////////////
+// Read methods //
+//////////////////
 
 uint8_t CPUBus::send_read_to_ppu(uint16_t address) const
 {

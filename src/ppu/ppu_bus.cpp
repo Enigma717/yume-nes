@@ -17,6 +17,10 @@ namespace
 }
 
 
+/////////
+// API //
+/////////
+
 void PPUBus::insert_cartridge(std::shared_ptr<Cartridge> cartridge)
 {
     cartridge_ptr = cartridge;
@@ -43,6 +47,11 @@ uint8_t PPUBus::dispatch_read_to_device(uint16_t address) const
         return process_palettes_ram_read(address);
 }
 
+
+///////////////////
+// Write methods //
+///////////////////
+
 void PPUBus::process_vram_write(uint16_t address, uint8_t data)
 {
     const auto normalized_address {normalize_vram_address(address)};
@@ -56,6 +65,11 @@ void PPUBus::process_palettes_ram_write(uint16_t address, uint8_t data)
 
     palettes_ram.at(normalized_address) = data;
 }
+
+
+//////////////////
+// Read methods //
+//////////////////
 
 uint8_t PPUBus::send_read_to_mapper_chr_rom(uint16_t address) const
 {
@@ -76,6 +90,10 @@ uint8_t PPUBus::process_palettes_ram_read(uint16_t address) const
     return palettes_ram.at(normalized_address);
 }
 
+
+///////////////////////
+// Address preparing //
+///////////////////////
 
 uint16_t PPUBus::normalize_vram_address(uint16_t address) const
 {

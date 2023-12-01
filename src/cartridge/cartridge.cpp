@@ -122,9 +122,9 @@ bool Cartridge::decode_header()
 }
 
 
-//////////////////////
-// Helper functions //
-//////////////////////
+////////////////////
+// Helper methods //
+////////////////////
 
 bool Cartridge::check_for_nes_logo_in_header() const
 {

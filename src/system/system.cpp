@@ -11,6 +11,10 @@ namespace
 }
 
 
+/////////
+// API //
+/////////
+
 System::System() : cpu{ppu}
 {
     cartridge = std::make_shared<Cartridge>();
@@ -55,6 +59,11 @@ void System::run_console()
         }
     }
 }
+
+
+//////////////////////////
+// System functionality //
+//////////////////////////
 
 void System::prepare_system_for_start()
 {

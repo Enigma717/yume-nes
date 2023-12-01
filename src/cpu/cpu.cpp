@@ -351,9 +351,9 @@ void CPU::perform_branching()
 }
 
 
-////////////////////////
-//  Addressing modes  //
-////////////////////////
+//////////////////////
+// Addressing modes //
+//////////////////////
 
 void CPU::addressing_mode_immediate()
 {
@@ -479,9 +479,9 @@ void CPU::addressing_mode_indirect_y()
 }
 
 
-////////////////////
-//  Instructions  //
-////////////////////
+//////////////////
+// Instructions //
+//////////////////
 
 void CPU::ADC()
 {

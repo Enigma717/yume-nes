@@ -17,7 +17,6 @@ namespace PPUBusConsts
 class PPUBus {
 public:
     void insert_cartridge(std::shared_ptr<Cartridge> cartridge);
-    void clear_memory();
 
     void    dispatch_write_to_device(uint16_t address, uint8_t data);
     uint8_t dispatch_read_to_device(uint16_t address) const;
