@@ -30,7 +30,7 @@ public:
 private:
     CartridgeContents cartridge_dump {};
     CartridgeContents header {CartridgeContents(CartridgeConsts::header_size, 0x00)};
-    int current_mapper_id {0};
+    int current_mapper_id {-1};
 
 
     bool    dump_cartridge_into_vector(const std::string& cartridge_path);

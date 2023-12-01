@@ -20,7 +20,8 @@ public:
     void run_console();
 
 private:
-    int system_cycles_executed {0};
+    bool cartridge_loaded {false};
+    int  system_cycles_executed {0};
 
     void prepare_system_for_start();
     void perform_master_clock_cycle(bool debug_mode = false);

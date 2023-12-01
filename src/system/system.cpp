@@ -33,12 +33,16 @@ bool System::boot_up(const std::string& cartridge_path)
     }
 
     prepare_system_for_start();
+    cartridge_loaded = true;
 
     return true;
 }
 
 void System::run_console()
 {
+    if (!cartridge_loaded)
+        return;
+
     sf::Clock clock;
 
     while (ppu.app_screen.isOpen()) {
