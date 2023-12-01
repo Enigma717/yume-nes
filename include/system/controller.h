@@ -20,7 +20,7 @@ public:
     };
 
 
-    void    handle_state_write(uint8_t data);
+    bool    handle_state_write(uint8_t data);
     uint8_t handle_state_read();
 
 private:

@@ -88,7 +88,8 @@ void CPUBus::send_write_to_ppu(uint16_t address, uint8_t data) const
 
 void CPUBus::send_write_to_controller(uint8_t data) const
 {
-    controller_ptr.lock()->handle_state_write(data);
+    if (!controller_ptr.lock()->handle_state_write(data))
+        ppu_ref.app_screen.close();
 }
 
 void CPUBus::send_write_to_mapper_prg_ram(uint16_t address, uint8_t data) const

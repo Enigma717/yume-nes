@@ -14,8 +14,12 @@ namespace
 // API //
 /////////
 
-void Controller::handle_state_write(uint8_t data)
+bool Controller::handle_state_write(uint8_t data)
 {
+    // Exit app
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
+        return false;
+
     strobe = data & first_bit_mask;
 
     if (!strobe) {
@@ -28,6 +32,8 @@ void Controller::handle_state_write(uint8_t data)
                 buttons_state |= ControllerKeys::buttons_bits.at(current_button);
         }
     }
+
+    return true;
 }
 
 uint8_t Controller::handle_state_read()

@@ -2,6 +2,7 @@
 
 #include "../../include/system/controller.h"
 
+#include <SFML/Window/Keyboard.hpp>
 #include <chrono>
 #include <iostream>
 
@@ -39,16 +40,8 @@ bool System::boot_up(const std::string& cartridge_path)
 void System::run_console()
 {
     sf::Clock clock;
-    while (ppu.app_screen.isOpen()) {
-        sf::Event event;
-        while (ppu.app_screen.pollEvent(event)) {
-            if (event.type == sf::Event::Closed
-                    || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
-                ppu.app_screen.close();
-                return;
-            }
-        }
 
+    while (ppu.app_screen.isOpen()) {
         perform_master_clock_cycle(false);
 
         if (system_cycles_executed % ppu_cycles_needed_to_render_frame == 0) {

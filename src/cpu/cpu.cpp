@@ -3,7 +3,6 @@
 #include "../../include/cpu/instruction.h"
 
 #include <algorithm>
-#include <cstdint>
 #include <iostream>
 #include <iomanip>
 
