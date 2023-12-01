@@ -32,18 +32,18 @@ namespace ControllerKeys
     using SFMLKey = sf::Keyboard::Key;
     using Button = Controller::Button;
 
-    const std::map<Button, SFMLKey> key_binds {
-        {Button::A, SFMLKey::J},
+    static const std::map<Button, SFMLKey> key_binds {
+        {Button::A, SFMLKey::L},
         {Button::B, SFMLKey::K},
-        {Button::Select, SFMLKey::N},
-        {Button::Start, SFMLKey::M},
+        {Button::Select, SFMLKey::H},
+        {Button::Start, SFMLKey::J},
         {Button::Up, SFMLKey::W},
         {Button::Down, SFMLKey::S},
         {Button::Left, SFMLKey::A},
         {Button::Right, SFMLKey::D},
     };
 
-    const std::map<Button, uint8_t> buttons_bits {
+    static const std::map<Button, uint8_t> buttons_bits {
         {Button::A, 0b1000'0000},
         {Button::B, 0b0100'0000},
         {Button::Select, 0b0010'0000},
