@@ -68,7 +68,7 @@ void PPU::perform_cycle(bool debug_mode)
     if (debug_mode)
         log_debug_info();
 
-    renderer.prepare_next_pixel(current_cycle, current_scanline);
+    renderer.prepare_next_pixel();
 
     current_cycle++;
 

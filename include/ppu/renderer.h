@@ -24,9 +24,6 @@ private:
     RenderingMode rendering_mode {RenderingMode::pre_render_scanline};
     std::vector<sf::RectangleShape> frame_buffer {};
 
-    int  current_cycle {0};
-    int  current_scanline {0};
-
     uint8_t fetched_nametable_tile_byte {0x00};
     uint8_t fetched_attribute_table_byte {0x00};
     uint8_t fetched_tile_first_plane_byte {0x00};
@@ -37,7 +34,7 @@ private:
     uint16_t data_multiplexer {0x0000};
 
 
-    void prepare_next_pixel(int ppu_current_cycle, int ppu_current_scanline);
+    void prepare_next_pixel();
     void choose_rendering_mode();
     void dispatch_rendering_mode();
     void render_pre_render_scanline();

@@ -73,11 +73,8 @@ Renderer::Renderer(PPU& ppu_ref) : ppu_ref{ppu_ref}
 // Process rendering //
 ///////////////////////
 
-void Renderer::prepare_next_pixel(int ppu_current_cycle, int ppu_current_scanline)
+void Renderer::prepare_next_pixel()
 {
-    current_cycle = ppu_current_cycle;
-    current_scanline = ppu_current_scanline;
-
     choose_rendering_mode();
     dispatch_rendering_mode();
     process_pixel_rendering();
@@ -85,13 +82,13 @@ void Renderer::prepare_next_pixel(int ppu_current_cycle, int ppu_current_scanlin
 
 void Renderer::choose_rendering_mode()
 {
-    if (current_scanline >= 0 && current_scanline < post_render_scanline_number)
+    if (ppu_ref.current_scanline >= 0 && ppu_ref.current_scanline < post_render_scanline_number)
         rendering_mode = RenderingMode::visible_scanline;
-    else if (current_scanline == post_render_scanline_number)
+    else if (ppu_ref.current_scanline == post_render_scanline_number)
         rendering_mode = RenderingMode::post_render_scanline;
-    else if (current_scanline > post_render_scanline_number && current_scanline < pre_render_scanline_number)
+    else if (ppu_ref.current_scanline > post_render_scanline_number && ppu_ref.current_scanline < pre_render_scanline_number)
         rendering_mode = RenderingMode::vblank_scanline;
-    if (current_scanline == pre_render_scanline_number)
+    if (ppu_ref.current_scanline == pre_render_scanline_number)
         rendering_mode = RenderingMode::pre_render_scanline;
 }
 
@@ -108,34 +105,34 @@ void Renderer::dispatch_rendering_mode()
 
 void Renderer::render_pre_render_scanline()
 {
-    if (current_cycle == clear_ppu_status_cycle)
+    if (ppu_ref.current_cycle == clear_ppu_status_cycle)
         ppu_ref.ppu_status.word = 0x00;
 
     render_visible_scanline();
 
-    if (current_cycle > vertical_scroll_copy_cycle_start && current_cycle < vertical_scroll_copy_cycle_end)
+    if (ppu_ref.current_cycle > vertical_scroll_copy_cycle_start && ppu_ref.current_cycle < vertical_scroll_copy_cycle_end)
         copy_vertical_scroll_to_address();
 }
 
 void Renderer::render_visible_scanline()
 {
-    if ((current_cycle > 0 && current_cycle < horizontal_scroll_copy_cycle)
-        || (current_cycle > next_tile_fetches_cycle_start && current_cycle < next_tile_fetches_cycle_end))
+    if ((ppu_ref.current_cycle > 0 && ppu_ref.current_cycle < horizontal_scroll_copy_cycle)
+        || (ppu_ref.current_cycle > next_tile_fetches_cycle_start && ppu_ref.current_cycle < next_tile_fetches_cycle_end))
         process_rendering_fetches();
 
-    if (current_cycle == visible_screen_width)
+    if (ppu_ref.current_cycle == visible_screen_width)
         coarse_y_increment_with_wrapping();
 
-    if (current_cycle == horizontal_scroll_copy_cycle)
+    if (ppu_ref.current_cycle == horizontal_scroll_copy_cycle)
         copy_horizontal_scroll_to_address();
 
-    if (current_cycle == next_tile_fetches_cycle_end || current_cycle == garbage_nametable_fetch_cycle)
+    if (ppu_ref.current_cycle == next_tile_fetches_cycle_end || ppu_ref.current_cycle == garbage_nametable_fetch_cycle)
         fetched_nametable_tile_byte = fetch_nametable_tile_byte_with_shifters_load();
 }
 
 void Renderer::render_vblank_scanline()
 {
-    if (current_scanline == vblank_scanline_number && current_cycle == set_vblank_flag_cycle) {
+    if (ppu_ref.current_scanline == vblank_scanline_number && ppu_ref.current_cycle == set_vblank_flag_cycle) {
         ppu_ref.ppu_status.flag.vblank_start = 1;
 
         if (ppu_ref.ppu_controller.flag.generate_nmi)
@@ -161,8 +158,8 @@ void Renderer::process_pixel_rendering()
 
     const auto final_color = PPUColors::available_colors.at(ppu_ref.read_from_bus(address_to_read));
 
-    const auto x_coord = current_cycle - 1;
-    const auto y_coord = current_scanline;
+    const auto x_coord = ppu_ref.current_cycle - 1;
+    const auto y_coord = ppu_ref.current_scanline;
 
     if (check_for_pixel_within_visible_screen(x_coord, y_coord)) {
         const auto pixel_index {y_coord * visible_screen_width + x_coord};
@@ -178,7 +175,7 @@ void Renderer::process_pixel_rendering()
 // https://www.nesdev.org/wiki/PPU_scrolling#Tile_and_attribute_fetching
 void Renderer::process_rendering_fetches()
 {
-    const auto subcycle_dot {current_cycle % fetching_subcycle_size};
+    const auto subcycle_dot {ppu_ref.current_cycle % fetching_subcycle_size};
 
     move_shift_registers();
 
