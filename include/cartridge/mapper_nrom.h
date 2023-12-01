@@ -36,5 +36,6 @@ private:
     CartridgeContents chr_rom_memory {
         CartridgeContents(MapperConsts::chr_rom_bank_size, 0x00)};
 
+
     friend class Cartridge;
 };
