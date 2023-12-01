@@ -1,5 +1,7 @@
 #include "../../include/system/system.h"
 
+#include "../../include/system/controller.h"
+
 #include <chrono>
 #include <iostream>
 
@@ -18,6 +20,7 @@ namespace
 System::System() : cpu{ppu}
 {
     cartridge = std::make_shared<Cartridge>();
+    controller = std::make_shared<Controller>();
 }
 
 bool System::boot_up(const std::string& cartridge_path)
@@ -37,17 +40,14 @@ void System::run_console()
 {
     sf::Clock clock;
     while (ppu.app_screen.isOpen()) {
-        // sf::Event event;
-        // while (ppu.app_screen.pollEvent(event)) {
-        //         if (event.type == sf::Event::Closed
-        //                 || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
-        //                 ppu.app_screen.close();
-        //                 return;
-        //         }
-        //     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-        //                 std::cout << "\n\n\nSPACE PRESSED\n\n\n";
-        //     }
-        // }
+        sf::Event event;
+        while (ppu.app_screen.pollEvent(event)) {
+            if (event.type == sf::Event::Closed
+                    || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
+                ppu.app_screen.close();
+                return;
+            }
+        }
 
         perform_master_clock_cycle(false);
 
@@ -70,6 +70,7 @@ void System::prepare_system_for_start()
     ppu.connect_bus_with_cartridge(cartridge);
 
     cpu.connect_bus_with_cartridge(cartridge);
+    cpu.connect_bus_with_controller(controller);
     cpu.hard_reset();
 }
 

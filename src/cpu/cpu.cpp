@@ -71,6 +71,11 @@ void CPU::connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge)
     memory_bus.insert_cartridge(cartridge);
 }
 
+void CPU::connect_bus_with_controller(std::shared_ptr<Controller> controller)
+{
+    memory_bus.connect_controller(controller);
+}
+
 void CPU::perform_cycle(bool debug_mode)
 {
     status.flag.unused = 1;

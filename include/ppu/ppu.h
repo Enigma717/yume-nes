@@ -22,7 +22,6 @@ public:
 
     void log_debug_info() const;
 
-
 private:
     PPUBus memory_bus {};
     Renderer renderer;

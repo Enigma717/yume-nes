@@ -10,6 +10,8 @@ public:
     CPU(PPU& ppu_ref);
 
     void connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge);
+    void connect_bus_with_controller(std::shared_ptr<Controller> controller);
+
     void perform_cycle(bool debug_mode = false);
     void hard_reset();
     void log_debug_info() const;
