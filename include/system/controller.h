@@ -8,7 +8,7 @@
 
 class Controller {
 public:
-    enum Button {
+    enum class Button {
         A,
         B,
         Select,
@@ -19,12 +19,13 @@ public:
         Right,
     };
 
-    bool strobe;
-    uint8_t buttons_state {0x00};
 
-
-    void handle_state_write(uint8_t data);
+    void    handle_state_write(uint8_t data);
     uint8_t handle_state_read();
+
+private:
+    bool strobe {false};
+    uint8_t buttons_state {0x00};
 };
 
 namespace ControllerKeys

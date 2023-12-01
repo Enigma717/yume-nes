@@ -2,11 +2,17 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
+
 namespace
 {
     uint8_t first_bit_mask {0b0000'0001};
     uint8_t msb_mask {0b1000'0000};
 }
+
+
+/////////
+// API //
+/////////
 
 void Controller::handle_state_write(uint8_t data)
 {
