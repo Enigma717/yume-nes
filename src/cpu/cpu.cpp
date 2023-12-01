@@ -3,6 +3,7 @@
 #include "../../include/cpu/instruction.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 
@@ -36,11 +37,6 @@ namespace
     bool check_for_negative_flag(uint8_t reg)
     {
         return reg >> 7;
-    }
-
-    bool check_for_negative_flag(uint16_t reg)
-    {
-        return reg >> 15;
     }
 
     bool check_for_flag_with_mask(uint16_t reg, uint16_t mask)
@@ -495,7 +491,7 @@ void CPU::ADC()
 
     const auto acc_sign {check_for_negative_flag(acc)};
     const auto value_sign {check_for_negative_flag(value)};
-    const auto result_sign {check_for_negative_flag(result)};
+    const auto result_sign {check_for_negative_flag(static_cast<uint8_t>(result))};
 
     acc = static_cast<uint8_t>(result);
 
@@ -906,7 +902,7 @@ void CPU::SBC()
 
     const auto acc_sign {check_for_negative_flag(acc)};
     const auto value_sign {check_for_negative_flag(value)};
-    const auto result_sign {check_for_negative_flag(result)};
+    const auto result_sign {check_for_negative_flag(static_cast<uint8_t>(result))};
 
     acc = static_cast<uint8_t>(result);
 
