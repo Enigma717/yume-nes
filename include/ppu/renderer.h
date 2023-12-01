@@ -7,11 +7,15 @@ class PPU;
 
 
 class Renderer {
-private:
+public:
     Renderer() = delete;
     Renderer(PPU& ppu_ref);
 
+    std::vector<sf::RectangleShape> frame_buffer {};
 
+    void prepare_next_pixel();
+
+private:
     PPU& ppu_ref;
 
     enum class RenderingMode {
@@ -22,7 +26,6 @@ private:
     };
 
     RenderingMode rendering_mode {RenderingMode::pre_render_scanline};
-    std::vector<sf::RectangleShape> frame_buffer {};
 
     uint8_t fetched_nametable_tile_byte {0x00};
     uint8_t fetched_attribute_table_byte {0x00};
@@ -34,7 +37,6 @@ private:
     uint16_t data_multiplexer {0x0000};
 
 
-    void prepare_next_pixel();
     void choose_rendering_mode();
     void dispatch_rendering_mode();
     void render_pre_render_scanline();
@@ -54,9 +56,6 @@ private:
     void copy_vertical_scroll_to_address();
     void load_next_tile_data_to_shift_registers();
     void move_shift_registers();
-
-
-    friend class PPU;
 };
 
 
