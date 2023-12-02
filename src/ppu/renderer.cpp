@@ -214,10 +214,11 @@ uint8_t Renderer::fetch_attribute_table_byte() const
 
 uint8_t Renderer::calculate_attribute_shift() const
 {
-    const uint16_t horizontal_half_choice = (ppu_ref.ppu_address.internal.coarse_y & second_bit_mask) << 1;
+    const uint16_t horizontal_half_choice = ppu_ref.ppu_address.internal.coarse_y & second_bit_mask;
     const uint16_t vertical_half_choice = ppu_ref.ppu_address.internal.coarse_x & second_bit_mask;
+    const uint8_t shift = (horizontal_half_choice << 1) | vertical_half_choice;
 
-    return static_cast<uint8_t>(horizontal_half_choice | vertical_half_choice);
+    return shift;
 }
 
 uint8_t Renderer::fetch_tile_plane_byte(uint8_t plane_offset) const

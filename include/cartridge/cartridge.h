@@ -12,6 +12,7 @@ namespace CartridgeConsts
 
 using CartridgeContents = std::vector<uint8_t>;
 
+
 class Cartridge {
 public:
     enum class MirroringType {

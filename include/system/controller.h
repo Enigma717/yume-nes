@@ -28,6 +28,7 @@ private:
     uint8_t buttons_state {0x00};
 };
 
+
 namespace ControllerKeys
 {
     using SFMLKey = sf::Keyboard::Key;

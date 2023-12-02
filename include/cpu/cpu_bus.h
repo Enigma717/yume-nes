@@ -9,7 +9,6 @@ class Cartridge;
 class Controller;
 class PPU;
 
-
 namespace CPUBusConsts
 {
     constexpr size_t memory_size {24576};

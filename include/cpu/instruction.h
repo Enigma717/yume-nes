@@ -59,6 +59,7 @@ public:
     int            bytes {1};
     int            cycles {1};
 
+
     bool operator==(const Instruction& rhs) const
     {
         return mnemonic == rhs.mnemonic &&
