@@ -10,6 +10,7 @@ class System {
 public:
     System();
 
+
     std::shared_ptr<Cartridge> cartridge;
     std::shared_ptr<Controller> controller;
     PPU ppu;

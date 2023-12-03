@@ -38,7 +38,6 @@ bool Cartridge::load_cartridge(const std::string& cartridge_path)
     if (!decode_header())
         return false;
 
-
     const auto final_prg_ram_size {MapperConsts::prg_ram_bank_size * mapper.prg_ram_banks_count};
     const auto final_prg_rom_size {MapperConsts::prg_rom_bank_size * mapper.prg_rom_banks_count};
     const auto final_chr_rom_size {MapperConsts::chr_rom_bank_size * mapper.chr_rom_banks_count};
@@ -46,7 +45,6 @@ bool Cartridge::load_cartridge(const std::string& cartridge_path)
     mapper.prg_rom_memory.resize(final_prg_ram_size);
     mapper.prg_rom_memory.resize(final_prg_rom_size);
     mapper.chr_rom_memory.resize(final_chr_rom_size);
-
 
     const auto actual_trainer_size {mapper.trainer_presence ? trainer_size : 0};
     const auto default_offset {CartridgeConsts::header_size + actual_trainer_size};

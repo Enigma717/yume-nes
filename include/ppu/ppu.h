@@ -1,13 +1,13 @@
 #pragma once
 
 #include "./ppu_bus.h"
-
 #include "./renderer.h"
 
 
 class PPU {
 public:
     PPU();
+
 
     sf::RenderWindow app_screen {};
     bool force_nmi_in_cpu {false};

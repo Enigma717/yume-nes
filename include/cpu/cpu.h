@@ -9,6 +9,7 @@ public:
     CPU() = delete;
     CPU(PPU& ppu_ref);
 
+
     void connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge);
     void connect_bus_with_controller(std::shared_ptr<Controller> controller);
 

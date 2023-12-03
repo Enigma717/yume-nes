@@ -1,7 +1,5 @@
 #include "../../include/system/controller.h"
 
-#include <SFML/Window/Keyboard.hpp>
-
 
 namespace
 {

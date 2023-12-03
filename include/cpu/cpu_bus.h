@@ -20,6 +20,7 @@ public:
     CPUBus() = delete;
     CPUBus(PPU& ppu);
 
+
     void insert_cartridge(std::shared_ptr<Cartridge> cartridge);
     void connect_controller(std::shared_ptr<Controller> controller);
     void clear_memory();
@@ -51,5 +52,4 @@ private:
     uint8_t send_read_to_mapper_prg_ram(uint16_t address) const;
     uint8_t send_read_to_mapper_prg_rom(uint16_t address) const;
     uint8_t cpu_ram_read(uint16_t address) const;
-
 };

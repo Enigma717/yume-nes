@@ -164,6 +164,7 @@ void CPU::next_instruction()
     execute_instruction();
 }
 
+
 //////////////////////////
 // Instruction decoding //
 //////////////////////////

@@ -116,7 +116,7 @@ uint16_t PPUBus::normalize_vram_address(uint16_t address) const
             normalized_address = address % single_screen_mirroring_mask;
             break;
         case Mirroring::four_screen:
-            normalized_address = address; // TODO
+            normalized_address = address;
             break;
     }
 

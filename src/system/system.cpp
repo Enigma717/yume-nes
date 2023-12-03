@@ -2,7 +2,6 @@
 
 #include "../../include/system/controller.h"
 
-#include <SFML/Window/Keyboard.hpp>
 #include <chrono>
 #include <iostream>
 
@@ -27,7 +26,7 @@ System::System() : cpu{ppu}
 bool System::boot_up(const std::string& cartridge_path)
 {
     if (!cartridge->load_cartridge(cartridge_path)) {
-        std::cerr << "\nError occurred while trying to load cartridge!\n\n";
+        std::cerr << "\nError occurred while trying to load cartridge.\n\n";
 
         return false;
     }
@@ -40,8 +39,11 @@ bool System::boot_up(const std::string& cartridge_path)
 
 void System::run_console()
 {
-    if (!cartridge_loaded)
+    if (!cartridge_loaded) {
+        std::cerr << "\nPlease load a cartridge first.\n\n";
+
         return;
+    }
 
     sf::Clock clock;
 

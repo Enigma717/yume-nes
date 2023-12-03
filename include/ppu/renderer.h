@@ -11,7 +11,9 @@ public:
     Renderer() = delete;
     Renderer(PPU& ppu_ref);
 
+
     std::vector<sf::RectangleShape> frame_buffer {};
+
 
     void prepare_next_pixel();
 

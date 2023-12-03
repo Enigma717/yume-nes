@@ -24,7 +24,7 @@ public:
     uint8_t handle_state_read();
 
 private:
-    bool strobe {false};
+    bool    strobe {false};
     uint8_t buttons_state {0x00};
 };
 

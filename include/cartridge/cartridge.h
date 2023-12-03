@@ -10,8 +10,6 @@ namespace CartridgeConsts
     constexpr size_t header_size {16};
 }
 
-using CartridgeContents = std::vector<uint8_t>;
-
 
 class Cartridge {
 public:
@@ -34,8 +32,8 @@ private:
     int current_mapper_id {-1};
 
 
-    bool    dump_cartridge_into_vector(const std::string& cartridge_path);
-    bool    decode_header();
+    bool dump_cartridge_into_vector(const std::string& cartridge_path);
+    bool decode_header();
 
     bool    check_for_nes_logo_in_header() const;
     bool    check_for_mirroring_mode() const;
