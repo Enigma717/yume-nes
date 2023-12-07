@@ -19,7 +19,6 @@ public:
         Right,
     };
 
-
     bool    handle_state_write(uint8_t data);
     uint8_t handle_state_read();
 
