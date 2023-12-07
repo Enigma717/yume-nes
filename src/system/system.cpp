@@ -8,8 +8,8 @@
 
 namespace
 {
-    constexpr size_t ppu_cycles_needed_to_render_frame {89342};
-    constexpr size_t ppu_cycles_needed_for_cpu_tick {3};
+    constexpr int ppu_cycles_needed_to_render_frame {89342};
+    constexpr int ppu_cycles_needed_for_cpu_tick {3};
 }
 
 
@@ -45,16 +45,11 @@ void System::run_console()
         return;
     }
 
-    sf::Clock clock;
-
     while (ppu.app_screen.isOpen()) {
         perform_master_clock_cycle(false);
 
         if (system_cycles_executed % ppu_cycles_needed_to_render_frame == 0) {
             ppu.render_whole_frame();
-
-            std::cout << "FPS:" << 1.0 / clock.getElapsedTime().asSeconds() << "\n";
-            clock.restart();
         }
     }
 }

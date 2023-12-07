@@ -8,6 +8,7 @@
 namespace
 {
     constexpr size_t   cpu_ram_bank_size {2048};
+
     constexpr uint16_t cpu_ram_upper_bound {0x1FFF};
     constexpr uint16_t apu_and_io_space_start {0x4000};
     constexpr uint16_t controller_address {0x4016};

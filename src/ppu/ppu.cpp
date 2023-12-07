@@ -25,10 +25,10 @@ namespace
     constexpr size_t final_screen_height {960};
     constexpr size_t framerate_cap {60};
 
-    constexpr int actual_screen_height {262};
-    constexpr int actual_screen_width {341};
-    constexpr int visible_screen_height {240};
-    constexpr int visible_screen_width {256};
+    constexpr size_t actual_screen_height {262};
+    constexpr size_t actual_screen_width {341};
+    constexpr size_t visible_screen_height {240};
+    constexpr size_t visible_screen_width {256};
 
     constexpr uint8_t vram_increment_enabled_value {0x20};
     constexpr uint8_t vram_increment_disabled_value {0x01};

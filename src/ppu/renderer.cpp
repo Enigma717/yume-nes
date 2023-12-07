@@ -44,6 +44,7 @@ namespace
     constexpr uint16_t multiplexer_default_pointer {0b1000'0000'0000'0000};
     constexpr uint16_t upper_byte_mask {0xFF00};
 
+
     bool check_for_pixel_within_visible_screen(int x_coord, int y_coord)
     {
         return x_coord >= 0 && x_coord < visible_screen_width
