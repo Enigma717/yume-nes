@@ -98,7 +98,7 @@ uint8_t PPUBus::process_palettes_ram_read(uint16_t address) const
 uint16_t PPUBus::normalize_vram_address(uint16_t address) const
 {
     using Mirroring = Cartridge::MirroringType;
-    const uint16_t current_nametable = address & current_nametable_mask;
+    const auto current_nametable {static_cast<uint16_t>(address & current_nametable_mask)};
     uint16_t normalized_address {0x0000};
 
     switch (current_mirroring_mode) {
@@ -125,7 +125,7 @@ uint16_t PPUBus::normalize_vram_address(uint16_t address) const
 
 uint16_t PPUBus::normalize_palettes_address(uint16_t address, bool is_reading) const
 {
-    uint16_t normalized_address = address % current_palette_mask;
+    auto normalized_address {static_cast<uint16_t>(address % current_palette_mask)};
 
     if (check_for_palette_mirroring(normalized_address))
         normalized_address -= palette_mirror_mask;

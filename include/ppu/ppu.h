@@ -73,7 +73,7 @@ private:
             uint16_t nametable : 2;
             uint16_t fine_y    : 3;
             uint16_t           : 1;
-        } internal;
+        } bits;
 
         uint16_t word {0x0000};
     };
@@ -82,7 +82,7 @@ private:
         struct {
             uint8_t position : 3;
             uint8_t          : 5;
-        } internal;
+        } bits;
 
         uint8_t word {0x00};
     };

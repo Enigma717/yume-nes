@@ -159,7 +159,7 @@ void PPU::handle_register_write_from_cpu(uint16_t address, uint8_t data)
 
 void PPU::process_ppu_controller_write(uint8_t data)
 {
-    ppu_scroll.internal.nametable = data & first_two_bits_mask;
+    ppu_scroll.bits.nametable = data & first_two_bits_mask;
     ppu_controller.word = data;
 }
 
@@ -173,13 +173,13 @@ void PPU::process_ppu_mask_write(uint8_t data)
 void PPU::process_ppu_scroll_write(uint8_t data)
 {
     if (second_address_write_latch == false) {
-        ppu_scroll.internal.coarse_x = data >> 3;
-        fine_x.internal.position = data & fine_registers_bits_mask;
+        ppu_scroll.bits.coarse_x = data >> 3;
+        fine_x.bits.position = data & fine_registers_bits_mask;
         second_address_write_latch = true;
     }
     else {
-        ppu_scroll.internal.coarse_y = data >> 3;
-        ppu_scroll.internal.fine_y = data & fine_registers_bits_mask;
+        ppu_scroll.bits.coarse_y = data >> 3;
+        ppu_scroll.bits.fine_y = data & fine_registers_bits_mask;
         second_address_write_latch = false;
     }
 }
@@ -189,7 +189,7 @@ void PPU::process_ppu_scroll_write(uint8_t data)
 void PPU::process_ppu_address_write(uint8_t data)
 {
     if (second_address_write_latch == false) {
-        uint16_t temp_address = (data & first_address_write_mask) << 8;
+        const uint16_t temp_address = (data & first_address_write_mask) << 8;
         ppu_scroll.word = (ppu_scroll.word & lower_byte_mask) | temp_address;
         second_address_write_latch = true;
     }
@@ -222,7 +222,7 @@ uint8_t PPU::handle_register_read_from_cpu(uint16_t address)
 
 uint8_t PPU::process_ppu_status_read()
 {
-    const uint8_t current_status = ppu_status.word;
+    const auto current_status {ppu_status.word};
 
     ppu_status.flag.vblank_start = 0;
     second_address_write_latch = false;

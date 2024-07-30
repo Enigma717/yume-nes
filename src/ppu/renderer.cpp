@@ -146,21 +146,28 @@ void Renderer::process_pixel_rendering()
     if (ppu_ref.ppu_mask.flag.show_background == 0)
         return;
 
-    data_multiplexer = multiplexer_default_pointer >> ppu_ref.fine_x.internal.position;
+    data_multiplexer = multiplexer_default_pointer >> ppu_ref.fine_x.bits.position;
 
-    const auto pixel_color_lsb = static_cast<uint8_t>(
-        (tile_data_first_shift_reg & data_multiplexer) >> (pixel_color_lsb_default_shift - ppu_ref.fine_x.internal.position));
-    const auto pixel_color_msb = static_cast<uint8_t>(
-        (tile_data_second_shift_reg & data_multiplexer) >> (pixel_color_msb_default_shift - ppu_ref.fine_x.internal.position));
+    const auto pixel_color_lsb {
+        static_cast<uint8_t>(
+            (tile_data_first_shift_reg & data_multiplexer) >>
+            (pixel_color_lsb_default_shift - ppu_ref.fine_x.bits.position))};
+    const auto pixel_color_msb {
+        static_cast<uint8_t>(
+            (tile_data_second_shift_reg & data_multiplexer) >>
+            (pixel_color_msb_default_shift - ppu_ref.fine_x.bits.position))};
 
-    const uint8_t pixel_color = pixel_color_msb | pixel_color_lsb;
-    const auto address_to_read = static_cast<uint16_t>(
-        palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color);
+    const auto pixel_color {
+        static_cast<uint8_t>(pixel_color_msb | pixel_color_lsb)};
+    const auto address_to_read {
+        static_cast<uint16_t>(
+            palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color)};
 
-    const auto final_color = PPUColors::available_colors.at(ppu_ref.read_from_bus(address_to_read));
+    const auto final_color {
+        PPUColors::available_colors.at(ppu_ref.read_from_bus(address_to_read))};
 
-    const auto x_coord = ppu_ref.current_cycle - 1;
-    const auto y_coord = ppu_ref.current_scanline;
+    const auto x_coord {ppu_ref.current_cycle - 1};
+    const auto y_coord {ppu_ref.current_scanline};
 
     if (check_for_pixel_within_visible_screen(x_coord, y_coord)) {
         const auto pixel_index {y_coord * visible_screen_width + x_coord};
@@ -194,7 +201,9 @@ void Renderer::process_rendering_fetches()
 
 uint8_t Renderer::fetch_nametable_tile_byte_with_shifters_load()
 {
-    const uint16_t address_to_read = nametables_space_start | (ppu_ref.ppu_address.word & loopy_no_fine_y_mask);
+    const uint16_t address_to_read {
+        static_cast<uint16_t>(
+            nametables_space_start | (ppu_ref.ppu_address.word & loopy_no_fine_y_mask))};
     load_next_tile_data_to_shift_registers();
 
     return ppu_ref.read_from_bus(address_to_read);
@@ -202,10 +211,15 @@ uint8_t Renderer::fetch_nametable_tile_byte_with_shifters_load()
 
 uint8_t Renderer::fetch_attribute_table_byte() const
 {
-    const uint16_t coarse_x_high_bits = ppu_ref.ppu_address.internal.coarse_x >> 2;
-    const uint16_t coarse_y_high_bits = (ppu_ref.ppu_address.internal.coarse_y >> 2) << 3;
-    const uint16_t nametable_bits = ppu_ref.ppu_address.internal.nametable << 10;
-    const uint16_t address_to_read = first_attribute_table_start | nametable_bits | coarse_y_high_bits | coarse_x_high_bits;
+    const auto coarse_x_high_bits {
+        static_cast<uint16_t>(ppu_ref.ppu_address.bits.coarse_x >> 2)};
+    const auto coarse_y_high_bits {
+        static_cast<uint16_t>((ppu_ref.ppu_address.bits.coarse_y >> 2) << 3)};
+    const auto nametable_bits {
+        static_cast<uint16_t>(ppu_ref.ppu_address.bits.nametable << 10)};
+    const auto address_to_read {
+        static_cast<uint16_t>(
+            first_attribute_table_start | nametable_bits | coarse_y_high_bits | coarse_x_high_bits)};
 
     const auto attribute_quadrant_shift {calculate_attribute_shift()};
     const auto attribute_table_byte {ppu_ref.read_from_bus(address_to_read)};
@@ -215,19 +229,23 @@ uint8_t Renderer::fetch_attribute_table_byte() const
 
 uint8_t Renderer::calculate_attribute_shift() const
 {
-    const uint16_t horizontal_half_choice = ppu_ref.ppu_address.internal.coarse_y & second_bit_mask;
-    const uint16_t vertical_half_choice = ppu_ref.ppu_address.internal.coarse_x & second_bit_mask;
-    const uint8_t shift = (horizontal_half_choice << 1) | vertical_half_choice;
+    const auto horizontal_half_choice {
+        static_cast<uint16_t>(ppu_ref.ppu_address.bits.coarse_y & second_bit_mask)};
+    const auto vertical_half_choice {
+        static_cast<uint16_t>(ppu_ref.ppu_address.bits.coarse_x & second_bit_mask)};
 
-    return shift;
+    return (horizontal_half_choice << 1) | vertical_half_choice;
 }
 
 uint8_t Renderer::fetch_tile_plane_byte(uint8_t plane_offset) const
 {
-    const uint16_t current_row_offset = ppu_ref.ppu_address.internal.fine_y;
-    const uint16_t current_tile_offset = fetched_nametable_tile_byte * tile_column_offset;
-    const uint16_t pattern_table_offset = ppu_ref.ppu_controller.flag.bg_table * second_pattern_table_offset;
-    const auto address_to_read = static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset + plane_offset);
+    const auto current_row_offset{ppu_ref.ppu_address.bits.fine_y};
+    const auto current_tile_offset {
+        static_cast<uint16_t>(fetched_nametable_tile_byte * tile_column_offset)};
+    const auto pattern_table_offset {
+        static_cast<uint16_t>(ppu_ref.ppu_controller.flag.bg_table * second_pattern_table_offset)};
+    const auto address_to_read {
+        static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset + plane_offset)};
 
     return ppu_ref.read_from_bus(address_to_read);
 }
@@ -243,12 +261,12 @@ void Renderer::coarse_x_increment_with_wrapping()
     if (ppu_ref.ppu_mask.flag.show_background == 0)
         return;
 
-    if (ppu_ref.ppu_address.internal.coarse_x == nametable_coarse_bound) {
-        ppu_ref.ppu_address.internal.coarse_x = 0x00;
-        ppu_ref.ppu_address.internal.nametable ^= first_bit_mask;
+    if (ppu_ref.ppu_address.bits.coarse_x == nametable_coarse_bound) {
+        ppu_ref.ppu_address.bits.coarse_x = 0x00;
+        ppu_ref.ppu_address.bits.nametable ^= first_bit_mask;
     }
     else {
-        ppu_ref.ppu_address.internal.coarse_x++;
+        ppu_ref.ppu_address.bits.coarse_x++;
     }
 }
 
@@ -258,21 +276,21 @@ void Renderer::coarse_y_increment_with_wrapping()
     if (ppu_ref.ppu_mask.flag.show_background == 0)
         return;
 
-    if (ppu_ref.ppu_address.internal.fine_y < fine_y_max_value) {
-        ppu_ref.ppu_address.internal.fine_y++;
+    if (ppu_ref.ppu_address.bits.fine_y < fine_y_max_value) {
+        ppu_ref.ppu_address.bits.fine_y++;
     }
     else {
-        ppu_ref.ppu_address.internal.fine_y = 0x00;
+        ppu_ref.ppu_address.bits.fine_y = 0x00;
 
-        if (ppu_ref.ppu_address.internal.coarse_y == nametable_change_to_attribute_bound) {
-            ppu_ref.ppu_address.internal.coarse_y = 0x00;
-            ppu_ref.ppu_address.internal.nametable ^= second_bit_mask;
+        if (ppu_ref.ppu_address.bits.coarse_y == nametable_change_to_attribute_bound) {
+            ppu_ref.ppu_address.bits.coarse_y = 0x00;
+            ppu_ref.ppu_address.bits.nametable ^= second_bit_mask;
         }
-        else if (ppu_ref.ppu_address.internal.coarse_y == nametable_coarse_bound) {
-            ppu_ref.ppu_address.internal.coarse_y = 0x00;
+        else if (ppu_ref.ppu_address.bits.coarse_y == nametable_coarse_bound) {
+            ppu_ref.ppu_address.bits.coarse_y = 0x00;
         }
         else {
-            ppu_ref.ppu_address.internal.coarse_y++;
+            ppu_ref.ppu_address.bits.coarse_y++;
         }
     }
 }
@@ -283,10 +301,12 @@ void Renderer::copy_horizontal_scroll_to_address()
     if (ppu_ref.ppu_mask.flag.show_background == 0)
         return;
 
-    const uint8_t horizontal_nametable_bit = ppu_ref.ppu_scroll.internal.nametable & first_bit_mask;
+    const auto horizontal_nametable_bit {
+        static_cast<uint8_t>(ppu_ref.ppu_scroll.bits.nametable & first_bit_mask)};
 
-    ppu_ref.ppu_address.internal.coarse_x = ppu_ref.ppu_scroll.internal.coarse_x;
-    ppu_ref.ppu_address.internal.nametable = (ppu_ref.ppu_scroll.internal.nametable & second_bit_mask) | horizontal_nametable_bit;
+    ppu_ref.ppu_address.bits.coarse_x = ppu_ref.ppu_scroll.bits.coarse_x;
+    ppu_ref.ppu_address.bits.nametable =
+        (ppu_ref.ppu_scroll.bits.nametable & second_bit_mask) | horizontal_nametable_bit;
 }
 
 // https://www.nesdev.org/wiki/PPU_scrolling#During_dots_280_to_304_of_the_pre-render_scanline_(end_of_vblank)
@@ -295,17 +315,21 @@ void Renderer::copy_vertical_scroll_to_address()
     if (ppu_ref.ppu_mask.flag.show_background == 0)
         return;
 
-    const uint8_t vertical_nametable_bit = ppu_ref.ppu_scroll.internal.nametable & second_bit_mask;
+    const auto vertical_nametable_bit {
+        static_cast<uint8_t>(ppu_ref.ppu_scroll.bits.nametable & second_bit_mask)};
 
-    ppu_ref.ppu_address.internal.coarse_y = ppu_ref.ppu_scroll.internal.coarse_y;
-    ppu_ref.ppu_address.internal.nametable = (ppu_ref.ppu_scroll.internal.nametable & first_bit_mask) | vertical_nametable_bit;
-    ppu_ref.ppu_address.internal.fine_y = ppu_ref.ppu_scroll.internal.fine_y;
+    ppu_ref.ppu_address.bits.coarse_y = ppu_ref.ppu_scroll.bits.coarse_y;
+    ppu_ref.ppu_address.bits.nametable =
+        (ppu_ref.ppu_scroll.bits.nametable & first_bit_mask) | vertical_nametable_bit;
+    ppu_ref.ppu_address.bits.fine_y = ppu_ref.ppu_scroll.bits.fine_y;
 }
 
 void Renderer::load_next_tile_data_to_shift_registers()
 {
-    tile_data_first_shift_reg = (tile_data_first_shift_reg & upper_byte_mask) | fetched_tile_first_plane_byte;
-    tile_data_second_shift_reg = (tile_data_second_shift_reg & upper_byte_mask) | fetched_tile_second_plane_byte;
+    tile_data_first_shift_reg =
+        (tile_data_first_shift_reg & upper_byte_mask) | fetched_tile_first_plane_byte;
+    tile_data_second_shift_reg =
+        (tile_data_second_shift_reg & upper_byte_mask) | fetched_tile_second_plane_byte;
 }
 
 void Renderer::move_shift_registers()

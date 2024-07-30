@@ -3,6 +3,7 @@
 #include "../../include/cpu/instruction.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 
@@ -171,11 +172,11 @@ void CPU::next_instruction()
 
 Instruction CPU::decode_instruction_from_opcode(uint8_t opcode) const
 {
-    auto instruction_it = std::find_if(
+    const auto instruction_it {std::find_if(
         Lookup::instructions_table.begin(),
         Lookup::instructions_table.end(),
         [&] (const Instruction& instr) { return instr.opcode == opcode; }
-        );
+        )};
 
     return *instruction_it;
 }
@@ -270,32 +271,26 @@ void CPU::execute_instruction()
 
 uint16_t CPU::read_nmi_vector() const
 {
-    auto lsb {read_from_bus(nmi_vector_lsb)};
-    auto msb {read_from_bus(nmi_vector_msb)};
+    const auto lsb {read_from_bus(nmi_vector_lsb)};
+    const auto msb {read_from_bus(nmi_vector_msb)};
 
-    uint16_t address = (msb << 8) | lsb;
-
-    return address;
+    return (msb << 8) | lsb;
 }
 
 uint16_t CPU::read_reset_vector() const
 {
-    auto lsb {read_from_bus(reset_vector_lsb)};
-    auto msb {read_from_bus(reset_vector_msb)};
+    const auto lsb {read_from_bus(reset_vector_lsb)};
+    const auto msb {read_from_bus(reset_vector_msb)};
 
-    uint16_t address = (msb << 8) | lsb;
-
-    return address;
+    return (msb << 8) | lsb;
 }
 
 uint16_t CPU::read_irq_vector() const
 {
-    auto lsb {read_from_bus(irq_vector_lsb)};
-    auto msb {read_from_bus(irq_vector_msb)};
+    const auto lsb {read_from_bus(irq_vector_lsb)};
+    const auto msb {read_from_bus(irq_vector_msb)};
 
-    uint16_t address = (msb << 8) | lsb;
-
-    return address;
+    return (msb << 8) | lsb;
 }
 
 void CPU::interrupt_nmi()
@@ -395,9 +390,9 @@ void CPU::addressing_mode_relative()
 
 void CPU::addressing_mode_absolute()
 {
-    auto lsb {read_from_bus(pc)};
+    const auto lsb {read_from_bus(pc)};
     pc++;
-    auto msb {read_from_bus(pc)};
+    const auto msb {read_from_bus(pc)};
     pc++;
 
     arg_address = (msb << 8) | lsb;
@@ -405,12 +400,12 @@ void CPU::addressing_mode_absolute()
 
 void CPU::addressing_mode_absolute_x()
 {
-    auto lsb {read_from_bus(pc)};
+    const auto lsb {read_from_bus(pc)};
     pc++;
-    auto msb {read_from_bus(pc)};
+    const auto msb {read_from_bus(pc)};
     pc++;
 
-    uint16_t read_address = (msb << 8) | lsb;
+    const auto read_address {static_cast<uint16_t>((msb << 8) | lsb)};
     arg_address = read_address + x_reg;
 
     if (check_for_page_crossing(arg_address, read_address))
@@ -420,12 +415,12 @@ void CPU::addressing_mode_absolute_x()
 
 void CPU::addressing_mode_absolute_y()
 {
-    auto lsb {read_from_bus(pc)};
+    const auto lsb {read_from_bus(pc)};
     pc++;
-    auto msb {read_from_bus(pc)};
+    const auto msb {read_from_bus(pc)};
     pc++;
 
-    uint16_t read_address = (msb << 8) | lsb;
+    const auto read_address {static_cast<uint16_t>((msb << 8) | lsb)};
     arg_address = read_address + y_reg;
 
     if (check_for_page_crossing(arg_address, read_address))
@@ -439,7 +434,7 @@ void CPU::addressing_mode_indirect()
     auto msb {read_from_bus(pc)};
     pc++;
 
-    uint16_t temp_address = (msb << 8) | lsb;
+    const auto temp_address {static_cast<uint16_t>((msb << 8) | lsb)};
 
     // Original 6502 CPU's indirect jump page crossing bug reproduction:
     // https://www.nesdev.org/obelisk-6502-guide/reference.html#JMP
@@ -455,24 +450,24 @@ void CPU::addressing_mode_indirect()
 
 void CPU::addressing_mode_indirect_x()
 {
-    const uint16_t temp_address = read_from_bus(pc) + x_reg;
+    const auto temp_address {read_from_bus(pc) + x_reg};
     pc++;
 
-    auto lsb {read_from_bus(temp_address & zero_page_mask)};
-    auto msb {read_from_bus((temp_address + 1) & zero_page_mask)};
+    const auto lsb {read_from_bus(temp_address & zero_page_mask)};
+    const auto msb {read_from_bus((temp_address + 1) & zero_page_mask)};
 
     arg_address = (msb << 8) | lsb;
 }
 
 void CPU::addressing_mode_indirect_y()
 {
-    const uint16_t temp_address = read_from_bus(pc);
+    const auto temp_address {read_from_bus(pc)};
     pc++;
 
-    auto lsb {read_from_bus(temp_address & zero_page_mask)};
-    auto msb {read_from_bus((temp_address + 1) & zero_page_mask)};
+    const auto lsb {read_from_bus(temp_address & zero_page_mask)};
+    const auto msb {read_from_bus((temp_address + 1) & zero_page_mask)};
 
-    const uint16_t read_address = (msb << 8) | lsb;
+    const auto read_address {static_cast<uint16_t>((msb << 8) | lsb)};
     arg_address = read_address + y_reg;
 
     if (check_for_page_crossing(arg_address, read_address))
@@ -487,7 +482,7 @@ void CPU::addressing_mode_indirect_y()
 void CPU::ADC()
 {
     const auto value {read_from_bus(arg_address)};
-    const auto result = static_cast<uint16_t>(acc + value + status.flag.carry);
+    const auto result {static_cast<uint16_t>(acc + value + status.flag.carry)};
 
     const auto acc_sign {check_for_negative_flag(acc)};
     const auto value_sign {check_for_negative_flag(value)};
@@ -554,7 +549,7 @@ void CPU::BEQ()
 void CPU::BIT()
 {
     const auto value {read_from_bus(arg_address)};
-    const uint8_t result = acc & value;
+    const auto result {static_cast<uint8_t>(acc & value)};
 
     status.flag.zero = check_for_zero_flag(result);
     status.flag.overflow = check_for_flag_with_mask(value, overflow_flag_mask);
@@ -581,7 +576,7 @@ void CPU::BPL()
 
 void CPU::BRK()
 {
-    const bool brk_flag_state = 1;
+    const bool brk_flag_state {true};
 
     process_interrupt(brk_flag_state);
 
@@ -821,7 +816,7 @@ void CPU::PLP()
 
 void CPU::ROL()
 {
-    const bool old_carry = status.flag.carry;
+    const auto old_carry {static_cast<bool>(status.flag.carry)};
 
     if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
@@ -847,7 +842,7 @@ void CPU::ROL()
 
 void CPU::ROR()
 {
-    const bool old_carry = status.flag.carry;
+    const auto old_carry {static_cast<bool>(status.flag.carry)};
 
     if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
@@ -878,16 +873,16 @@ void CPU::RTI()
     status.flag.brk = 0;
     status.flag.unused = 0;
 
-    auto pc_lsb {stack_pop()};
-    auto pc_msb {stack_pop()};
+    const auto pc_lsb {stack_pop()};
+    const auto pc_msb {stack_pop()};
 
     pc = (pc_msb << 8) | pc_lsb;
 }
 
 void CPU::RTS()
 {
-    auto pc_lsb {stack_pop()};
-    auto pc_msb {stack_pop()};
+    const auto pc_lsb {stack_pop()};
+    const auto pc_msb {stack_pop()};
 
     pc = (pc_msb << 8) | pc_lsb;
     pc++;

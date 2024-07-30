@@ -30,7 +30,7 @@ uint8_t MapperNROM::map_prg_ram_read(uint16_t address) const
 
 uint8_t MapperNROM::map_prg_rom_read(uint16_t address) const
 {
-    uint16_t mapped_address = address - prg_rom_space_offset;
+    auto mapped_address {static_cast<uint16_t>(address - prg_rom_space_offset)};
 
     if (prg_rom_banks_count == 1)
         mapped_address = mapped_address % MapperConsts::prg_rom_bank_size;
