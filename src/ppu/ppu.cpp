@@ -83,7 +83,8 @@ void PPU::perform_cycle(bool debug_mode)
 
 void PPU::render_whole_frame()
 {
-    const auto& bg_color {PPUColors::available_colors.at(read_from_bus(palette_bg_color_mask))};
+    const auto& bg_color {
+        PPUColors::available_colors.at(read_from_bus(palette_bg_color_mask))};
 
     app_screen.setSize({final_screen_width, final_screen_height});
     app_screen.clear(bg_color);
@@ -189,7 +190,8 @@ void PPU::process_ppu_scroll_write(uint8_t data)
 void PPU::process_ppu_address_write(uint8_t data)
 {
     if (second_address_write_latch == false) {
-        const uint16_t temp_address = (data & first_address_write_mask) << 8;
+        const auto temp_address {
+            static_cast<uint16_t>((data & first_address_write_mask) << 8)};
         ppu_scroll.word = (ppu_scroll.word & lower_byte_mask) | temp_address;
         second_address_write_latch = true;
     }
@@ -216,7 +218,7 @@ uint8_t PPU::handle_register_read_from_cpu(uint16_t address)
         case RA::PPUSTATUS: return process_ppu_status_read(); break;
         case RA::OAMDATA:   return oam_data;                  break;
         case RA::PPUDATA:   return process_ppu_data_read();   break;
-        default: return 0x00; break;
+        default:            return 0x00;                      break;
     }
 }
 

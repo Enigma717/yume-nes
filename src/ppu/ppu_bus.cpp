@@ -98,7 +98,8 @@ uint8_t PPUBus::process_palettes_ram_read(uint16_t address) const
 uint16_t PPUBus::normalize_vram_address(uint16_t address) const
 {
     using Mirroring = Cartridge::MirroringType;
-    const auto current_nametable {static_cast<uint16_t>(address & current_nametable_mask)};
+    const auto current_nametable {
+        static_cast<uint16_t>(address & current_nametable_mask)};
     uint16_t normalized_address {0x0000};
 
     switch (current_mirroring_mode) {

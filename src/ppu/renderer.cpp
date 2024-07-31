@@ -83,13 +83,27 @@ void Renderer::prepare_next_pixel()
 
 void Renderer::choose_rendering_mode()
 {
-    if (ppu_ref.current_scanline >= 0 && ppu_ref.current_scanline < post_render_scanline_number)
+    const auto visible_section {
+        ppu_ref.current_scanline >= 0 &&
+        ppu_ref.current_scanline < post_render_scanline_number};
+
+    const auto post_render_section {
+        ppu_ref.current_scanline == post_render_scanline_number};
+
+    const auto vblank_section {
+        ppu_ref.current_scanline > post_render_scanline_number &&
+        ppu_ref.current_scanline < pre_render_scanline_number};
+
+    const auto pre_render_section {
+        ppu_ref.current_scanline == pre_render_scanline_number};
+
+    if (visible_section)
         rendering_mode = RenderingMode::visible_scanline;
-    else if (ppu_ref.current_scanline == post_render_scanline_number)
+    else if (post_render_section)
         rendering_mode = RenderingMode::post_render_scanline;
-    else if (ppu_ref.current_scanline > post_render_scanline_number && ppu_ref.current_scanline < pre_render_scanline_number)
+    else if (vblank_section)
         rendering_mode = RenderingMode::vblank_scanline;
-    if (ppu_ref.current_scanline == pre_render_scanline_number)
+    else if (pre_render_section)
         rendering_mode = RenderingMode::pre_render_scanline;
 }
 
@@ -111,14 +125,21 @@ void Renderer::render_pre_render_scanline()
 
     render_visible_scanline();
 
-    if (ppu_ref.current_cycle > vertical_scroll_copy_cycle_start && ppu_ref.current_cycle < vertical_scroll_copy_cycle_end)
+    if (ppu_ref.current_cycle > vertical_scroll_copy_cycle_start
+        && ppu_ref.current_cycle < vertical_scroll_copy_cycle_end)
         copy_vertical_scroll_to_address();
 }
 
 void Renderer::render_visible_scanline()
 {
-    if ((ppu_ref.current_cycle > 0 && ppu_ref.current_cycle < horizontal_scroll_copy_cycle)
-        || (ppu_ref.current_cycle > next_tile_fetches_cycle_start && ppu_ref.current_cycle < next_tile_fetches_cycle_end))
+    const auto is_after_first_cycle {ppu_ref.current_cycle > 0};
+    const auto is_horizontal_copy_cycle{
+        ppu_ref.current_cycle < horizontal_scroll_copy_cycle};
+    const auto is_fetching_next_tile {
+        ppu_ref.current_cycle > next_tile_fetches_cycle_start &&
+        ppu_ref.current_cycle < next_tile_fetches_cycle_end};
+
+    if ((is_after_first_cycle && is_horizontal_copy_cycle) || is_fetching_next_tile)
         process_rendering_fetches();
 
     if (ppu_ref.current_cycle == visible_screen_width)
@@ -127,13 +148,20 @@ void Renderer::render_visible_scanline()
     if (ppu_ref.current_cycle == horizontal_scroll_copy_cycle)
         copy_horizontal_scroll_to_address();
 
-    if (ppu_ref.current_cycle == next_tile_fetches_cycle_end || ppu_ref.current_cycle == garbage_nametable_fetch_cycle)
+
+    const auto is_fetch_cycle_finished {
+        ppu_ref.current_cycle == next_tile_fetches_cycle_end};
+    const auto is_garbage_fetch_cycle {
+        ppu_ref.current_cycle == garbage_nametable_fetch_cycle};
+
+    if (is_fetch_cycle_finished || is_garbage_fetch_cycle)
         fetched_nametable_tile_byte = fetch_nametable_tile_byte_with_shifters_load();
 }
 
 void Renderer::render_vblank_scanline()
 {
-    if (ppu_ref.current_scanline == vblank_scanline_number && ppu_ref.current_cycle == set_vblank_flag_cycle) {
+    if (ppu_ref.current_scanline == vblank_scanline_number
+        && ppu_ref.current_cycle == set_vblank_flag_cycle) {
         ppu_ref.ppu_status.flag.vblank_start = 1;
 
         if (ppu_ref.ppu_controller.flag.generate_nmi)
@@ -156,9 +184,9 @@ void Renderer::process_pixel_rendering()
         static_cast<uint8_t>(
             (tile_data_second_shift_reg & data_multiplexer) >>
             (pixel_color_msb_default_shift - ppu_ref.fine_x.bits.position))};
-
     const auto pixel_color {
         static_cast<uint8_t>(pixel_color_msb | pixel_color_lsb)};
+
     const auto address_to_read {
         static_cast<uint16_t>(
             palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color)};
@@ -243,9 +271,11 @@ uint8_t Renderer::fetch_tile_plane_byte(uint8_t plane_offset) const
     const auto current_tile_offset {
         static_cast<uint16_t>(fetched_nametable_tile_byte * tile_column_offset)};
     const auto pattern_table_offset {
-        static_cast<uint16_t>(ppu_ref.ppu_controller.flag.bg_table * second_pattern_table_offset)};
+        static_cast<uint16_t>(
+            ppu_ref.ppu_controller.flag.bg_table * second_pattern_table_offset)};
     const auto address_to_read {
-        static_cast<uint16_t>(pattern_table_offset + current_tile_offset + current_row_offset + plane_offset)};
+        static_cast<uint16_t>(
+            pattern_table_offset + current_tile_offset + current_row_offset + plane_offset)};
 
     return ppu_ref.read_from_bus(address_to_read);
 }

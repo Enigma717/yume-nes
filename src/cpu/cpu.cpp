@@ -46,7 +46,8 @@ namespace
 
     bool check_for_page_crossing(uint16_t first_address, uint16_t second_address)
     {
-        return (first_address & one_byte_overflow_mask) != (second_address & one_byte_overflow_mask);
+        return (first_address & one_byte_overflow_mask)
+            != (second_address & one_byte_overflow_mask);
     }
 
     bool check_for_sign_change(bool a, bool b, bool c)

@@ -22,9 +22,10 @@ bool Controller::handle_state_write(uint8_t data)
 
     if (!strobe) {
         for (auto i {0}; i < 8; i++) {
-            const auto current_button = static_cast<Button>(i);
-            const auto current_button_state =
-                sf::Keyboard::isKeyPressed(ControllerKeys::key_binds.at(current_button));
+            const auto current_button {static_cast<Button>(i)};
+            const auto current_button_state {
+                sf::Keyboard::isKeyPressed(
+                    ControllerKeys::key_binds.at(current_button))};
 
             if (current_button_state)
                 buttons_state |= ControllerKeys::buttons_bits.at(current_button);
