@@ -103,13 +103,13 @@ bool Cartridge::decode_header()
         return false;
     }
 
-    mapper.prg_rom_banks_count = header.at(header_prg_rom_size_byte_flag);
-    mapper.chr_rom_banks_count = header.at(header_chr_rom_size_byte_flag);
+    mapper.prg_rom_banks_count = header[header_prg_rom_size_byte_flag];
+    mapper.chr_rom_banks_count = header[header_chr_rom_size_byte_flag];
     mapper.trainer_presence = check_for_trainer_presence();
 
     if (check_for_prg_ram_presence()) {
         mapper.prg_ram_presence = true;
-        mapper.prg_ram_banks_count = header.at(header_prg_ram_size_byte_flag);
+        mapper.prg_ram_banks_count = header[header_prg_ram_size_byte_flag];
     }
 
     if (check_for_ignoring_mirroring())
@@ -137,32 +137,32 @@ bool Cartridge::check_for_nes_logo_in_header() const
 
 bool Cartridge::check_for_mirroring_mode() const
 {
-    return header.at(header_mapper_lsb_and_mirroring_byte_flag) & mirroring_mask;
+    return header[header_mapper_lsb_and_mirroring_byte_flag] & mirroring_mask;
 }
 
 bool Cartridge::check_for_prg_ram_presence() const
 {
-    return header.at(header_mapper_lsb_and_mirroring_byte_flag) & prg_ram_mask;
+    return header[header_mapper_lsb_and_mirroring_byte_flag] & prg_ram_mask;
 }
 
 bool Cartridge::check_for_trainer_presence() const
 {
-    return header.at(header_mapper_lsb_and_mirroring_byte_flag) & trainer_mask;
+    return header[header_mapper_lsb_and_mirroring_byte_flag] & trainer_mask;
 }
 
 bool Cartridge::check_for_ignoring_mirroring() const
 {
-    return header.at(header_mapper_lsb_and_mirroring_byte_flag) & ignore_mirroring_mask;
+    return header[header_mapper_lsb_and_mirroring_byte_flag] & ignore_mirroring_mask;
 }
 
 std::uint8_t Cartridge::calculate_mapper_id() const
 {
     const auto mapper_lsb {
         static_cast<std::uint8_t>(
-            (header.at(header_mapper_lsb_and_mirroring_byte_flag) & mapper_mask) >> 4)};
+            (header[header_mapper_lsb_and_mirroring_byte_flag] & mapper_mask) >> 4)};
     const auto mapper_msb {
         static_cast<std::uint8_t>(
-            (header.at(header_mapper_msb_byte_flag) & mapper_mask) >> 4)};
+            (header[header_mapper_msb_byte_flag] & mapper_mask) >> 4)};
 
     return (mapper_msb << 4) | mapper_lsb;
 }

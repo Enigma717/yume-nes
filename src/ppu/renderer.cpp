@@ -189,14 +189,14 @@ void Renderer::process_pixel_rendering()
             palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color)};
 
     const auto final_color {
-        PPUColors::available_colors.at(ppu_ref.read_from_bus(address_to_read))};
+        PPUColors::available_colors[ppu_ref.read_from_bus(address_to_read)]};
 
     const auto x_coord {ppu_ref.current_cycle - 1};
     const auto y_coord {ppu_ref.current_scanline};
 
     if (check_for_pixel_within_visible_screen(x_coord, y_coord)) {
         const auto pixel_index {y_coord * visible_screen_width + x_coord};
-        frame_buffer.at(pixel_index).setFillColor(final_color);
+        frame_buffer[pixel_index].setFillColor(final_color);
     }
 }
 

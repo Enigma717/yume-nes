@@ -53,14 +53,14 @@ void PPUBus::process_vram_write(std::uint16_t address, std::uint8_t data)
 {
     const auto normalized_address {normalize_vram_address(address)};
 
-    vram.at(normalized_address) = data;
+    vram[normalized_address] = data;
 }
 
 void PPUBus::process_palettes_ram_write(std::uint16_t address, std::uint8_t data)
 {
     const auto normalized_address {normalize_palettes_address(address)};
 
-    palettes_ram.at(normalized_address) = data;
+    palettes_ram[normalized_address] = data;
 }
 
 //////////////////
@@ -76,14 +76,14 @@ std::uint8_t PPUBus::process_vram_read(std::uint16_t address) const
 {
     const auto normalized_address {normalize_vram_address(address)};
 
-    return vram.at(normalized_address);
+    return vram[normalized_address];
 }
 
 std::uint8_t PPUBus::process_palettes_ram_read(std::uint16_t address) const
 {
     const auto normalized_address {normalize_palettes_address(address, true)};
 
-    return palettes_ram.at(normalized_address);
+    return palettes_ram[normalized_address];
 }
 
 ///////////////////////

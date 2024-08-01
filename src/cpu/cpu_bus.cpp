@@ -99,9 +99,9 @@ void CPUBus::send_write_to_mapper_prg_ram(std::uint16_t address, std::uint8_t da
 void CPUBus::cpu_ram_write(std::uint16_t address, std::uint8_t data)
 {
     if (address <= cpu_ram_upper_bound)
-        cpu_ram.at(address % cpu_ram_bank_size) = data;
+        cpu_ram[address % cpu_ram_bank_size] = data;
     else
-        cpu_ram.at(address) = data;
+        cpu_ram[address] = data;
 }
 
 
@@ -132,7 +132,7 @@ std::uint8_t CPUBus::send_read_to_mapper_prg_rom(std::uint16_t address) const
 std::uint8_t CPUBus::cpu_ram_read(std::uint16_t address) const
 {
     if (address <= cpu_ram_upper_bound)
-        return cpu_ram.at(address % cpu_ram_bank_size);
+        return cpu_ram[address % cpu_ram_bank_size];
 
-    return cpu_ram.at(address);
+    return cpu_ram[address];
 }

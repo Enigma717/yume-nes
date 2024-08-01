@@ -96,5 +96,5 @@ private:
     int cycles_queued {0};
     int cycles_executed {0};
 
-    const Instruction* current_instruction {&Lookup::instructions_table.at(113)};
+    const Instruction* current_instruction {&Lookup::instructions_table[113]};
 };

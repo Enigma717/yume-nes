@@ -4,7 +4,7 @@ namespace
 {
     constexpr std::uint8_t first_bit_mask {0b0000'0001u};
     constexpr std::uint8_t msb_mask {0b1000'0000u};
-    constexpr std::uint8_t buttons_count {8u}
+    constexpr std::uint8_t buttons_count {8u};
 }
 
 /////////

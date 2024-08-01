@@ -82,7 +82,7 @@ void PPU::perform_cycle(bool debug_mode)
 void PPU::render_whole_frame()
 {
     const auto& bg_color {
-        PPUColors::available_colors.at(read_from_bus(palette_bg_color_mask))};
+        PPUColors::available_colors[read_from_bus(palette_bg_color_mask)]};
 
     app_screen.setSize({final_screen_width, final_screen_height});
     app_screen.clear(bg_color);
