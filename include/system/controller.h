@@ -5,7 +5,6 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
-
 class Controller {
 public:
     enum class Button {
@@ -19,12 +18,12 @@ public:
         Right,
     };
 
-    bool    handle_state_write(uint8_t data);
-    uint8_t handle_state_read();
+    bool    handle_state_write(std::uint8_t data);
+    std::uint8_t handle_state_read();
 
 private:
-    bool    strobe {false};
-    uint8_t buttons_state {0x00};
+    bool strobe {false};
+    std::uint8_t buttons_state {0x00u};
 };
 
 
@@ -44,14 +43,14 @@ namespace ControllerKeys
         {Button::Right, SFMLKey::D},
     };
 
-    static const std::map<Button, uint8_t> buttons_bits {
-        {Button::A, 0b1000'0000},
-        {Button::B, 0b0100'0000},
-        {Button::Select, 0b0010'0000},
-        {Button::Start, 0b0001'0000},
-        {Button::Up, 0b0000'1000},
-        {Button::Down, 0b0000'0100},
-        {Button::Left, 0b0000'0010},
-        {Button::Right, 0b0000'0001},
+    static const std::map<Button, std::uint8_t> buttons_bits {
+        {Button::A, 0b1000'0000u},
+        {Button::B, 0b0100'0000u},
+        {Button::Select, 0b0010'0000u},
+        {Button::Start, 0b0001'0000u},
+        {Button::Up, 0b0000'1000u},
+        {Button::Down, 0b0000'0100u},
+        {Button::Left, 0b0000'0010u},
+        {Button::Right, 0b0000'0001u},
     };
 }

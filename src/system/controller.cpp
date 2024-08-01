@@ -1,18 +1,17 @@
 #include "../../include/system/controller.h"
 
-
 namespace
 {
-    uint8_t first_bit_mask {0b0000'0001};
-    uint8_t msb_mask {0b1000'0000};
+    constexpr std::uint8_t first_bit_mask {0b0000'0001u};
+    constexpr std::uint8_t msb_mask {0b1000'0000u};
+    constexpr std::uint8_t buttons_count {8u}
 }
-
 
 /////////
 // API //
 /////////
 
-bool Controller::handle_state_write(uint8_t data)
+bool Controller::handle_state_write(std::uint8_t data)
 {
     // Exit app
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
@@ -21,7 +20,7 @@ bool Controller::handle_state_write(uint8_t data)
     strobe = data & first_bit_mask;
 
     if (!strobe) {
-        for (auto i {0}; i < 8; i++) {
+        for (auto i {0}; i < buttons_count; i++) {
             const auto current_button {static_cast<Button>(i)};
             const auto current_button_state {
                 sf::Keyboard::isKeyPressed(
@@ -35,7 +34,7 @@ bool Controller::handle_state_write(uint8_t data)
     return true;
 }
 
-uint8_t Controller::handle_state_read()
+std::uint8_t Controller::handle_state_read()
 {
     const bool read_state = (buttons_state & msb_mask) >> 7;
 

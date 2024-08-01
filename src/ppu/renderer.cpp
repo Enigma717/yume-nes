@@ -1,10 +1,9 @@
 #include "../../include/ppu/ppu.h"
 
-
 namespace
 {
-    constexpr size_t fetching_subcycle_size {8};
-    constexpr size_t pixel_size {1};
+    constexpr std::size_t fetching_subcycle_size {8uz};
+    constexpr std::size_t pixel_size {1uz};
 
     constexpr int visible_pixels_count {61440};
     constexpr int visible_screen_height {240};
@@ -22,27 +21,27 @@ namespace
     constexpr int vertical_scroll_copy_cycle_end {305};
     constexpr int vertical_scroll_copy_cycle_start {279};
 
-    constexpr uint8_t fine_y_max_value {0x07};
-    constexpr uint8_t nametable_change_to_attribute_bound {0x1D};
-    constexpr uint8_t nametable_coarse_bound {0x1F};
-    constexpr uint8_t pixel_color_lsb_default_shift {0x0F};
-    constexpr uint8_t pixel_color_msb_default_shift {0x0E};
+    constexpr std::uint8_t fine_y_max_value {0x07u};
+    constexpr std::uint8_t nametable_change_to_attribute_bound {0x1Du};
+    constexpr std::uint8_t nametable_coarse_bound {0x1Fu};
+    constexpr std::uint8_t pixel_color_lsb_default_shift {0x0Fu};
+    constexpr std::uint8_t pixel_color_msb_default_shift {0x0Eu};
 
-    constexpr uint8_t first_bit_mask {0b0000'0001};
-    constexpr uint8_t first_two_bits_mask {0b0000'0011};
-    constexpr uint8_t second_bit_mask {0b0000'0010};
+    constexpr std::uint8_t first_bit_mask {0b0000'0001u};
+    constexpr std::uint8_t first_two_bits_mask {0b0000'0011u};
+    constexpr std::uint8_t second_bit_mask {0b0000'0010u};
 
-    constexpr uint16_t second_pattern_table_offset {0x1000};
-    constexpr uint16_t second_plane_offset {0x0008};
-    constexpr uint16_t tile_column_offset {0x0010};
+    constexpr std::uint16_t second_pattern_table_offset {0x1000u};
+    constexpr std::uint16_t second_plane_offset {0x0008u};
+    constexpr std::uint16_t tile_column_offset {0x0010u};
 
-    constexpr uint16_t first_attribute_table_start {0x23C0};
-    constexpr uint16_t nametables_space_start {0x2000};
-    constexpr uint16_t palettes_space_start {0x3F00};
+    constexpr std::uint16_t first_attribute_table_start {0x23C0u};
+    constexpr std::uint16_t nametables_space_start {0x2000u};
+    constexpr std::uint16_t palettes_space_start {0x3F00u};
 
-    constexpr uint16_t loopy_no_fine_y_mask {0x0FFF};
-    constexpr uint16_t multiplexer_default_pointer {0b1000'0000'0000'0000};
-    constexpr uint16_t upper_byte_mask {0xFF00};
+    constexpr std::uint16_t loopy_no_fine_y_mask {0x0FFFu};
+    constexpr std::uint16_t multiplexer_default_pointer {0b1000'0000'0000'0000u};
+    constexpr std::uint16_t upper_byte_mask {0xFF00u};
 
 
     bool check_for_pixel_within_visible_screen(int x_coord, int y_coord)
@@ -51,7 +50,6 @@ namespace
             && y_coord >= 0 && y_coord < visible_screen_height;
     }
 }
-
 
 Renderer::Renderer(PPU& ppu_ref) : ppu_ref{ppu_ref}
 {
@@ -68,7 +66,6 @@ Renderer::Renderer(PPU& ppu_ref) : ppu_ref{ppu_ref}
         }
     }
 }
-
 
 ///////////////////////
 // Process rendering //
@@ -121,7 +118,7 @@ void Renderer::dispatch_rendering_mode()
 void Renderer::render_pre_render_scanline()
 {
     if (ppu_ref.current_cycle == clear_ppu_status_cycle)
-        ppu_ref.ppu_status.word = 0x00;
+        ppu_ref.ppu_status.word = 0x00u;
 
     render_visible_scanline();
 
@@ -177,18 +174,18 @@ void Renderer::process_pixel_rendering()
     data_multiplexer = multiplexer_default_pointer >> ppu_ref.fine_x.bits.position;
 
     const auto pixel_color_lsb {
-        static_cast<uint8_t>(
+        static_cast<std::uint8_t>(
             (tile_data_first_shift_reg & data_multiplexer) >>
             (pixel_color_lsb_default_shift - ppu_ref.fine_x.bits.position))};
     const auto pixel_color_msb {
-        static_cast<uint8_t>(
+        static_cast<std::uint8_t>(
             (tile_data_second_shift_reg & data_multiplexer) >>
             (pixel_color_msb_default_shift - ppu_ref.fine_x.bits.position))};
     const auto pixel_color {
-        static_cast<uint8_t>(pixel_color_msb | pixel_color_lsb)};
+        static_cast<std::uint8_t>(pixel_color_msb | pixel_color_lsb)};
 
     const auto address_to_read {
-        static_cast<uint16_t>(
+        static_cast<std::uint16_t>(
             palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color)};
 
     const auto final_color {
@@ -202,7 +199,6 @@ void Renderer::process_pixel_rendering()
         frame_buffer.at(pixel_index).setFillColor(final_color);
     }
 }
-
 
 ////////////////////////////////
 // Rendering subcycle fetches //
@@ -227,26 +223,26 @@ void Renderer::process_rendering_fetches()
         fetched_tile_second_plane_byte = fetch_tile_plane_byte(second_plane_offset);
 }
 
-uint8_t Renderer::fetch_nametable_tile_byte_with_shifters_load()
+std::uint8_t Renderer::fetch_nametable_tile_byte_with_shifters_load()
 {
-    const uint16_t address_to_read {
-        static_cast<uint16_t>(
+    const std::uint16_t address_to_read {
+        static_cast<std::uint16_t>(
             nametables_space_start | (ppu_ref.ppu_address.word & loopy_no_fine_y_mask))};
     load_next_tile_data_to_shift_registers();
 
     return ppu_ref.read_from_bus(address_to_read);
 }
 
-uint8_t Renderer::fetch_attribute_table_byte() const
+std::uint8_t Renderer::fetch_attribute_table_byte() const
 {
     const auto coarse_x_high_bits {
-        static_cast<uint16_t>(ppu_ref.ppu_address.bits.coarse_x >> 2)};
+        static_cast<std::uint16_t>(ppu_ref.ppu_address.bits.coarse_x >> 2)};
     const auto coarse_y_high_bits {
-        static_cast<uint16_t>((ppu_ref.ppu_address.bits.coarse_y >> 2) << 3)};
+        static_cast<std::uint16_t>((ppu_ref.ppu_address.bits.coarse_y >> 2) << 3)};
     const auto nametable_bits {
-        static_cast<uint16_t>(ppu_ref.ppu_address.bits.nametable << 10)};
+        static_cast<std::uint16_t>(ppu_ref.ppu_address.bits.nametable << 10)};
     const auto address_to_read {
-        static_cast<uint16_t>(
+        static_cast<std::uint16_t>(
             first_attribute_table_start | nametable_bits | coarse_y_high_bits | coarse_x_high_bits)};
 
     const auto attribute_quadrant_shift {calculate_attribute_shift()};
@@ -255,31 +251,30 @@ uint8_t Renderer::fetch_attribute_table_byte() const
     return (attribute_table_byte >> attribute_quadrant_shift) & first_two_bits_mask;
 }
 
-uint8_t Renderer::calculate_attribute_shift() const
+std::uint8_t Renderer::calculate_attribute_shift() const
 {
     const auto horizontal_half_choice {
-        static_cast<uint16_t>(ppu_ref.ppu_address.bits.coarse_y & second_bit_mask)};
+        static_cast<std::uint16_t>(ppu_ref.ppu_address.bits.coarse_y & second_bit_mask)};
     const auto vertical_half_choice {
-        static_cast<uint16_t>(ppu_ref.ppu_address.bits.coarse_x & second_bit_mask)};
+        static_cast<std::uint16_t>(ppu_ref.ppu_address.bits.coarse_x & second_bit_mask)};
 
     return (horizontal_half_choice << 1) | vertical_half_choice;
 }
 
-uint8_t Renderer::fetch_tile_plane_byte(uint8_t plane_offset) const
+std::uint8_t Renderer::fetch_tile_plane_byte(std::uint8_t plane_offset) const
 {
     const auto current_row_offset{ppu_ref.ppu_address.bits.fine_y};
     const auto current_tile_offset {
-        static_cast<uint16_t>(fetched_nametable_tile_byte * tile_column_offset)};
+        static_cast<std::uint16_t>(fetched_nametable_tile_byte * tile_column_offset)};
     const auto pattern_table_offset {
-        static_cast<uint16_t>(
+        static_cast<std::uint16_t>(
             ppu_ref.ppu_controller.flag.bg_table * second_pattern_table_offset)};
     const auto address_to_read {
-        static_cast<uint16_t>(
+        static_cast<std::uint16_t>(
             pattern_table_offset + current_tile_offset + current_row_offset + plane_offset)};
 
     return ppu_ref.read_from_bus(address_to_read);
 }
-
 
 //////////////////////////////
 // Fetches helper functions //
@@ -310,14 +305,14 @@ void Renderer::coarse_y_increment_with_wrapping()
         ppu_ref.ppu_address.bits.fine_y++;
     }
     else {
-        ppu_ref.ppu_address.bits.fine_y = 0x00;
+        ppu_ref.ppu_address.bits.fine_y = 0x00u;
 
         if (ppu_ref.ppu_address.bits.coarse_y == nametable_change_to_attribute_bound) {
-            ppu_ref.ppu_address.bits.coarse_y = 0x00;
+            ppu_ref.ppu_address.bits.coarse_y = 0x00u;
             ppu_ref.ppu_address.bits.nametable ^= second_bit_mask;
         }
         else if (ppu_ref.ppu_address.bits.coarse_y == nametable_coarse_bound) {
-            ppu_ref.ppu_address.bits.coarse_y = 0x00;
+            ppu_ref.ppu_address.bits.coarse_y = 0x00u;
         }
         else {
             ppu_ref.ppu_address.bits.coarse_y++;
@@ -332,7 +327,7 @@ void Renderer::copy_horizontal_scroll_to_address()
         return;
 
     const auto horizontal_nametable_bit {
-        static_cast<uint8_t>(ppu_ref.ppu_scroll.bits.nametable & first_bit_mask)};
+        static_cast<std::uint8_t>(ppu_ref.ppu_scroll.bits.nametable & first_bit_mask)};
 
     ppu_ref.ppu_address.bits.coarse_x = ppu_ref.ppu_scroll.bits.coarse_x;
     ppu_ref.ppu_address.bits.nametable =
@@ -346,7 +341,7 @@ void Renderer::copy_vertical_scroll_to_address()
         return;
 
     const auto vertical_nametable_bit {
-        static_cast<uint8_t>(ppu_ref.ppu_scroll.bits.nametable & second_bit_mask)};
+        static_cast<std::uint8_t>(ppu_ref.ppu_scroll.bits.nametable & second_bit_mask)};
 
     ppu_ref.ppu_address.bits.coarse_y = ppu_ref.ppu_scroll.bits.coarse_y;
     ppu_ref.ppu_address.bits.nametable =

@@ -5,26 +5,24 @@
 #include <filesystem>
 #include <fstream>
 
-
 namespace
 {
-    constexpr size_t trainer_size {512};
+    constexpr std::size_t trainer_size {512uz};
 
-    constexpr uint8_t header_chr_rom_size_byte_flag {0x05};
-    constexpr uint8_t header_mapper_lsb_and_mirroring_byte_flag {0x06};
-    constexpr uint8_t header_mapper_msb_byte_flag {0x07};
-    constexpr uint8_t header_prg_ram_size_byte_flag {0x08};
-    constexpr uint8_t header_prg_rom_size_byte_flag {0x04};
+    constexpr std::uint8_t header_chr_rom_size_byte_flag {0x05u};
+    constexpr std::uint8_t header_mapper_lsb_and_mirroring_byte_flag {0x06u};
+    constexpr std::uint8_t header_mapper_msb_byte_flag {0x07u};
+    constexpr std::uint8_t header_prg_ram_size_byte_flag {0x08u};
+    constexpr std::uint8_t header_prg_rom_size_byte_flag {0x04u};
 
-    constexpr uint8_t ignore_mirroring_mask {0b0000'1000};
-    constexpr uint8_t mapper_mask {0b1111'0000};
-    constexpr uint8_t mirroring_mask {0b0000'0001};
-    constexpr uint8_t prg_ram_mask {0b0000'0010};
-    constexpr uint8_t trainer_mask {0b0000'0100};
+    constexpr std::uint8_t ignore_mirroring_mask {0b0000'1000u};
+    constexpr std::uint8_t mapper_mask {0b1111'0000u};
+    constexpr std::uint8_t mirroring_mask {0b0000'0001u};
+    constexpr std::uint8_t prg_ram_mask {0b0000'0010u};
+    constexpr std::uint8_t trainer_mask {0b0000'0100u};
 
-    const CartridgeContents nes_logo {0x4E, 0x45, 0x53, 0x1A};
+    const CartridgeContents nes_logo {0x4Eu, 0x45u, 0x53u, 0x1Au};
 }
-
 
 /////////
 // API //
@@ -63,7 +61,6 @@ bool Cartridge::load_cartridge(const std::string& cartridge_path)
     return true;
 }
 
-
 ///////////////////
 // File decoding //
 ///////////////////
@@ -87,8 +84,8 @@ bool Cartridge::dump_cartridge_into_vector(const std::string& cartridge_path)
     cartridge_dump.reserve(cartridge_size);
     cartridge_dump.insert(
         cartridge_dump.begin(),
-        std::istream_iterator<uint8_t>(game),
-        std::istream_iterator<uint8_t>());
+        std::istream_iterator<std::uint8_t>(game),
+        std::istream_iterator<std::uint8_t>());
 
     return true;
 }
@@ -126,7 +123,6 @@ bool Cartridge::decode_header()
     return true;
 }
 
-
 ////////////////////
 // Helper methods //
 ////////////////////
@@ -159,13 +155,13 @@ bool Cartridge::check_for_ignoring_mirroring() const
     return header.at(header_mapper_lsb_and_mirroring_byte_flag) & ignore_mirroring_mask;
 }
 
-uint8_t Cartridge::calculate_mapper_id() const
+std::uint8_t Cartridge::calculate_mapper_id() const
 {
     const auto mapper_lsb {
-        static_cast<uint8_t>(
+        static_cast<std::uint8_t>(
             (header.at(header_mapper_lsb_and_mirroring_byte_flag) & mapper_mask) >> 4)};
     const auto mapper_msb {
-        static_cast<uint8_t>(
+        static_cast<std::uint8_t>(
             (header.at(header_mapper_msb_byte_flag) & mapper_mask) >> 4)};
 
     return (mapper_msb << 4) | mapper_lsb;

@@ -7,44 +7,43 @@
 #include <iostream>
 #include <iomanip>
 
-
 namespace
 {
-    constexpr uint8_t carry_flag_mask {0b0000'0001};
-    constexpr uint8_t overflow_flag_mask {0b0100'0000};
-    constexpr uint8_t negative_flag_mask {0b1000'0000};
+    constexpr std::uint8_t carry_flag_mask {0b0000'0001u};
+    constexpr std::uint8_t overflow_flag_mask {0b0100'0000u};
+    constexpr std::uint8_t negative_flag_mask {0b1000'0000u};
 
-    constexpr uint16_t one_byte_overflow_mask {0xFF00};
-    constexpr uint16_t zero_page_mask {0x00FF};
+    constexpr std::uint16_t one_byte_overflow_mask {0xFF00u};
+    constexpr std::uint16_t zero_page_mask {0x00FFu};
 
-    constexpr uint16_t apu_and_io_space_start {0x4000};
-    constexpr uint16_t ppu_registers_space_start {0x2000};
-    constexpr uint16_t stack_offset {0x0100};
+    constexpr std::uint16_t apu_and_io_space_start {0x4000u};
+    constexpr std::uint16_t ppu_registers_space_start {0x2000u};
+    constexpr std::uint16_t stack_offset {0x0100u};
 
-    constexpr uint16_t irq_vector_lsb {0xFFFE};
-    constexpr uint16_t irq_vector_msb {0xFFFF};
-    constexpr uint16_t nmi_vector_lsb {0xFFFA};
-    constexpr uint16_t nmi_vector_msb {0xFFFB};
-    constexpr uint16_t reset_vector_lsb {0xFFFC};
-    constexpr uint16_t reset_vector_msb {0xFFFD};
+    constexpr std::uint16_t irq_vector_lsb {0xFFFEu};
+    constexpr std::uint16_t irq_vector_msb {0xFFFFu};
+    constexpr std::uint16_t nmi_vector_lsb {0xFFFAu};
+    constexpr std::uint16_t nmi_vector_msb {0xFFFBu};
+    constexpr std::uint16_t reset_vector_lsb {0xFFFCu};
+    constexpr std::uint16_t reset_vector_msb {0xFFFDu};
 
 
-    bool check_for_zero_flag(uint8_t reg)
+    bool check_for_zero_flag(std::uint8_t reg)
     {
-        return reg == 0x00;
+        return reg == 0x00u;
     }
 
-    bool check_for_negative_flag(uint8_t reg)
+    bool check_for_negative_flag(std::uint8_t reg)
     {
         return reg >> 7;
     }
 
-    bool check_for_flag_with_mask(uint16_t reg, uint16_t mask)
+    bool check_for_flag_with_mask(std::uint16_t reg, std::uint16_t mask)
     {
         return (reg & mask) > 0;
     }
 
-    bool check_for_page_crossing(uint16_t first_address, uint16_t second_address)
+    bool check_for_page_crossing(std::uint16_t first_address, std::uint16_t second_address)
     {
         return (first_address & one_byte_overflow_mask)
             != (second_address & one_byte_overflow_mask);
@@ -55,7 +54,6 @@ namespace
         return ((a && b) && !c) || (!(a || b) && c);
     }
 }
-
 
 /////////
 // API //
@@ -96,27 +94,27 @@ void CPU::perform_cycle(bool debug_mode)
 
 void CPU::hard_reset()
 {
-    acc = 0x00;
-    x_reg = 0x00;
-    y_reg = 0x00;
-    stack_ptr = 0xFD;
+    acc = 0x00u;
+    x_reg = 0x00u;
+    y_reg = 0x00u;
+    stack_ptr = 0xFDu;
     pc = read_reset_vector();
-    status.word = 0x34;
+    status.word = 0x34u;
     memory_bus.clear_memory();
 }
 
 void CPU::log_debug_info() const
 {
-    uint8_t debug_read_data {0x00};
+    std::uint8_t debug_read_data {0x00u};
 
     if (arg_address >= ppu_registers_space_start && arg_address < apu_and_io_space_start)
-        debug_read_data = 0xAA;
+        debug_read_data = 0xAAu;
     else
         debug_read_data = read_from_bus(arg_address);
 
     std::cout << "[DEBUG CPU] CYCLE: " << std::setw(10) << std::left << std::setfill(' ') << cycles_executed;
     std::cout << std::hex << std::uppercase << std::setfill('0')
-        << " | OPCODE: 0x" << std::setw(2) << std::right << static_cast<short>(current_instruction.opcode)
+        << " | OPCODE: 0x" << std::setw(2) << std::right << static_cast<short>(current_instruction->opcode)
         << " | ARG: 0x" << std::setw(4) << std::right << static_cast<short>(arg_address)
         << " | MEM[ARG]: 0x" << std::setw(2) << std::right << static_cast<short>(debug_read_data)
         << " || A: 0x" << std::setw(2) << std::right << static_cast<short>(acc)
@@ -127,28 +125,27 @@ void CPU::log_debug_info() const
         << " | P: 0x" << std::setw(2) << std::right << static_cast<short>(status.word);
 }
 
-
 ////////////////////
 // Bus management //
 ////////////////////
 
-void CPU::write_to_bus(uint16_t address, uint8_t data)
+void CPU::write_to_bus(std::uint16_t address, std::uint8_t data)
 {
     memory_bus.dispatch_write_to_device(address, data);
 }
 
-void CPU::stack_push(uint8_t data)
+void CPU::stack_push(std::uint8_t data)
 {
     write_to_bus(stack_offset + stack_ptr, data);
     stack_ptr--;
 }
 
-uint8_t CPU::read_from_bus(uint16_t address) const
+std::uint8_t CPU::read_from_bus(std::uint16_t address) const
 {
     return memory_bus.dispatch_read_to_device(address);
 }
 
-uint8_t CPU::stack_pop()
+std::uint8_t CPU::stack_pop()
 {
     stack_ptr++;
     return read_from_bus(stack_offset + stack_ptr);
@@ -160,18 +157,17 @@ void CPU::next_instruction()
     pc++;
 
     current_instruction = decode_instruction_from_opcode(instruction_opcode);
-    cycles_queued = current_instruction.cycles;
+    cycles_queued = current_instruction->cycles;
 
     execute_addressing_mode();
     execute_instruction();
 }
 
-
 //////////////////////////
 // Instruction decoding //
 //////////////////////////
 
-Instruction CPU::decode_instruction_from_opcode(uint8_t opcode) const
+const Instruction* CPU::decode_instruction_from_opcode(std::uint8_t opcode) const
 {
     const auto instruction_it {std::find_if(
         Lookup::instructions_table.begin(),
@@ -179,13 +175,13 @@ Instruction CPU::decode_instruction_from_opcode(uint8_t opcode) const
         [&] (const Instruction& instr) { return instr.opcode == opcode; }
         )};
 
-    return *instruction_it;
+    return &*instruction_it;
 }
 
 void CPU::execute_addressing_mode()
 {
     using AM = Instruction::AddressingMode;
-    switch (current_instruction.addressing_mode) {
+    switch (current_instruction->addressing_mode) {
         case AM::immediate:   addressing_mode_immediate();   break;
         case AM::zero_page:   addressing_mode_zero_page();   break;
         case AM::zero_page_x: addressing_mode_zero_page_x(); break;
@@ -204,7 +200,7 @@ void CPU::execute_addressing_mode()
 void CPU::execute_instruction()
 {
     using MN = Instruction::MnemonicName;
-    switch (current_instruction.mnemonic) {
+    switch (current_instruction->mnemonic) {
         case MN::ADC: ADC(); break;
         case MN::AND: AND(); break;
         case MN::ASL: ASL(); break;
@@ -265,12 +261,11 @@ void CPU::execute_instruction()
     }
 }
 
-
 ////////////////////////////
 // Interrupts + branching //
 ////////////////////////////
 
-uint16_t CPU::read_nmi_vector() const
+std::uint16_t CPU::read_nmi_vector() const
 {
     const auto lsb {read_from_bus(nmi_vector_lsb)};
     const auto msb {read_from_bus(nmi_vector_msb)};
@@ -278,7 +273,7 @@ uint16_t CPU::read_nmi_vector() const
     return (msb << 8) | lsb;
 }
 
-uint16_t CPU::read_reset_vector() const
+std::uint16_t CPU::read_reset_vector() const
 {
     const auto lsb {read_from_bus(reset_vector_lsb)};
     const auto msb {read_from_bus(reset_vector_msb)};
@@ -286,7 +281,7 @@ uint16_t CPU::read_reset_vector() const
     return (msb << 8) | lsb;
 }
 
-uint16_t CPU::read_irq_vector() const
+std::uint16_t CPU::read_irq_vector() const
 {
     const auto lsb {read_from_bus(irq_vector_lsb)};
     const auto msb {read_from_bus(irq_vector_msb)};
@@ -320,8 +315,8 @@ void CPU::interrupt_reset()
 
 void CPU::process_interrupt(bool brk_flag_state)
 {
-    const auto pc_lsb = static_cast<uint8_t>(pc & zero_page_mask);
-    const auto pc_msb = static_cast<uint8_t>(pc >> 8);
+    const auto pc_lsb = static_cast<std::uint8_t>(pc & zero_page_mask);
+    const auto pc_msb = static_cast<std::uint8_t>(pc >> 8);
 
     status.flag.brk = brk_flag_state;
     status.flag.unused = 1;
@@ -337,7 +332,7 @@ void CPU::perform_branching()
     if (branch_offset & negative_flag_mask)
         branch_offset = branch_offset | one_byte_overflow_mask;
 
-    const uint16_t new_pc = pc + branch_offset;
+    const std::uint16_t new_pc = pc + branch_offset;
 
     if (check_for_page_crossing(pc, new_pc))
         cycles_queued += 2;
@@ -346,7 +341,6 @@ void CPU::perform_branching()
 
     pc = new_pc;
 }
-
 
 //////////////////////
 // Addressing modes //
@@ -406,7 +400,7 @@ void CPU::addressing_mode_absolute_x()
     const auto msb {read_from_bus(pc)};
     pc++;
 
-    const auto read_address {static_cast<uint16_t>((msb << 8) | lsb)};
+    const auto read_address {static_cast<std::uint16_t>((msb << 8) | lsb)};
     arg_address = read_address + x_reg;
 
     if (check_for_page_crossing(arg_address, read_address))
@@ -421,7 +415,7 @@ void CPU::addressing_mode_absolute_y()
     const auto msb {read_from_bus(pc)};
     pc++;
 
-    const auto read_address {static_cast<uint16_t>((msb << 8) | lsb)};
+    const auto read_address {static_cast<std::uint16_t>((msb << 8) | lsb)};
     arg_address = read_address + y_reg;
 
     if (check_for_page_crossing(arg_address, read_address))
@@ -435,7 +429,7 @@ void CPU::addressing_mode_indirect()
     auto msb {read_from_bus(pc)};
     pc++;
 
-    const auto temp_address {static_cast<uint16_t>((msb << 8) | lsb)};
+    const auto temp_address {static_cast<std::uint16_t>((msb << 8) | lsb)};
 
     // Original 6502 CPU's indirect jump page crossing bug reproduction:
     // https://www.nesdev.org/obelisk-6502-guide/reference.html#JMP
@@ -468,13 +462,12 @@ void CPU::addressing_mode_indirect_y()
     const auto lsb {read_from_bus(temp_address & zero_page_mask)};
     const auto msb {read_from_bus((temp_address + 1) & zero_page_mask)};
 
-    const auto read_address {static_cast<uint16_t>((msb << 8) | lsb)};
+    const auto read_address {static_cast<std::uint16_t>((msb << 8) | lsb)};
     arg_address = read_address + y_reg;
 
     if (check_for_page_crossing(arg_address, read_address))
         cycles_queued += 1;
 }
-
 
 //////////////////
 // Instructions //
@@ -483,13 +476,13 @@ void CPU::addressing_mode_indirect_y()
 void CPU::ADC()
 {
     const auto value {read_from_bus(arg_address)};
-    const auto result {static_cast<uint16_t>(acc + value + status.flag.carry)};
+    const auto result {static_cast<std::uint16_t>(acc + value + status.flag.carry)};
 
     const auto acc_sign {check_for_negative_flag(acc)};
     const auto value_sign {check_for_negative_flag(value)};
-    const auto result_sign {check_for_negative_flag(static_cast<uint8_t>(result))};
+    const auto result_sign {check_for_negative_flag(static_cast<std::uint8_t>(result))};
 
-    acc = static_cast<uint8_t>(result);
+    acc = static_cast<std::uint8_t>(result);
 
     status.flag.carry = check_for_flag_with_mask(result, one_byte_overflow_mask);
     status.flag.zero = check_for_zero_flag(acc);
@@ -509,7 +502,7 @@ void CPU::AND()
 
 void CPU::ASL()
 {
-    if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction->addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
 
         acc = acc << 1;
@@ -550,7 +543,7 @@ void CPU::BEQ()
 void CPU::BIT()
 {
     const auto value {read_from_bus(arg_address)};
-    const auto result {static_cast<uint8_t>(acc & value)};
+    const auto result {static_cast<std::uint8_t>(acc & value)};
 
     status.flag.zero = check_for_zero_flag(result);
     status.flag.overflow = check_for_flag_with_mask(value, overflow_flag_mask);
@@ -619,7 +612,7 @@ void CPU::CLV()
 void CPU::CMP()
 {
     const auto value {read_from_bus(arg_address)};
-    const uint8_t result = acc - value;
+    const std::uint8_t result = acc - value;
 
     status.flag.carry = acc >= value;
     status.flag.zero = check_for_zero_flag(result);
@@ -629,7 +622,7 @@ void CPU::CMP()
 void CPU::CPX()
 {
     const auto value {read_from_bus(arg_address)};
-    const uint8_t result = x_reg - value;
+    const std::uint8_t result = x_reg - value;
 
     status.flag.carry = x_reg >= value;
     status.flag.zero = check_for_zero_flag(result);
@@ -639,7 +632,7 @@ void CPU::CPX()
 void CPU::CPY()
 {
     const auto value {read_from_bus(arg_address)};
-    const uint8_t result = y_reg - value;
+    const std::uint8_t result = y_reg - value;
 
     status.flag.carry = y_reg >= value;
     status.flag.zero = check_for_zero_flag(result);
@@ -719,8 +712,8 @@ void CPU::JSR()
 {
     pc--;
 
-    const auto pc_lsb = static_cast<uint8_t>(pc & zero_page_mask);
-    const auto pc_msb = static_cast<uint8_t>(pc >> 8);
+    const auto pc_lsb = static_cast<std::uint8_t>(pc & zero_page_mask);
+    const auto pc_msb = static_cast<std::uint8_t>(pc >> 8);
 
     stack_push(pc_msb);
     stack_push(pc_lsb);
@@ -754,7 +747,7 @@ void CPU::LDY()
 
 void CPU::LSR()
 {
-    if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction->addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
 
         acc = acc >> 1;
@@ -819,7 +812,7 @@ void CPU::ROL()
 {
     const auto old_carry {static_cast<bool>(status.flag.carry)};
 
-    if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction->addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, negative_flag_mask);
 
         acc = acc << 1;
@@ -845,7 +838,7 @@ void CPU::ROR()
 {
     const auto old_carry {static_cast<bool>(status.flag.carry)};
 
-    if (current_instruction.addressing_mode == Instruction::AddressingMode::accumulator) {
+    if (current_instruction->addressing_mode == Instruction::AddressingMode::accumulator) {
         status.flag.carry = check_for_flag_with_mask(acc, carry_flag_mask);
 
         acc = acc >> 1;
@@ -892,15 +885,15 @@ void CPU::RTS()
 void CPU::SBC()
 {
     auto value {read_from_bus(arg_address)};
-    value = static_cast<uint8_t>(~value);
+    value = static_cast<std::uint8_t>(~value);
 
-    const auto result = static_cast<uint16_t>(acc + value + status.flag.carry);
+    const auto result = static_cast<std::uint16_t>(acc + value + status.flag.carry);
 
     const auto acc_sign {check_for_negative_flag(acc)};
     const auto value_sign {check_for_negative_flag(value)};
-    const auto result_sign {check_for_negative_flag(static_cast<uint8_t>(result))};
+    const auto result_sign {check_for_negative_flag(static_cast<std::uint8_t>(result))};
 
-    acc = static_cast<uint8_t>(result);
+    acc = static_cast<std::uint8_t>(result);
 
     status.flag.carry = check_for_flag_with_mask(result, one_byte_overflow_mask);
     status.flag.zero = check_for_zero_flag(acc);
