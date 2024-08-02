@@ -12,7 +12,7 @@ public:
 
     void prepare_next_pixel();
 
-    std::vector<sf::RectangleShape> frame_buffer {};
+    sf::VertexArray frame_buffer {};
 
 private:
     void choose_rendering_mode();

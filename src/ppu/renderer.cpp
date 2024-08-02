@@ -4,10 +4,11 @@ namespace
 {
     constexpr std::size_t fetching_subcycle_size {8uz};
     constexpr std::size_t pixel_size {1uz};
+    constexpr std::size_t vertices_in_pixel {4uz};
 
-    constexpr int visible_pixels_count {61440};
-    constexpr int visible_screen_height {240};
-    constexpr int visible_screen_width {256};
+    constexpr std::size_t visible_pixels_count {61440uz};
+    constexpr std::size_t visible_screen_height {240uz};
+    constexpr std::size_t visible_screen_width {256};
 
     constexpr int clear_ppu_status_cycle {1};
     constexpr int garbage_nametable_fetch_cycle {339};
@@ -44,25 +45,32 @@ namespace
     constexpr std::uint16_t upper_byte_mask {0xFF00u};
 
 
-    bool check_for_pixel_within_visible_screen(int x_coord, int y_coord)
+    bool check_for_pixel_within_visible_screen(std::size_t x_coord, std::size_t y_coord)
     {
-        return x_coord >= 0 && x_coord < visible_screen_width
-            && y_coord >= 0 && y_coord < visible_screen_height;
+        return x_coord < visible_screen_width && y_coord < visible_screen_height;
     }
 }
 
 Renderer::Renderer(PPU& ppu_ref) : ppu_ref{ppu_ref}
 {
-    frame_buffer.reserve(visible_pixels_count);
+    frame_buffer.resize(visible_pixels_count * vertices_in_pixel);
+    frame_buffer.setPrimitiveType(sf::Quads);
 
-    for (auto i {0}; i < visible_screen_height; i++) {
-        for (auto j {0}; j < visible_screen_width; j++) {
-            sf::RectangleShape square(sf::Vector2f(pixel_size, pixel_size));
-            const auto x_coord = static_cast<float>(j);
-            const auto y_coord = static_cast<float>(i);
-            square.setPosition(x_coord, y_coord);
+    for (std::size_t i {0uz}; i < visible_screen_height; i++) {
+        for (std::size_t j {0uz}; j < visible_screen_width; j++) {
+            const auto index {(i * visible_screen_width + j) * vertices_in_pixel};
+            const auto base_x_coord {static_cast<float>(j * pixel_size)};
+            const auto base_y_coord {static_cast<float>(i * pixel_size)};
 
-            frame_buffer.push_back(square);
+            std::array<sf::Vector2f, vertices_in_pixel> coords {
+                sf::Vector2f{base_x_coord, base_y_coord},
+                sf::Vector2f{base_x_coord + pixel_size, base_y_coord},
+                sf::Vector2f{base_x_coord + pixel_size, base_y_coord + pixel_size},
+                sf::Vector2f{base_x_coord, base_y_coord + pixel_size}
+            };
+
+            for (std::size_t k {0uz}; k < vertices_in_pixel; k++)
+                frame_buffer[index + k].position = coords[k];
         }
     }
 }
@@ -188,15 +196,17 @@ void Renderer::process_pixel_rendering()
         static_cast<std::uint16_t>(
             palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color)};
 
-    const auto final_color {
+    const auto& final_color {
         PPUColors::available_colors[ppu_ref.read_from_bus(address_to_read)]};
 
-    const auto x_coord {ppu_ref.current_cycle - 1};
-    const auto y_coord {ppu_ref.current_scanline};
+    const auto x_coord {static_cast<std::size_t>(ppu_ref.current_cycle - 1)};
+    const auto y_coord {static_cast<std::size_t>(ppu_ref.current_scanline)};
 
     if (check_for_pixel_within_visible_screen(x_coord, y_coord)) {
-        const auto pixel_index {y_coord * visible_screen_width + x_coord};
-        frame_buffer[pixel_index].setFillColor(final_color);
+        const auto pixel_index {(y_coord * visible_screen_width + x_coord) * 4};
+
+        for (std::size_t i {0uz}; i < vertices_in_pixel; i++)
+            frame_buffer[pixel_index + i].color = final_color;
     }
 }
 

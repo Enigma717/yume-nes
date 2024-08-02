@@ -86,12 +86,7 @@ void PPU::render_whole_frame()
 
     app_screen.setSize({final_screen_width, final_screen_height});
     app_screen.clear(bg_color);
-
-    for (const auto& pixel : renderer.frame_buffer) {
-        if (pixel.getFillColor() != bg_color)
-            app_screen.draw(pixel);
-    }
-
+    app_screen.draw(renderer.frame_buffer);
     app_screen.display();
 }
 
