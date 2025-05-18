@@ -2,11 +2,14 @@
 yume
 run_tests
 
+# build dir
+build
+.cache
+
 # ROM test files
 *.nes
 
-# notes and scripts
-*.txt
+# scripts
 *.sh
 
 # test files
