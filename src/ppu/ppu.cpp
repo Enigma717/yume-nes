@@ -46,12 +46,23 @@ namespace
 /////////
 
 PPU::PPU()
-: app_screen{sf::VideoMode(visible_screen_width, visible_screen_height), "Yume NES"},
-  renderer{*this}
+: app_screen{sf::VideoMode({visible_screen_width, visible_screen_height}), "Yume NES"},
+  renderer{*this},
+  frame_render_buffer{sf::PrimitiveType::Triangles}
 {
     app_screen.setSize({final_screen_width, final_screen_height});
     app_screen.setPosition({center_screen_in_x_axis, center_screen_in_y_axis});
     app_screen.setFramerateLimit(framerate_cap);
+
+    if (!frame_render_buffer.create(renderer.pixels_triangles.size()))
+    {
+        std::cerr << "\nError creating the frame buffer!\n";
+
+        std::exit(1);
+    }
+    
+    frame_render_buffer.setUsage(sf::VertexBuffer::Usage::Dynamic);
+    frame_render_buffer.setPrimitiveType(sf::PrimitiveType::Triangles);
 }
 
 void PPU::connect_bus_with_cartridge(std::shared_ptr<Cartridge> cartridge)
@@ -84,9 +95,12 @@ void PPU::render_whole_frame()
     const auto& bg_color {
         PPUColors::available_colors[read_from_bus(palette_bg_color_mask)]};
 
+    if (!frame_render_buffer.update(renderer.pixels_triangles.data()))
+        std::cerr << "\nError updating the frame buffer!\n";
+
     app_screen.setSize({final_screen_width, final_screen_height});
     app_screen.clear(bg_color);
-    app_screen.draw(renderer.frame_buffer);
+    app_screen.draw(frame_render_buffer);
     app_screen.display();
 }
 

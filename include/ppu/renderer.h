@@ -12,7 +12,7 @@ public:
 
     void prepare_next_pixel();
 
-    sf::VertexArray frame_buffer {};
+    std::vector<sf::Vertex> pixels_triangles {};
 
 private:
     void choose_rendering_mode();

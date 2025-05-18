@@ -4,11 +4,11 @@ namespace
 {
     constexpr std::size_t fetching_subcycle_size {8uz};
     constexpr std::size_t pixel_size {1uz};
-    constexpr std::size_t vertices_in_pixel {4uz};
+    constexpr std::size_t vertices_in_pixel {6uz};
 
     constexpr std::size_t visible_pixels_count {61440uz};
     constexpr std::size_t visible_screen_height {240uz};
-    constexpr std::size_t visible_screen_width {256};
+    constexpr std::size_t visible_screen_width {256uz};
 
     constexpr int clear_ppu_status_cycle {1};
     constexpr int garbage_nametable_fetch_cycle {339};
@@ -44,7 +44,6 @@ namespace
     constexpr std::uint16_t multiplexer_default_pointer {0b1000'0000'0000'0000u};
     constexpr std::uint16_t upper_byte_mask {0xFF00u};
 
-
     bool check_for_pixel_within_visible_screen(std::size_t x_coord, std::size_t y_coord)
     {
         return x_coord < visible_screen_width && y_coord < visible_screen_height;
@@ -53,24 +52,20 @@ namespace
 
 Renderer::Renderer(PPU& ppu_ref) : ppu_ref{ppu_ref}
 {
-    frame_buffer.resize(visible_pixels_count * vertices_in_pixel);
-    frame_buffer.setPrimitiveType(sf::Quads);
+    pixels_triangles.resize(visible_pixels_count * vertices_in_pixel);
 
     for (std::size_t i {0uz}; i < visible_screen_height; i++) {
         for (std::size_t j {0uz}; j < visible_screen_width; j++) {
-            const auto index {(i * visible_screen_width + j) * vertices_in_pixel};
-            const auto base_x_coord {static_cast<float>(j * pixel_size)};
-            const auto base_y_coord {static_cast<float>(i * pixel_size)};
+            const auto pixel_index {(i * visible_screen_width + j) * vertices_in_pixel};
+            const auto x_coord {static_cast<float>(j * pixel_size)};
+            const auto y_coord {static_cast<float>(i * pixel_size)};
 
-            std::array<sf::Vector2f, vertices_in_pixel> coords {
-                sf::Vector2f{base_x_coord, base_y_coord},
-                sf::Vector2f{base_x_coord + pixel_size, base_y_coord},
-                sf::Vector2f{base_x_coord + pixel_size, base_y_coord + pixel_size},
-                sf::Vector2f{base_x_coord, base_y_coord + pixel_size}
-            };
-
-            for (std::size_t k {0uz}; k < vertices_in_pixel; k++)
-                frame_buffer[index + k].position = coords[k];
+            pixels_triangles[pixel_index + 0].position = sf::Vector2f{x_coord, y_coord};
+            pixels_triangles[pixel_index + 1].position = sf::Vector2f{x_coord + pixel_size, y_coord};
+            pixels_triangles[pixel_index + 2].position = sf::Vector2f{x_coord, y_coord + pixel_size};
+            pixels_triangles[pixel_index + 3].position = sf::Vector2f{x_coord, y_coord + pixel_size};
+            pixels_triangles[pixel_index + 4].position = sf::Vector2f{x_coord + pixel_size, y_coord};
+            pixels_triangles[pixel_index + 5].position = sf::Vector2f{x_coord + pixel_size, y_coord + pixel_size};
         }
     }
 }
@@ -179,6 +174,12 @@ void Renderer::process_pixel_rendering()
     if (ppu_ref.ppu_mask.flag.show_background == 0)
         return;
 
+    const auto x_coord {static_cast<std::size_t>(ppu_ref.current_cycle - 1)};
+    const auto y_coord {static_cast<std::size_t>(ppu_ref.current_scanline)};
+
+    if (!check_for_pixel_within_visible_screen(x_coord, y_coord)) 
+        return;
+
     data_multiplexer = multiplexer_default_pointer >> ppu_ref.fine_x.bits.position;
 
     const auto pixel_color_lsb {
@@ -195,19 +196,12 @@ void Renderer::process_pixel_rendering()
     const auto address_to_read {
         static_cast<std::uint16_t>(
             palettes_space_start + (fetched_attribute_table_byte << 2) + pixel_color)};
-
     const auto& final_color {
         PPUColors::available_colors[ppu_ref.read_from_bus(address_to_read)]};
+    const auto pixel_index {(y_coord * visible_screen_width + x_coord) * vertices_in_pixel};
 
-    const auto x_coord {static_cast<std::size_t>(ppu_ref.current_cycle - 1)};
-    const auto y_coord {static_cast<std::size_t>(ppu_ref.current_scanline)};
-
-    if (check_for_pixel_within_visible_screen(x_coord, y_coord)) {
-        const auto pixel_index {(y_coord * visible_screen_width + x_coord) * 4};
-
-        for (std::size_t i {0uz}; i < vertices_in_pixel; i++)
-            frame_buffer[pixel_index + i].color = final_color;
-    }
+    for (std::size_t i {0uz}; i < vertices_in_pixel; i++)
+        pixels_triangles[pixel_index + i].color = final_color;
 }
 
 ////////////////////////////////

@@ -107,6 +107,7 @@ private:
     std::uint8_t oam_dma {0x00u};
 
     FineX fine_x {};
+    sf::VertexBuffer frame_render_buffer {};
     bool second_address_write_latch {false};
     std::uint8_t ppu_data_read_buffer {0x00u};
 
